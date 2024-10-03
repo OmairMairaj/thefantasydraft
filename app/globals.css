@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Removed the Exo 2 import since it's handled in Next.js */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+  --background: #03070A;
+  --foreground: #FFFFFF;
+  --accent: #FF8A00;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: "Poppins", sans-serif;
+  /* Default font for the entire site */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /* Exo 2 will be applied dynamically via className */
+  color: var(--accent);
+  /* background: var(--background); */
+}
+
+.button {
+  background: #070E13;
+  border: 2px solid transparent;
+  /* Transparent border to show the gradient */
+  background-image: linear-gradient(#070E13, #070E13),
+    /* Solid button background */
+    linear-gradient(180deg, #1C1C1C, #F18302);
+  /* Gradient border */
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  /* Clip the background and border separately */
+  display: inline-block;
+}
+
+.button:hover {
+  background: #FF8A00;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
