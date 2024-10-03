@@ -22,7 +22,7 @@ const Partners = () => {
 
     return (
         <section className="partners-section py-16">
-            <div className="container mx-auto text-center">
+            <div className="text-center">
                 {/* Title */}
                 <h2 className={`text-3xl md:text-5xl font-bold italic text-orange-500 mb-8 ${exo2.className}`}>
                     PARTNERS
