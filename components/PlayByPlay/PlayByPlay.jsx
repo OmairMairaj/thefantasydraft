@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Exo_2 } from '@next/font/google';
+import { Exo_2 } from 'next/font/google';
 
 const exo2 = Exo_2({
     weight: ['700', '800'],

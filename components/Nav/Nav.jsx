@@ -3,6 +3,13 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Exo_2 } from 'next/font/google';
+
+const exo2 = Exo_2({
+    weight: ['400', '500', '700', '800'],
+    style: ['italic'],
+    subsets: ['latin'],
+});
 
 const Nav = () => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -47,23 +54,23 @@ const Nav = () => {
 
             {/* Nav Links (Hidden on Mobile, Shown in Hamburger Menu) */}
             <div className={`md:flex ${menuOpen ? 'block' : 'hidden'} md:space-x-6`}>
-                <a href="/" className="hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer">
+                <a href="/" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                     HOME
                 </a>
-                <a href="/how-to-play" className="hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer">
+                <a href="/how-to-play" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                     HOW TO PLAY
                 </a>
-                <a href="/contact" className="hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer">
+                <a href="/contact" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                     CONTACT US
                 </a>
             </div>
 
             {/* CTA Buttons */}
             <div className="flex space-x-2">
-                <a href="/signup" className="button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer">
+                <a href="/signup" className={`button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer ${exo2.className}`}>
                     SIGN UP
                 </a>
-                <a href="/login" className="button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer">
+                <a href="/login" className={`button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer ${exo2.className}`}>
                     LOGIN
                 </a>
             </div>

@@ -52,3 +52,38 @@ h6 {
     text-wrap: balance;
   }
 }
+
+/* Autofill background color fix */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px #0C1922 inset !important;
+  /* Replace with your custom background color */
+  /* -webkit-text-fill-color: white !important; */
+  /* Set text color to white */
+}
+
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #0C1922 inset !important;
+  /* -webkit-text-fill-color: white !important; */
+}
+
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #0C1922 inset !important;
+  /* -webkit-text-fill-color: white !important; */
+}
+
+input:-webkit-autofill:hover {
+  -webkit-box-shadow: 0 0 0 30px #0C1922 inset !important;
+  /* -webkit-text-fill-color: white !important; */
+}
+
+/* For Firefox */
+input:-moz-autofill {
+  background-color: #0C1922 !important;
+  /* color: white !important; */
+}
+
+/* For Internet Explorer */
+input:-ms-autofill {
+  background-color: #0C1922 !important;
+  /* color: white !important; */
+}

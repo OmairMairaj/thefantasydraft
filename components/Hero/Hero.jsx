@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import bannerImage from '../../public/images/banner-image.svg'; // Path to your SVG image
-import { Exo_2 } from '@next/font/google';
+import { Exo_2 } from 'next/font/google';
 
 const exo2 = Exo_2({
     weight: ['400', '600', '700', '800'], // Weights that you need

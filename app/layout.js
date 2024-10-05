@@ -1,14 +1,7 @@
-import { Exo_2 } from '@next/font/google';
 import "./globals.css";
 
 import Nav from '../components/Nav/Nav';
 import Footer from "@/components/Footer/Footer";
-
-const exo2 = Exo_2({
-  weight: ['400', '600', '700', '800'],
-  style: ['normal', 'italic'],
-  subsets: ['latin'],
-});
 
 export const metadata = {
   title: "The Fantasy Draft",
@@ -18,7 +11,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="w-full px-8 md:px-8 lg:px-16 2xl:w-[1560px] m-auto">
+      <body className="w-full px-16 2xl:w-[1560px] m-auto">
         <Nav />
         <main>
           {children}

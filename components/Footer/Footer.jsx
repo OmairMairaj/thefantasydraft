@@ -1,5 +1,13 @@
 import React from 'react';
 import Image from 'next/image';
+import { Exo_2 } from 'next/font/google';
+
+const exo2 = Exo_2({
+    weight: ['400', '500', '700', '800'],
+    style: ['italic'],
+    subsets: ['latin'],
+});
+
 
 const Footer = () => {
     return (
@@ -17,11 +25,11 @@ const Footer = () => {
 
                 {/* Center - Navigation Links */}
                 <div className="footer-links flex space-x-8 text-white">
-                    <a href="/" className="hover:text-[#FF8A00]">Home</a>
-                    <a href="/how-to-play" className="hover:text-[#FF8A00]">How To Play</a>
-                    <a href="/contact" className="hover:text-[#FF8A00]">Contact</a>
-                    <a href="/terms-and-conditions" className="hover:text-[#FF8A00]">Terms & Condition</a>
-                    <a href="/privacy-policy" className="hover:text-[#FF8A00]">Privacy Policy</a>
+                    <a href="/" className={`hover:text-[#FF8A00] ${exo2.className}`}>Home</a>
+                    <a href="/how-to-play" className={`hover:text-[#FF8A00] ${exo2.className}`}>How To Play</a>
+                    <a href="/contact" className={`hover:text-[#FF8A00] ${exo2.className}`}>Contact</a>
+                    <a href="/terms-and-conditions" className={`hover:text-[#FF8A00] ${exo2.className}`}>Terms & Condition</a>
+                    <a href="/privacy-policy" className={`hover:text-[#FF8A00] ${exo2.className}`}>Privacy Policy</a>
                 </div>
 
                 {/* Right side - Social media links */}
@@ -45,7 +53,7 @@ const Footer = () => {
             <div className="border-t border-gray-500 my-4"></div>
 
             {/* Copyright section */}
-            <div className="text-center text-white">
+            <div className={`text-center text-white ${exo2.className}`}>
                 <p>&copy; {new Date().getFullYear()} All rights reserved</p>
             </div>
             {/* <Image
