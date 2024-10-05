@@ -1,9 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Exo_2 } from 'next/font/google';
+import { usePathname } from 'next/navigation';
+import { FaUserCircle } from 'react-icons/fa';
+import { FiChevronDown } from 'react-icons/fi';
+import { FaBell } from 'react-icons/fa';
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],
@@ -13,10 +17,28 @@ const exo2 = Exo_2({
 
 const Nav = () => {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const pathname = usePathname();
+    const dropdownRef = useRef(null);
+
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [dropdownRef]);
 
     return (
-        <nav className="flex justify-between items-center border-b border-white py-4">
-            {/* Logo */}
+        <nav className={`max-h-[12vh] flex justify-between items-center border-b border-white py-4`}>
             <div className="flex space-x-5 items-center">
                 <Link href="/">
                     <Image
@@ -52,28 +74,96 @@ const Nav = () => {
                 </button>
             </div>
 
-            {/* Nav Links (Hidden on Mobile, Shown in Hamburger Menu) */}
-            <div className={`md:flex ${menuOpen ? 'block' : 'hidden'} md:space-x-6`}>
-                <a href="/" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
-                    HOME
-                </a>
-                <a href="/how-to-play" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
-                    HOW TO PLAY
-                </a>
-                <a href="/contact" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
-                    CONTACT US
-                </a>
-            </div>
+            {/* Nav Links */}
+            {pathname !== '/dashboard' ? (
+                <div className={`md:flex ${menuOpen ? 'block' : 'hidden'} md:space-x-6`}>
+                    <Link href="/" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                        HOME
+                    </Link>
+                    <Link href="/how-to-play" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                        HOW TO PLAY
+                    </Link>
+                    <Link href="/contact" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                        CONTACT US
+                    </Link>
+                </div>
+            ) : (
+                <div className={`md:flex ${menuOpen ? 'block' : 'hidden'} md:space-x-6`}>
+                    <Link href="/dashboard" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                        DASHBOARD
+                    </Link>
+                    <Link href="/how-to-play" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                        RULES
+                    </Link>
+                </div>
+            )}
 
-            {/* CTA Buttons */}
-            <div className="flex space-x-2">
-                <a href="/signup" className={`button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer ${exo2.className}`}>
-                    SIGN UP
-                </a>
-                <a href="/login" className={`button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer ${exo2.className}`}>
-                    LOGIN
-                </a>
-            </div>
+            {/* Conditional Elements: Signup/Login OR User Dropdown for Dashboard */}
+            {pathname !== '/dashboard' ? (
+                <div className="flex space-x-2">
+                    {pathname !== '/signup' && (
+                        <Link href="/signup" className={`button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer ${exo2.className}`}>
+                            SIGN UP
+                        </Link>
+                    )}
+                    {pathname !== '/login' && (
+                        <Link href="/login" className={`button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer ${exo2.className}`}>
+                            LOGIN
+                        </Link>
+                    )}
+                </div>
+            ) : (
+                <div className="flex items-center space-x-4">
+                    {/* Notification Icon */}
+                    <div className="relative flex justify-center items-center w-14 h-14 rounded-full border-2 border-transparent fade-gradient p-1 cursor-pointer">
+                        <div className="flex justify-center items-center w-full h-full rounded-full">
+                            <FaBell className="text-white text-lg" />
+                        </div>
+                    </div>
+
+                    {/* User Avatar and Dropdown */}
+                    <div ref={dropdownRef} className="relative">
+                        <button
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                            className="flex items-center space-x-4 fade-gradient py-2 px-5 rounded-full"
+                        >
+                            {/* Avatar */}
+                            {/* <div className="flex items-center bg-[#0C1922] rounded-full p-1">
+                                <Image
+                                    src="/path-to-avatar.jpg" // Replace with the path to the user's avatar
+                                    alt="User Avatar"
+                                    width={30}
+                                    height={30}
+                                    className="rounded-full"
+                                />
+                            </div> */}
+
+                            <FaUserCircle className="text-4xl" />
+
+                            {/* Username and Chevron */}
+                            <span className="text-white ml-2">Omair Mairaj</span>
+                            <FiChevronDown className="text-white" />
+                        </button>
+
+                        {/* Dropdown */}
+                        {dropdownOpen && (
+                            <div
+                                className="absolute right-0 mt-2 w-48 bg-[#0C1922] text-white rounded-lg py-2 z-10"
+                                style={{
+                                    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.6), 0px 2px 8px rgba(0, 0, 0, 0.2)',
+                                }}
+                            >
+                                <a href="/profile" className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg">
+                                    Account
+                                </a>
+                                <a href="/logout" className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg">
+                                    Logout
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </nav>
     );
 };

@@ -25,11 +25,11 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-[67vh] flex flex-col items-center pt-[150px]">
+        <div className="min-h-[88vh] flex flex-col items-center justify-center mb-[40]">
             <div className="w-1/3 bg-[#0C1922] p-16 rounded-3xl shadow-lg mb-500">
                 <h1 className={`text-4xl font-bold italic ${exo2.className}`}>LOGIN</h1>
                 <form onSubmit={handleSubmit}>
-                    <div className="mt-8 mb-8 space-y-4">
+                    <div className="mt-8 mb-4 space-y-4">
                         <input
                             type="email"
                             value={email}
@@ -57,11 +57,11 @@ export default function Login() {
                                 type="checkbox"
                                 checked={stayLoggedIn}
                                 onChange={(e) => setStayLoggedIn(e.target.checked)}
-                                className="mr-2"
+                                className="mr-2 ml-1 size-4"
                             />
                             Stay Logged In?
                         </label>
-                        <a href="#" className="text-orange-500 text-sm hover:underline">Forgot Password?</a>
+                        <a href="/forgot-password" className="text-orange-500 text-sm hover:underline">Forgot Password?</a>
                     </div>
                     <button
                         type="submit"

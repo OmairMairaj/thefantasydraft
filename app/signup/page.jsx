@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Exo_2 } from 'next/font/google';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import eye icons
 
 const exo2 = Exo_2({
     weight: ['700', '800'],
@@ -16,7 +17,9 @@ const SignUp = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [stayLoggedIn, setStayLoggedIn] = useState(false);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // For confirm password field
     const router = useRouter();
 
     const handleSubmit = (e) => {
@@ -25,19 +28,22 @@ const SignUp = () => {
             alert('Passwords do not match!');
             return;
         }
+        if (!agreedToTerms) {
+            alert('You must agree to the Terms & Conditions');
+            return;
+        }
         // Logic to register the user (you can call an API here)
-        console.log('Name:', name, 'Email:', email, 'Password:', password, 'Stay Logged In:', stayLoggedIn);
+        console.log('Name:', firstName, lastName, 'Email:', email, 'Password:', password, 'Agreed to Terms:', agreedToTerms);
         // On success, redirect to the dashboard or another page
         router.push('/dashboard');
     };
 
-
     return (
-        <div className='min-h-[67vh] flex flex-col items-center pt-[100px]'>
-            <div className='w-2/5 bg-[#0C1922] p-16 rounded-3xl shadow-lg mb-500"'>
+        <div className='min-h-[88vh] flex flex-col items-center justify-center'>
+            <div className='w-2/5 bg-[#0C1922] p-16 rounded-3xl shadow-lg'>
                 <h1 className={`text-4xl font-bold italic ${exo2.className}`}>SIGN UP</h1>
                 <form onSubmit={handleSubmit} className='mt-8'>
-                    <div className='w-full mb-4 flex justify-between space-x-4 '>
+                    <div className='w-full mb-4 flex justify-between space-x-4'>
                         <div className='w-1/2'>
                             <input type="text"
                                 value={firstName}
@@ -55,7 +61,7 @@ const SignUp = () => {
                                 placeholder="Last Name*"
                                 className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
                                 required
-                                autocomplete="off"
+                                autoComplete="off"
                             />
                         </div>
                     </div>
@@ -66,50 +72,70 @@ const SignUp = () => {
                         placeholder="Email*"
                         className="w-full p-3 mb-4 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
                         required
-                        autocomplete="off"
+                        autoComplete="off"
                     />
-                    <div>
+                    {/* Password Field with Toggle */}
+                    <div className="relative w-full mb-4">
                         <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'} // Toggle between password and text input types
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Password*"
-                            className="w-full mb-4 p-3 text-white bg-[#0C1922] border border-[#30363D] rounded-lg focus:outline-none focus:border-orange-500"
+                            className="w-full p-3 text-white bg-[#0C1922] border border-[#30363D] rounded-lg focus:outline-none focus:border-orange-500"
                             required
                         />
+                        <div
+                            className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <FaEye className="text-gray-400" /> : <FaEyeSlash className="text-gray-400" />}
+                        </div>
                     </div>
-                    <div>
+
+                    {/* Confirm Password Field with Toggle */}
+                    <div className="relative w-full mb-4">
                         <input
-                            type="password"
+                            type={showConfirmPassword ? 'text' : 'password'}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Confirm Password*"
-                            className="w-full mb-4 p-3 text-white bg-[#0C1922] border border-[#30363D] rounded-lg focus:outline-none focus:border-orange-500"
+                            className="w-full p-3 text-white bg-[#0C1922] border border-[#30363D] rounded-lg focus:outline-none focus:border-orange-500"
                             required
                         />
+                        <div
+                            className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                            {showConfirmPassword ? <FaEye className="text-gray-400" /> : <FaEyeSlash className="text-gray-400" />}
+                        </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                        <label className="flex items-center text-white">
-                            <input
-                                type="checkbox"
-                                checked={stayLoggedIn}
-                                onChange={(e) => setStayLoggedIn(e.target.checked)}
-                                className="mr-2"
-                            />
-                            Stay Logged In?
+
+                    <div className="flex items-start mb-4 space-x-2">
+                        <input
+                            type="checkbox"
+                            checked={agreedToTerms}
+                            onChange={(e) => setAgreedToTerms(e.target.checked)}
+                            className="align-top m-1 size-4"
+                        />
+                        <label className="text-white">
+                            By creating an account, you agree to our &nbsp;
+                            <a href="/terms-conditions" className="text-orange-500 underline hover:text-orange-400">
+                                Terms & Conditions
+                            </a>
                         </label>
-                        <a href="#" className="text-orange-500 text-sm hover:underline">Forgot Password?</a>
                     </div>
                     <button
                         type="submit"
-                        className="w-full mt-8 py-3 bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] rounded-full text-white font-bold text-lg hover:bg-orange-600 transition-all"
+                        disabled={!agreedToTerms}
+                        className={`w-full mt-8 py-3 rounded-full text-white font-bold text-lg transition-all ${agreedToTerms ? 'bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-orange-600' : 'bg-gray-500 cursor-not-allowed'
+                            }`}
                     >
-                        Register
+                        Create Account
                     </button>
                 </form>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default SignUp
+export default SignUp;
