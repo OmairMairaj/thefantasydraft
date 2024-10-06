@@ -38,6 +38,7 @@ export default function Login() {
                             className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-orange-500 text-white"
                             required
                             autocomplete="off"
+                            autoFocus
                         />
                         {/* </div> */}
                         {/* <div> */}
@@ -65,7 +66,7 @@ export default function Login() {
                     </div>
                     <button
                         type="submit"
-                        className={`w-full mt-8 py-3 bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] rounded-full text-white font-bold text-lg hover:bg-orange-600 transition-all ${exo2.className}`}
+                        className={`w-full mt-8 py-3 bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] rounded-full text-white font-bold text-lg hover:bg-[#FF8A00] transition-all ${exo2.className}`}
                     >
                         Login
                     </button>

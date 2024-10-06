@@ -17,12 +17,12 @@ const Hero = () => {
                 <div className="text-content py-40 w-1/2">
                     <h1 className={`text-4xl lg:text-4xl xl:text-6xl font-bold leading-tight mb-4 text-white italic ${exo2.className}`}>
                         FANTASY FOOTBALL, <br />
-                        BUT <span className="text-[#F18302]">BETTER</span>
+                        BUT <span className="text-[#FF8A00]">BETTER</span>
                     </h1>
                     <p className="text-sm md:text-base lg:text-lg 2xl:text-xl mb-8">
                         Do you love fantasy football, but you're bored of everyone having the same teams? Welcome to Fantasy football drafting. Play with unique squads in an enthralling head to head style competition to crown the true champion of fantasy football.
                     </p>
-                    <a href="/signup" className="button relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 hover:bg-[#FF8A00] cursor-pointer">
+                    <a href="/signup" className={`fade-gradient relative italic px-6 md:px-8 lg:px-12 py-4 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}>
                         START PLAYING <span className="ml-2 text-2xl">»</span>
                     </a>
                 </div>

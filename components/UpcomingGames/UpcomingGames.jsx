@@ -95,7 +95,7 @@ export default function UpcomingGames() {
         <section className="upcoming-games-section py-16">
             <div className="">
                 {/* Section Title */}
-                <h2 className={`text-orange-500 text-3xl md:text-4xl font-bold mb-12 text-center ${exo2.className}`}>
+                <h2 className={`text-3xl md:text-4xl font-bold mb-12 text-center ${exo2.className}`}>
                     UPCOMING GAME WEEKS
                 </h2>
 
@@ -119,8 +119,8 @@ export default function UpcomingGames() {
 
                                 {/* VS */}
                                 <div className={`flex justify-center items-center relative ${exo2.className}`} style={{ height: '4rem', width: '4rem', fontSize: '3rem' }}>
-                                    <span className="absolute text-orange-500 font-bold" style={{ top: '-0.5rem', left: '0rem' }}>V</span>
-                                    <span className="absolute text-orange-500 font-bold" style={{ top: '0.5rem', left: '1.6rem' }}>S</span>
+                                    <span className="absolute text-[#FF8A00] font-bold" style={{ top: '-0.5rem', left: '0rem' }}>V</span>
+                                    <span className="absolute text-[#FF8A00] font-bold" style={{ top: '0.5rem', left: '1.6rem' }}>S</span>
                                 </div>
 
                                 {/* Away Team */}
@@ -137,7 +137,7 @@ export default function UpcomingGames() {
                             </div>
 
                             {/* Game Date and Time */}
-                            <div className={`text-orange-500 text-lg ${exo2.className}`}>
+                            <div className={`text-[#FF8A00] text-lg ${exo2.className}`}>
                                 {game.date} {game.time}
                             </div>
                         </div>
