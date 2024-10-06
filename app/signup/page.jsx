@@ -51,6 +51,7 @@ const SignUp = () => {
                                 placeholder="First Name*"
                                 className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
                                 required
+                                autoFocus
                             />
                         </div>
                         <div className='w-1/2'>
@@ -127,7 +128,7 @@ const SignUp = () => {
                     <button
                         type="submit"
                         disabled={!agreedToTerms}
-                        className={`w-full mt-8 py-3 rounded-full text-white font-bold text-lg transition-all ${agreedToTerms ? 'bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-orange-600' : 'bg-gray-500 cursor-not-allowed'
+                        className={`w-full mt-8 py-3 rounded-full text-white font-bold text-lg transition-all ${agreedToTerms ? 'bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-[#FF8A00]' : 'bg-gray-500 cursor-default'
                             }`}
                     >
                         Create Account

@@ -62,7 +62,7 @@ export default function PlayByPlay() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
                     {/* Text Section */}
                     <div>
-                        <h2 className={`text-orange-500 text-3xl md:text-4xl font-bold mb-4 ${exo2.className}`}>PLAY BY PLAY</h2>
+                        <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${exo2.className}`}>PLAY BY PLAY</h2>
                         <p className="text-lg mb-4">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
                         </p>
@@ -87,15 +87,15 @@ export default function PlayByPlay() {
                     {/* Step 1 */}
                     <div
                         className={`${activeStep === 0 ? 'bg-black' : 'bg-transparent'
-                            } rounded-lg p-6 border-2 border-orange-500 transition-all duration-300`}
+                            } rounded-lg p-6 border-2 border-[#FF8A00] transition-all duration-300`}
                         onClick={() => handleStepClick(1)}
                     >
-                        <div
-                            className={`text-orange-500 text-xl font-bold mb-4 cursor-pointer ${activeStep === 0 ? '' : 'text-center py-4'
+                        <h6
+                            className={` text-xl font-bold mb-4 cursor-pointer ${activeStep === 0 ? '' : 'text-center py-4'
                                 }`}
                         >
                             STEP 1
-                        </div>
+                        </h6>
                         {activeStep === 0 && (
                             <div className="text-white text-lg mb-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -115,15 +115,15 @@ export default function PlayByPlay() {
                     {/* Step 2 */}
                     <div
                         className={`${activeStep === 1 ? 'bg-black' : 'bg-transparent'
-                            } rounded-lg p-6 border-2 border-orange-500 transition-all duration-300`}
+                            } rounded-lg p-6 border-2 border-[#FF8A00] transition-all duration-300`}
                         onClick={() => handleStepClick(2)}
                     >
-                        <div
-                            className={`text-orange-500 text-xl font-bold mb-4 cursor-pointer ${activeStep === 1 ? '' : 'text-center py-4'
+                        <h6
+                            className={` text-xl font-bold mb-4 cursor-pointer ${activeStep === 1 ? '' : 'text-center py-4'
                                 }`}
                         >
                             STEP 2
-                        </div>
+                        </h6>
                         {activeStep === 1 && (
                             <div className="text-white text-lg mb-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -143,15 +143,15 @@ export default function PlayByPlay() {
                     {/* Step 3 */}
                     <div
                         className={`${activeStep === 2 ? 'bg-black' : 'bg-transparent'
-                            } rounded-lg p-6 border-2 border-orange-500 transition-all duration-300`}
+                            } rounded-lg p-6 border-2 border-[#FF8A00] transition-all duration-300`}
                         onClick={() => handleStepClick(3)}
                     >
-                        <div
-                            className={`text-orange-500 text-xl font-bold mb-4 cursor-pointer ${activeStep === 2 ? '' : 'text-center py-4'
+                        <h6
+                            className={`text-xl font-bold mb-4 cursor-pointer ${activeStep === 2 ? '' : 'text-center py-4'
                                 }`}
                         >
                             STEP 3
-                        </div>
+                        </h6>
                         {activeStep === 2 && (
                             <div className="text-white text-lg mb-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -171,15 +171,15 @@ export default function PlayByPlay() {
                     {/* Step 4 */}
                     <div
                         className={`${activeStep === 3 ? 'bg-black' : 'bg-transparent'
-                            } rounded-lg p-6 border-2 border-orange-500 transition-all duration-300`}
+                            } rounded-lg p-6 border-2 border-[#FF8A00] transition-all duration-300`}
                         onClick={() => handleStepClick(4)}
                     >
-                        <div
-                            className={`text-orange-500 text-xl font-bold mb-4 cursor-pointer ${activeStep === 3 ? '' : 'text-center py-4'
+                        <h6
+                            className={`text-xl font-bold mb-4 cursor-pointer ${activeStep === 3 ? '' : 'text-center py-4'
                                 }`}
                         >
                             STEP 4
-                        </div>
+                        </h6>
                         {activeStep === 3 && (
                             <div className="text-white text-lg mb-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -204,12 +204,12 @@ export default function PlayByPlay() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-16">
                     {/* Text Section */}
                     <div>
-                        <h2 className={`text-orange-500 text-3xl md:text-4xl font-bold mb-4 ${exo2.className}`}>
+                        <h2 className={` text-3xl md:text-4xl font-bold mb-4 ${exo2.className}`}>
                             PLAY BY PLAY
                         </h2>
 
                         {/* Carousel Text */}
-                        <h3 className="text-orange-500 text-2xl font-bold mb-4">{steps[activeStep].title}</h3>
+                        <h3 className=" text-2xl font-bold mb-4">{steps[activeStep].title}</h3>
                         <p className="text-lg mb-4">{steps[activeStep].description}</p>
 
                         {/* Navigation Arrows */}
@@ -243,6 +243,6 @@ export default function PlayByPlay() {
                 </div>
             </div>
 
-        </section>
+        </section >
     );
 }

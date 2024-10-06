@@ -29,31 +29,13 @@ h6 {
   /* background: var(--background); */
 }
 
-.button {
-  background: #070E13;
-  border: 2px solid transparent;
-  /* Transparent border to show the gradient */
-  background-image: linear-gradient(#070E13, #070E13),
-    /* Solid button background */
-    linear-gradient(180deg, #1C1C1C, #F18302);
-  /* Gradient border */
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  /* Clip the background and border separately */
-  display: inline-block;
-}
-
-.button:hover {
-  background: #FF8A00;
-}
-
 .fade-gradient {
   background: #070E13;
   border: 2px solid transparent;
   /* Transparent border to show the gradient */
   background-image: linear-gradient(#070E13, #070E13),
     /* Solid button background */
-    linear-gradient(180deg, #1C1C1C, #F18302);
+    linear-gradient(180deg, #1C1C1C, #FF8A00);
   /* Gradient border */
   background-origin: border-box;
   background-clip: padding-box, border-box;
@@ -62,7 +44,7 @@ h6 {
 }
 
 .fade-gradient:hover {
-  background: #FF8A00;
+  background-image: linear-gradient(180deg, #FF8A00, #FF8A00A3);
 }
 
 @layer utilities {
