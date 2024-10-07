@@ -10,7 +10,7 @@ const exo2 = Exo_2({
 
 export default function Intro() {
     return (
-        <section className="intro-section text-white py-16">
+        <section className="intro-section py-16">
             <div className=" flex flex-col md:flex-row items-center justify-between gap-12 ">
 
                 {/* Left Content */}

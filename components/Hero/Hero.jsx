@@ -11,7 +11,7 @@ const exo2 = Exo_2({
 
 const Hero = () => {
     return (
-        <section className="hero-section text-white relative overflow-hidden">
+        <section className="hero-section relative overflow-hidden">
             <div className=" md:flex md:items-center md:justify-between">
                 {/* Left Content - Headline and Text */}
                 <div className="text-content py-40 w-1/2">

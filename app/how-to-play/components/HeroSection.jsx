@@ -9,7 +9,7 @@ const exo2 = Exo_2({
     subsets: ['latin'],
 });
 
-const HeroSection = () => {
+const HeroSection = ({ scrollToContent }) => {
     return (
         <section className=" my-10">
             <div className="flex flex-col md:flex-row items-center justify-between mb-10 ">
@@ -17,12 +17,12 @@ const HeroSection = () => {
                     <h1 className={`text-5xl md:text-6xl font-bold text-white italic ${exo2.className}`}>
                         HOW TO <span className="text-[#FF8A00]">PLAY</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-400 leading-relaxed">
+                    <p className="text-lg leading-relaxed">
                         The match result is based on the Gameweek score of each team minus any transfer points spent preparing for the Gameweek.
                         3 points are awarded for a win and 1 point for a draw, teams are then ranked on points earned in Head-to-Head matches.
                         Head-to-Head fixtures are generated at the start of the league's first Gameweek.
                     </p>
-                    <button className={`fade-gradient text-white flex items-center py-2 px-16 rounded-full font-bold ${exo2.className}`}>
+                    <button className={`fade-gradient flex items-center text-white py-2 px-16 rounded-full font-bold ${exo2.className}`} onClick={scrollToContent}>
                         LEARN MORE <span className="ml-2 text-2xl flex items-center mb-1.5"> »</span>
                     </button>
                 </div>
@@ -60,7 +60,7 @@ const HeroSection = () => {
                     <h1 className={`text-4xl md:text-5xl font-bold italic ${exo2.className}`}>
                         GETTING TO KNOW THE BASICS
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-400 leading-relaxed">
+                    <p className="text-lg leading-relaxed">
                         From your 15 player squad, select 11 players by the Gameweek deadline to form your team.
                         All your points for the Gameweek will be scored by these 11 players, however if one or more doesn't
                         play they may be automatically substituted. Your team can play in any formation providing that 1 goalkeeper,

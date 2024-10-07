@@ -97,7 +97,7 @@ export default function PlayByPlay() {
                             STEP 1
                         </h6>
                         {activeStep === 0 && (
-                            <div className="text-white text-lg mb-4">
+                            <div className="text-lg mb-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                                 <div className="flex justify-center mt-4">
                                     <Image
@@ -125,7 +125,7 @@ export default function PlayByPlay() {
                             STEP 2
                         </h6>
                         {activeStep === 1 && (
-                            <div className="text-white text-lg mb-4">
+                            <div className="text-lg mb-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                                 <div className="flex justify-center mt-4">
                                     <Image
@@ -153,7 +153,7 @@ export default function PlayByPlay() {
                             STEP 3
                         </h6>
                         {activeStep === 2 && (
-                            <div className="text-white text-lg mb-4">
+                            <div className="text-lg mb-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                                 <div className="flex justify-center mt-4">
                                     <Image
@@ -181,7 +181,7 @@ export default function PlayByPlay() {
                             STEP 4
                         </h6>
                         {activeStep === 3 && (
-                            <div className="text-white text-lg mb-4">
+                            <div className="text-lg mb-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                                 <div className="flex justify-center mt-4">
                                     <Image

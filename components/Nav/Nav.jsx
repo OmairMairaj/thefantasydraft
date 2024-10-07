@@ -77,22 +77,22 @@ const Nav = () => {
             {/* Nav Links */}
             {pathname !== '/dashboard' ? (
                 <div className={`md:flex ${menuOpen ? 'block' : 'hidden'} md:space-x-6`}>
-                    <Link href="/" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                    <Link href="/" className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                         HOME
                     </Link>
-                    <Link href="/how-to-play" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                    <Link href="/how-to-play" className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                         HOW TO PLAY
                     </Link>
-                    <Link href="/contact" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                    <Link href="/contact" className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                         CONTACT US
                     </Link>
                 </div>
             ) : (
                 <div className={`md:flex ${menuOpen ? 'block' : 'hidden'} md:space-x-6`}>
-                    <Link href="/dashboard" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                    <Link href="/dashboard" className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                         DASHBOARD
                     </Link>
-                    <Link href="/how-to-play" className={`hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                    <Link href="/how-to-play" className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                         RULES
                     </Link>
                 </div>

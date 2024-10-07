@@ -11,7 +11,7 @@ const exo2 = Exo_2({
 
 const Footer = () => {
     return (
-        <footer className="footer bg-[url('/images/Ellipse.svg')] bg-cover bg-center bg-no-repeat text-white py-8">
+        <footer className="footer bg-[url('/images/Ellipse.svg')] bg-cover bg-center bg-no-repeat text-white pt-16 pb-4">
             <div className="flex justify-between items-center">
                 {/* Left side - Logo */}
                 <div className="flex items-center">
@@ -54,7 +54,7 @@ const Footer = () => {
 
             {/* Copyright section */}
             <div className={`text-center text-white ${exo2.className}`}>
-                <p>&copy; {new Date().getFullYear()} All rights reserved</p>
+                <p className="text-white">&copy; {new Date().getFullYear()} All rights reserved</p>
             </div>
             {/* <Image
                 src="/images/Ellipse.svg" // Your logo path

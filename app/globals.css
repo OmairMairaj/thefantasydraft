@@ -12,7 +12,7 @@
 }
 
 body {
-  color: var(--foreground);
+  color: #c2c2c2;
   background: var(--background);
   font-family: "Poppins", sans-serif;
   /* Default font for the entire site */
@@ -27,6 +27,10 @@ h6 {
   /* Exo 2 will be applied dynamically via className */
   color: var(--accent);
   /* background: var(--background); */
+}
+
+p {
+  color: #c2c2c2;
 }
 
 .fade-gradient {
