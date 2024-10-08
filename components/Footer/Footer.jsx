@@ -11,7 +11,7 @@ const exo2 = Exo_2({
 
 const Footer = () => {
     return (
-        <footer className="footer bg-[url('/images/Ellipse.svg')] bg-cover bg-center bg-no-repeat text-white pt-16 pb-4">
+        <footer className="footer bg-[url('/images/Ellipse.svg')] bg-cover bg-center bg-no-repeat text-white pt-16 pb-4 m-auto mx-6 md:mx-10 lg:mx-16 xl:mx-20 ">
             <div className="flex justify-between items-center">
                 {/* Left side - Logo */}
                 <div className="flex items-center">

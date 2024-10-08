@@ -7,7 +7,7 @@ import UpcomingGames from "@/components/UpcomingGames/UpcomingGames";
 
 export default function Home() {
   return (
-    <div>
+    <div className="px-6 md:px-10 lg:px-16 xl:px-20 ">
       <Hero />
       <Intro />
       <Partners />

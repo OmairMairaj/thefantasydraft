@@ -11,25 +11,49 @@ const exo2 = Exo_2({
 
 const HeroSection = ({ scrollToContent }) => {
     return (
-        <section className=" my-10">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-10 ">
-                <div className="md:w-1/2 space-y-8 ">
-                    <h1 className={`text-5xl md:text-6xl font-bold text-white italic ${exo2.className}`}>
+        // <section className=" my-10">
+        //     <div className="flex flex-col md:flex-row items-center justify-between mb-10 ">
+        //         <div className="md:w-1/2 space-y-8 ">
+        //             <h1 className={`text-5xl md:text-6xl font-bold text-white italic ${exo2.className}`}>
+        //                 HOW TO <span className="text-[#FF8A00]">PLAY</span>
+        //             </h1>
+        //             <p className="text-lg leading-relaxed">
+        //                 The match result is based on the Gameweek score of each team minus any transfer points spent preparing for the Gameweek.
+        //                 3 points are awarded for a win and 1 point for a draw, teams are then ranked on points earned in Head-to-Head matches.
+        //                 Head-to-Head fixtures are generated at the start of the league's first Gameweek.
+        //             </p>
+        //             <button className={`fade-gradient flex items-center text-white py-2 px-16 rounded-full font-bold ${exo2.className}`} onClick={scrollToContent}>
+        //                 LEARN MORE <span className="ml-2 text-2xl flex items-center mb-1.5"> »</span>
+        //             </button>
+        //         </div>
+        //         <div className="md:w-1/2 relative">
+        //             {/* Main Image */}
+        //             <Image
+        //                 src="/images/how-to-play-hero.svg"  // Use your actual image path
+        //                 alt="How to Play"
+        //                 width={1000}
+        //                 height={500}
+        //                 className="object-cover z-20 w-full h-auto rounded-lg relative"
+        //             />
+
+        <section className="my-10">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-10">
+                <div className="md:w-1/2 space-y-8">
+                    <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold text-white italic ${exo2.className}`}>
                         HOW TO <span className="text-[#FF8A00]">PLAY</span>
                     </h1>
-                    <p className="text-lg leading-relaxed">
+                    <p className="text-base sm:text-lg leading-relaxed">
                         The match result is based on the Gameweek score of each team minus any transfer points spent preparing for the Gameweek.
                         3 points are awarded for a win and 1 point for a draw, teams are then ranked on points earned in Head-to-Head matches.
                         Head-to-Head fixtures are generated at the start of the league's first Gameweek.
                     </p>
-                    <button className={`fade-gradient flex items-center text-white py-2 px-16 rounded-full font-bold ${exo2.className}`} onClick={scrollToContent}>
-                        LEARN MORE <span className="ml-2 text-2xl flex items-center mb-1.5"> »</span>
+                    <button className={`fade-gradient px-6 md:px-8 lg:px-12 pt-2 pb-3 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg cursor-pointer ${exo2.className}`} onClick={scrollToContent}>
+                        LEARN MORE <span className="ml-2 text-xl md:text-2xl items-center mb-1.5"> »</span>
                     </button>
                 </div>
-                <div className="md:w-1/2 relative">
-                    {/* Main Image */}
+                <div className="md:w-1/2 relative mt-6 md:mt-0">
                     <Image
-                        src="/images/how-to-play-hero.svg"  // Use your actual image path
+                        src="/images/how-to-play-hero.svg"
                         alt="How to Play"
                         width={1000}
                         height={500}

@@ -40,7 +40,7 @@ const SignUp = () => {
 
     return (
         <div className='min-h-[88vh] flex flex-col items-center justify-center'>
-            <div className='w-2/5 bg-[#0C1922] p-16 rounded-3xl shadow-lg'>
+            <div className='max-w-xl mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg'>
                 <h1 className={`text-4xl font-bold italic ${exo2.className}`}>SIGN UP</h1>
                 <form onSubmit={handleSubmit} className='mt-8'>
                     <div className='w-full mb-4 flex justify-between space-x-4'>
@@ -120,7 +120,7 @@ const SignUp = () => {
                         />
                         <label className="text-white">
                             By creating an account, you agree to our &nbsp;
-                            <a href="/terms-conditions" className="text-orange-500 underline hover:text-orange-400">
+                            <a href="/terms-and-conditions" className="text-orange-500 underline hover:text-orange-400">
                                 Terms & Conditions
                             </a>
                         </label>

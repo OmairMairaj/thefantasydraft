@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Exo_2 } from 'next/font/google';
+import Link from 'next/link';
 
 const exo2 = Exo_2({
     weight: ['700', '800'],
@@ -24,9 +25,9 @@ export default function Intro() {
                     <p className="text-lg md:text-xl mb-8">
                         Join the community today and become the true champion of fantasy football!
                     </p>
-                    <a href="/how-to-play" className={`fade-gradient px-6 md:px-8 lg:px-12 py-4 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
+                    <Link href="/how-to-play" className={`fade-gradient px-6 md:px-8 lg:px-12 pt-2 pb-3 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
                         Learn How to Play <span className="ml-2 text-2xl">»</span>
-                    </a>
+                    </Link>
 
                 </div>
 

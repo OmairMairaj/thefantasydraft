@@ -14,12 +14,12 @@ const HowToPlay = () => {
     };
 
     return (
-        <>
+        <div className="px-6 md:px-10 lg:px-16 xl:px-20 ">
             <HeroSection scrollToContent={scrollToContent} /> {/* Pass scrollToContent to HeroSection */}
             <div ref={contentRef}>
                 <ContentSection />
             </div>
-        </>
+        </div>
     );
 };
 

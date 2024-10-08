@@ -38,7 +38,7 @@ const Nav = () => {
     }, [dropdownRef]);
 
     return (
-        <nav className={`max-h-[12vh] flex justify-between items-center border-b border-white py-4`}>
+        <nav className={`max-h-[120px] flex justify-between items-center border-b border-white py-10 m-auto mx-6 md:mx-10 lg:mx-16 xl:mx-20  relative`}>
             <div className="flex space-x-5 items-center">
                 <Link href="/">
                     <Image
@@ -100,7 +100,7 @@ const Nav = () => {
 
             {/* Conditional Elements: Signup/Login OR User Dropdown for Dashboard */}
             {pathname !== '/dashboard' ? (
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 p-1">
                     {pathname !== '/signup' && (
                         <Link href="/signup" className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}>
                             SIGN UP
