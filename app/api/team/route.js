@@ -24,7 +24,7 @@ export const POST = async (req, res) => {
     connectToDb();
     const payload = await req.json();
     console.log(payload);
-    if (payload && payload.input &&  payload.input.length > 0) {
+    if (payload && payload.input && payload.input.length > 0) {
       const newTeam = await Team.insertMany(payload.input)
       return NextResponse.json({ error: false, data: newTeam });
     } else {
