@@ -39,21 +39,20 @@ const SignUp = () => {
       password: password,
       confirm_password: confirmPassword,
     };
-    console.log(body);
+    // console.log(body);
     axios
       .post(URL, body)
       .then((res) => {
         console.log(res);
         alert(res.data.message);
         if (!res.data.error) {
+            router.push("/login");
         }
       })
       .catch((err) => {
         console.log(err);
         alert("An unexpected error occurred. Please try again later");
       });
-    // On success, redirect to the dashboard or another page
-    // router.push("/dashboard");
   };
 
   return (

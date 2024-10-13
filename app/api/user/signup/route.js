@@ -39,7 +39,8 @@ export const POST = async (req, res) => {
             last_name: payload.last_name,
             email: payload.email,
             password: hash,
-            confirmation_code: confCode
+            confirmation_code: confCode,
+            status: 'Pending Email Verification'
           })
           const email_body = `<body><h3>Hello ${newUser.first_name}</h3><br /><p> Thank you for signing up for Fantasy Draft.</p><br /><p> Lets get started. Please verify your account by following this link :</p><br /><br /><a href="${process.env.NEXT_PUBLIC_FRONTEND_URL}verify?code=${confCode} ">Verify Account</a><br /><br /><p>If you have questions, we are here to help. Email us at ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}</p><br /><br /><p>Regards,</p><p>Team Fantasy Draft</p></body>`
           const email = await sendEmail(payload.email, "Fantasy Registration : Verification Email", email_body)

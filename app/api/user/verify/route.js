@@ -12,12 +12,11 @@ export const POST = async (req, res) => {
         message: 'Error: Confirmation code is required.'
       })
     }
-    const confUser = await User.findOneAndUpdate({ confirmation_code: payload.code, status: 'Pending Email Verification' }, { status: "Active" })
-    console.log(confUser);
+    const confUser = await User.findOneAndUpdate({ confirmation_code: payload.code }, { status: "Active" })
     if (confUser) {
       return NextResponse.json({
         error: false,
-        message: 'User Verification successful!',
+        message: 'User Verification successful! Please login',
         user: confUser
       })
     } else {
