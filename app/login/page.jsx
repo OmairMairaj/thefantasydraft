@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter to use client-side navigation
 import { Exo_2 } from 'next/font/google';
+import axios from 'axios';
 
 const exo2 = Exo_2({
     weight: ['700', '800'],
@@ -19,9 +20,25 @@ export default function Login() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Email:', email, 'Password:', password);
-        // Simulate successful login and navigate to another page
-        router.push('/dashboard'); // Navigate to the dashboard page on success
+        const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "user/login";
+                const body = {
+                    email: email,
+                    password: password
+                };
+                // console.log(body);
+                axios.post(URL, body).then((res) => {
+                    console.log(res);
+                    alert(res.data.message);
+                    if(!res.data.error){
+                        sessionStorage.setItem("token",res.data.token)
+                        sessionStorage.setItem("user",JSON.stringify(res.data.user))
+                        router.push('/dashboard');
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                    alert("An unexpected error occurred. Please try again later");
+                });
+
     };
 
     return (

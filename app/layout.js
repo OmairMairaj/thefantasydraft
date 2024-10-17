@@ -1,7 +1,7 @@
 import "./globals.css";
-
 import Nav from '../components/Nav/Nav';
 import Footer from "@/components/Footer/Footer";
+import Provider from "./provider";
 
 export const metadata = {
   title: "The Fantasy Draft",
@@ -12,13 +12,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="m-auto flex flex-col items-center max-w-[100rem]">
-        <div className="w-full">
-          <Nav />
-          <main>
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <Provider>
+          <div className="w-full">
+            <Nav />
+            <main>
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </Provider>
       </body>
     </html>
   );

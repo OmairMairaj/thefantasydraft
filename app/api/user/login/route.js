@@ -1,21 +1,58 @@
 import { User } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
+import { validateLoginInput, comparePassword } from "@/lib/helpers"
+import jwt from "jsonwebtoken"
 
 export const POST = async (req, res) => {
   try {
     connectToDb();
     const payload = await req.json();
-    console.log(payload);
-    if (payload && payload.input) {
-      const newUser = await User.insertMany(payload.input)
-      return NextResponse.json({ error: false, data: newUser });
-    } else {
+    const { errors, isValid } = validateLoginInput(payload)
+
+    if (!isValid) {
       return NextResponse.json({
         error: true,
-        err: "Problem with body",
-        message: "Please fill in all the fields"
-      });
+        message: Object.values(errors)[0]
+      })
+    } else {
+      const loginUser = await User.findOne({ email: payload.email });
+      if (loginUser) {
+        if (loginUser.status === 'Suspended') {
+          return NextResponse.json({
+            error: true,
+            message: 'Your account has been suspended. Please contact support for resolution.'
+          })
+        } else if (loginUser.status === 'Pending Email Verification') {
+          return NextResponse.json({
+            error: true,
+            message: 'The email registered with your account has not yet been verified. Please check your inbox to verify your email.'
+          })
+        } else {
+          console.log(payload);
+          console.log(loginUser);
+          const isMatch = await comparePassword(payload.password, loginUser.password);
+          if (!isMatch) {
+            return NextResponse.json({
+              error: true,
+              message: "The password entered is invalid for this email. Please try again."
+            })
+          } else {
+            const token = await jwt.sign({str:JSON.stringify(loginUser)}, process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_USER, { expiresIn: "6 hours" });
+            return NextResponse.json({
+              error: false,
+              message: 'Login successful.',
+              token: token,
+              user: loginUser
+            })
+          }
+        }
+      } else {
+        return NextResponse.json({
+          error: true,
+          message: "We could not find a user with this email. Please try again."
+        })
+      }
     }
   }
   catch (err) {
@@ -23,7 +60,7 @@ export const POST = async (req, res) => {
     return NextResponse.json({
       error: true,
       err: err,
-      message: "An unexpected error occurred please try again"
+      message: "An unexpected error occurred. Please try again later"
     });
   }
 };
