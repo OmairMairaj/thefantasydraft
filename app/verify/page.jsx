@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Exo_2 } from "next/font/google";
 import axios from "axios";
@@ -11,11 +11,11 @@ const exo2 = Exo_2({
   subsets: ["latin"],
 });
 
-const Verify = () => {
+const VerifyContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
-  const [MyText, setMyText] = React.useState("Verifying Email...");
+  const [MyText, setMyText] = useState("Verifying Email...");
 
   React.useEffect(() => {
     if (!code) {
@@ -67,6 +67,15 @@ const Verify = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Wrap the VerifyContent in Suspense to avoid errors
+const Verify = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyContent />
+    </Suspense>
   );
 };
 
