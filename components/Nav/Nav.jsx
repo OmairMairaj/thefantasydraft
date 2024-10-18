@@ -161,7 +161,7 @@ const Nav = () => {
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center space-x-4 fade-gradient py-2 px-5 rounded-full"
+              className="fade-gradient flex items-center space-x-4 py-2 px-5 rounded-full"
             >
               {/* Avatar */}
               {/* <div className="flex items-center bg-[#0C1922] rounded-full p-1">

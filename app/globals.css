@@ -44,7 +44,7 @@ p {
   background-origin: border-box;
   background-clip: padding-box, border-box;
   /* Clip the background and border separately */
-  display: inline-block;
+  /* display: inline-block; */
   transition: ease-out 0.3s;
   margin: 0 2px
 }
