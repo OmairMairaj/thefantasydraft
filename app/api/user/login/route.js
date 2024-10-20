@@ -38,7 +38,7 @@ export const POST = async (req, res) => {
               message: "The password entered is invalid for this email. Please try again."
             })
           } else {
-            const token = await jwt.sign({str:JSON.stringify(loginUser)}, process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_USER, { expiresIn: "6 hours" });
+            const token = await jwt.sign({str:JSON.stringify(loginUser)}, process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_USER, { expiresIn: "1 year" });
             return NextResponse.json({
               error: false,
               message: 'Login successful.',

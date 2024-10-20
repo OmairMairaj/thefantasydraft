@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Exo_2 } from "next/font/google";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { FaUserCircle } from "react-icons/fa";
 import { FiChevronDown } from "react-icons/fi";
@@ -18,12 +19,32 @@ const exo2 = Exo_2({
 
 const Nav = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const pathname = usePathname();
   const dropdownRef = useRef(null);
+  const router = useRouter();
 
-  const session = useSession();
-  console.log(session);
+  // const session = useSession();
+  // console.log(session);
+
+  React.useEffect(() => {
+    if (sessionStorage.getItem("user")) {
+      setUser(sessionStorage.getItem("user"));
+    } else {
+      if (localStorage.getItem("user")) {
+        setUser(sessionStorage.getItem("user"));
+      } else {
+        setUser(null);
+      }
+    }
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (pathname == "/dashboard" && !user) {
+      router.push("/login");
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -196,12 +217,16 @@ const Nav = () => {
                 >
                   Account
                 </a>
-                <a
-                  href="/logout"
+                <div
+                  onClick={() => {
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    router.push("/");
+                  }}
                   className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                 >
                   Logout
-                </a>
+                </div>
               </div>
             )}
           </div>

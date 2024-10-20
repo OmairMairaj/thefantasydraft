@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
+  "type":"module",
   "dependencies": {
     "@next/font": "^14.2.14",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
+    "express": "^4.21.1",
     "is-empty": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.0",

@@ -30,8 +30,11 @@ export default function Login() {
                     console.log(res);
                     alert(res.data.message);
                     if(!res.data.error){
-                        sessionStorage.setItem("token",res.data.token)
-                        sessionStorage.setItem("user",JSON.stringify(res.data.user))
+                        if(stayLoggedIn){
+                            localStorage.setItem("user",JSON.stringify(res.data))
+                        }else{
+                            sessionStorage.setItem("user",JSON.stringify(res.data))
+                        }
                         router.push('/dashboard');
                     }
                 }).catch((err) => {
