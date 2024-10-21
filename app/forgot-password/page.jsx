@@ -1,6 +1,6 @@
 "use client"; // This ensures the page is rendered on the client
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter to use client-side navigation
 import { Exo_2 } from "next/font/google";
 import axios from "axios";
@@ -11,7 +11,7 @@ const exo2 = Exo_2({
   subsets: ["latin"],
 });
 
-const ForgotPassword = () => {
+const ForgotPasswordContent = () => {
   const [email, setEmail] = useState("");
   const router = useRouter(); // Make sure useRouter is called within the client component
 
@@ -69,6 +69,14 @@ const ForgotPassword = () => {
         </form>
       </div>
     </div>
+  );
+};
+
+const ForgotPassword = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 };
 
