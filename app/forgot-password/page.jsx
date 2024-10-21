@@ -11,7 +11,7 @@ const exo2 = Exo_2({
   subsets: ["latin"],
 });
 
-export default function ForgotPassword() {
+const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const router = useRouter(); // Make sure useRouter is called within the client component
 
@@ -39,7 +39,9 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-[88vh] flex flex-col items-center justify-center mb-[40]">
       <div className="max-w-lg mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg mb-500">
-        <h1 className={`text-4xl font-bold italic ${exo2.className}`}>FORGOT PASSWORD</h1>
+        <h1 className={`text-4xl font-bold italic ${exo2.className}`}>
+          FORGOT PASSWORD
+        </h1>
         <form onSubmit={handleSubmit}>
           <div className="mt-8 mb-4 space-y-4">
             <input
@@ -53,7 +55,10 @@ export default function ForgotPassword() {
               autoFocus
             />
             <br />
-            <div>An email would be sent to your inbox with instructions to reset your password.</div>
+            <div>
+              An email would be sent to your inbox with instructions to reset
+              your password.
+            </div>
           </div>
           <button
             type="submit"
@@ -65,4 +70,6 @@ export default function ForgotPassword() {
       </div>
     </div>
   );
-}
+};
+
+export default ForgotPassword;

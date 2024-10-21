@@ -11,7 +11,7 @@ const exo2 = Exo_2({
   subsets: ["latin"],
 });
 
-export default function Login() {
+const ChangePassword = () => {
   const searchParams = useSearchParams();
   const router = useRouter(); // Make sure useRouter is called within the client component
   const email = searchParams.get("email");
@@ -46,7 +46,9 @@ export default function Login() {
   return (
     <div className="min-h-[88vh] flex flex-col items-center justify-center mb-[40]">
       <div className="max-w-lg mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg mb-500">
-        <h1 className={`text-4xl font-bold italic ${exo2.className}`}>RESET PASSWORD</h1>
+        <h1 className={`text-4xl font-bold italic ${exo2.className}`}>
+          RESET PASSWORD
+        </h1>
         <form onSubmit={handleSubmit}>
           <div className="mt-8 mb-4 space-y-4">
             {/* <input
@@ -107,4 +109,6 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};
+
+export default ChangePassword;
