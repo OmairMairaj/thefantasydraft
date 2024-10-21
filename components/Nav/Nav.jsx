@@ -35,13 +35,13 @@ const Nav = () => {
       if (localStorage.getItem("user")) {
         setUser(sessionStorage.getItem("user"));
       } else {
-        setUser(null);
+        setUser("nothing");
       }
     }
   }, [pathname]);
 
   React.useEffect(() => {
-    if (pathname == "/dashboard" && !user) {
+    if (pathname == "/dashboard" && user==="nothing") {
       router.push("/login");
     }
   }, [user]);
@@ -143,7 +143,7 @@ const Nav = () => {
       )}
 
       {/* Conditional Elements: Signup/Login OR User Dropdown for Dashboard */}
-      {pathname !== "/dashboard" ? (
+      {user==="nothing" ? (
         <div className="flex space-x-2 p-1">
           {pathname !== "/signup" && (
             <Link
@@ -207,6 +207,7 @@ const Nav = () => {
               <div
                 className="absolute right-0 mt-2 w-48 bg-[#0C1922] text-white rounded-lg py-2 z-10"
                 style={{
+                  zIndex:100,
                   boxShadow:
                     "0px 4px 20px rgba(0, 0, 0, 0.6), 0px 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
@@ -216,13 +217,21 @@ const Nav = () => {
                   className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                 >
                   Account
-                </a>
+                </a>  
+                <a
+                  href="/dashboard"
+                  className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                >
+                  Dashboard
+                </a>  
                 <div
                   onClick={() => {
+                    setDropdownOpen(false);
                     sessionStorage.clear();
                     localStorage.clear();
                     router.push("/");
                   }}
+                  style={{cursor:"pointer"}}
                   className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                 >
                   Logout

@@ -16,8 +16,8 @@ app.prepare().then(() => {
     const server = express();
 
     // Schedule the cron job to run every 10 minutes
-    cron.schedule('*/60 * * * *', () => {
-        console.log('Running the Python script every 60 minutes');
+    cron.schedule('*/5 * * * *', () => {
+        console.log('Running the Python script every 5 minutes');
 
         // Install dependencies
         exec(`pip install requests pymongo -t /tmp/python_modules`, (installError) => {

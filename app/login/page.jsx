@@ -57,7 +57,7 @@ export default function Login() {
                             placeholder="Email*"
                             className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-orange-500 text-white"
                             required
-                            autocomplete="off"
+                            autoComplete="off"
                             autoFocus
                         />
                         {/* </div> */}
@@ -69,7 +69,7 @@ export default function Login() {
                             placeholder="Password*"
                             className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-orange-500 text-white"
                             required
-                            autocomplete="off"
+                            autoComplete="off"
                         />
                     </div>
                     <div className="flex items-center justify-between">
