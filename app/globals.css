@@ -49,6 +49,11 @@ p {
   margin: 0 2px
 }
 
+tr,
+td {
+  height: 100%;
+}
+
 .fade-gradient:hover {
   background-image: linear-gradient(180deg, #FF8A00, #FF8A00A3);
   transform: scale(1.02);

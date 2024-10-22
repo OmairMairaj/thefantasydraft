@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter to use client-side navigation
-import { Exo_2 } from 'next/font/google';
 import axios from 'axios';
+import { Exo_2 } from 'next/font/google';
 
 const exo2 = Exo_2({
     weight: ['700', '800'],
@@ -21,27 +21,26 @@ export default function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "user/login";
-                const body = {
-                    email: email,
-                    password: password
-                };
-                // console.log(body);
-                axios.post(URL, body).then((res) => {
-                    console.log(res);
-                    alert(res.data.message);
-                    if(!res.data.error){
-                        if(stayLoggedIn){
-                            localStorage.setItem("user",JSON.stringify(res.data))
-                        }else{
-                            sessionStorage.setItem("user",JSON.stringify(res.data))
-                        }
-                        router.push('/dashboard');
-                    }
-                }).catch((err) => {
-                    console.log(err);
-                    alert("An unexpected error occurred. Please try again later");
-                });
-
+        const body = {
+            email: email,
+            password: password
+        };
+        // console.log(body);
+        axios.post(URL, body).then((res) => {
+            console.log(res);
+            alert(res.data.message);
+            if (!res.data.error) {
+                if (stayLoggedIn) {
+                    localStorage.setItem("user", JSON.stringify(res.data))
+                } else {
+                    sessionStorage.setItem("user", JSON.stringify(res.data))
+                }
+                router.push('/dashboard');
+            }
+        }).catch((err) => {
+            console.log(err);
+            alert("An unexpected error occurred. Please try again later");
+        });
     };
 
     return (
