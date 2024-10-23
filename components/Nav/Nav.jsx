@@ -71,33 +71,13 @@ const Nav = () => {
             src="/images/logo.svg"
             width={100}
             height={100}
-            className="object-cover cursor-pointer"
+            className="object-cover cursor-pointer w-16 md:w-20 lg:w-24 xl:w-28"
             alt="The Fantasy Draft Logo"
           />
         </Link>
-      </div>
-
-      {/* Hamburger Icon for Mobile */}
-      <div className="md:hidden">
-        <button
-          className="text-white focus:outline-none"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16m-7 6h7"}
-            ></path>
-          </svg>
-        </button>
+        <h1 className={`md:hidden text-xl sm:text-2xl lg:text-4xl xl:text-6xl font-bold leading-tight ml-2 text-white italic ${exo2.className}`}>
+          THE <span className="text-[#FF8A00]">FANTASY</span> <br disabled />DRAFT
+        </h1>
       </div>
 
       {/* Nav Links */}
@@ -144,32 +124,106 @@ const Nav = () => {
       )}
 
       {/* Conditional Elements: Signup/Login OR User Dropdown for Dashboard */}
-      {(user === "nothing" || user === null ) ? (
+      {(user === "nothing" || user === null) ? (
         <div className="flex space-x-2 p-1">
-          {pathname !== "/signup" && (
-            <Link
-              href="/signup"
-              className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}
+          <div className="hidden md:flex">
+            {pathname !== "/signup" && (
+              <Link
+                href="/signup"
+                className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}
+              >
+                SIGN UP
+              </Link>
+            )}
+            {pathname !== "/login" && (
+              <Link
+                href="/login"
+                className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}
+              >
+                LOGIN
+              </Link>
+              //Un-comment for NEXT AUTH
+              // <div
+              //   onClick={() => signIn()}
+              //   className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}
+              // >
+              //   LOGIN
+              // </div>
+            )}
+          </div>
+
+          {/* Notification Icon */}
+          <div ref={dropdownRef} className="relative md:hidden">
+            <button
+              className="text-white focus:outline-none flex items-center hover:text-[#FF8A00]"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              SIGN UP
-            </Link>
-          )}
-          {pathname !== "/login" && (
-            <Link
-              href="/login"
-              className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}
-            >
-              LOGIN
-            </Link>
-            //Un-comment for NEXT AUTH
-            // <div
-            //   onClick={() => signIn()}
-            //   className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}
-            // >
-            //   LOGIN
-            // </div>
-          )}
+              <svg
+                className="w-12 h-12"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16m-7 6h7"}
+                ></path>
+              </svg>
+            </button>
+
+            {/* Dropdown */}
+            {dropdownOpen && (
+              <div
+                className="absolute right-0 mt-2 w-48 bg-[#0C1922] text-white rounded-lg py-2 z-10"
+                style={{
+                  zIndex: 100,
+                  boxShadow:
+                    "0px 4px 20px rgba(0, 0, 0, 0.6), 0px 2px 8px rgba(0, 0, 0, 0.2)",
+                }}
+              >
+                <div className="md:hidden border-b border-gray-600 py-2">
+                  <a
+                    href="/"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Home
+                  </a>
+                  <a
+                    href="/how-to-play"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    How To Play
+                  </a>
+
+                  <a
+                    href="/contact"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Contact Us
+                  </a>
+                </div>
+                <div className=" py-2">
+                  <a
+                    href="/signup"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Sign Up
+                  </a>
+                  <a
+                    href="/Login"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Login
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+
       ) : (
         <div className="flex items-center space-x-4">
           {/* Notification Icon */}
@@ -183,7 +237,7 @@ const Nav = () => {
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="fade-gradient flex items-center space-x-4 py-2 px-5 rounded-full"
+              className="fade-gradient flex items-center space-x-4 py-2 px-2 rounded-full"
             >
               {/* Avatar */}
               {/* <div className="flex items-center bg-[#0C1922] rounded-full p-1">
@@ -199,10 +253,10 @@ const Nav = () => {
               <FaUserCircle className="text-4xl" />
 
               {/* Username and Chevron */}
-              <span className="text-white ml-2">
+              <span className="hidden md:flex text-white ml-2">
                 {(user && user.first_name) ? user.first_name + " " + user.last_name : ""}
               </span>
-              <FiChevronDown className="text-white" />
+              <FiChevronDown className="text-white hidden md:flex" />
             </button>
 
             {/* Dropdown */}
@@ -215,36 +269,60 @@ const Nav = () => {
                     "0px 4px 20px rgba(0, 0, 0, 0.6), 0px 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
               >
-                <a
-                  href="/profile"
-                  className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                >
-                  Account
-                </a>
-                <a
-                  href="/dashboard"
-                  className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                >
-                  Dashboard
-                </a>
-                <div
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    sessionStorage.clear();
-                    localStorage.clear();
-                    router.push("/");
-                  }}
-                  style={{ cursor: "pointer" }}
-                  className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                >
-                  Logout
+                <div className="md:hidden border-b border-gray-600 py-2">
+                  <a
+                    href="/"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Home
+                  </a>
+                  <a
+                    href="/how-to-play"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    How To Play
+                  </a>
+
+                  <a
+                    href="/contact"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Contact Us
+                  </a>
+                </div>
+                <div className=" py-2">
+                  <a
+                    href="/profile"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Account
+                  </a>
+                  <a
+                    href="/dashboard"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Dashboard
+                  </a>
+                  <div
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      sessionStorage.clear();
+                      localStorage.clear();
+                      router.push("/");
+                    }}
+                    style={{ cursor: "pointer" }}
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Logout
+                  </div>
                 </div>
               </div>
             )}
           </div>
         </div>
-      )}
-    </nav>
+      )
+      }
+    </nav >
   );
 };
 
