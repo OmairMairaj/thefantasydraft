@@ -75,6 +75,7 @@ const ContactForm = () => {
                 firstName: '',
                 lastName: '',
                 email: '',
+                phone: '',
                 message: ''
             });
             alert('Message sent successfully!');
@@ -82,15 +83,15 @@ const ContactForm = () => {
     };
 
     return (
-        <div className="my-20 flex flex-col items-center justify-center relative">
-            <div className="max-w-4xl mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg flex shadow-black justify-between space-x-8">
+        <div className="my-20 flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 lg:px-16">
+            <div className="w-full max-w-sm md:max-w-2xl lg:max-w-4xl bg-[#0C1922] p-8 sm:p-12 md:p-16 rounded-3xl shadow-lg flex flex-col md:flex-row shadow-black justify-between space-y-8 md:space-y-0 md:space-x-8">
                 {/* Form Section */}
-                <div className="w-3/5">
-                    <h2 className={`text-3xl font-bold text-[#FF8A00] mb-8 italic ${exo2.className}`}>
+                <div className="w-full md:w-3/5">
+                    <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold text-[#FF8A00] mb-6 sm:mb-8 italic ${exo2.className}`}>
                         CONTACT FORM
                     </h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="flex space-x-4">
+                        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                             <input
                                 type="text"
                                 name="firstName"
@@ -120,18 +121,27 @@ const ContactForm = () => {
                             className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
                             required
                         />
+                        <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            placeholder="Phone*"
+                            className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
+                            required
+                        />
                         <textarea
                             name="message"
                             value={formData.message}
                             onChange={handleInputChange}
                             placeholder="Your message..."
                             className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
-                            rows="7"
+                            rows="5"
                             required
                         ></textarea>
                         <button
                             type="submit"
-                            className={`w-full mt-8 py-3 rounded-full text-white font-bold text-lg transition-all bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-[#FF8A00] italic ${exo2.className}`}
+                            className={`w-full mt-4 py-3 rounded-full text-white font-bold text-base sm:text-lg transition-all bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-[#FF8A00] italic ${exo2.className}`}
                         >
                             Send Message
                         </button>
@@ -139,25 +149,25 @@ const ContactForm = () => {
                 </div>
 
                 {/* Contact Details Section */}
-                <div className={`w-2/5 bg-[#0C1922] italic ${exo2.className}`}>
-                    <h2 className={`text-3xl font-bold text-[#FF8A00] mb-8 italic ${exo2.className}`}>
+                <div className={`w-full md:w-2/5 bg-[#0C1922] italic ${exo2.className}`}>
+                    <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold text-[#FF8A00] mb-6 sm:mb-8 italic ${exo2.className}`}>
                         CONTACT DETAILS
                     </h2>
-                    <div className=" mb-8">
-                        <h2 className="text-xl mb-1 font-bold text-white">Address:</h2>
-                        <p>House ABC Area 123 North Carolina, 81W567</p>
+                    <div className="mb-6">
+                        <h2 className="text-lg md:text-xl mb-1 font-bold text-white">Address:</h2>
+                        <p className="text-sm md:text-base">House ABC Area 123 North Carolina, 81W567</p>
                     </div>
-                    <div className=" mb-8">
-                        <h2 className="text-xl mb-1 font-bold text-white">Email:</h2>
-                        <p>
+                    <div className="mb-6">
+                        <h2 className="text-lg md:text-xl mb-1 font-bold text-white">Email:</h2>
+                        <p className="text-sm md:text-base">
                             <a href="mailto:support@draft.com" className="hover:underline hover:text-[#FF8A00]">
                                 support@draft.com
                             </a>
                         </p>
                     </div>
-                    <div className=" mb-8">
-                        <h2 className="text-xl mb-1 font-bold text-white">Phone:</h2>
-                        <p>
+                    <div className="mb-6">
+                        <h2 className="text-lg md:text-xl mb-1 font-bold text-white">Phone:</h2>
+                        <p className="text-sm md:text-base">
                             <a href="tel:+1201123456" className="hover:underline hover:text-[#FF8A00]">
                                 +1 (201) 123 456
                             </a>
