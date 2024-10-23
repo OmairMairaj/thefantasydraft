@@ -25,15 +25,12 @@ const Nav = () => {
   const dropdownRef = useRef(null);
   const router = useRouter();
 
-  // const session = useSession();
-  // console.log(session);
-
   React.useEffect(() => {
     if (sessionStorage.getItem("user")) {
-      setUser(sessionStorage.getItem("user"));
+      setUser(JSON.parse(sessionStorage.getItem("user")).user);
     } else {
       if (localStorage.getItem("user")) {
-        setUser(sessionStorage.getItem("user"));
+        setUser(JSON.parse(localStorage.getItem("user")).user);
       } else {
         setUser("nothing");
       }
@@ -41,7 +38,10 @@ const Nav = () => {
   }, [pathname]);
 
   React.useEffect(() => {
-    if (pathname == "/dashboard" && user==="nothing") {
+    if (
+      (pathname == "/dashboard" || pathname == "/profile") &&
+      user === "nothing"
+    ) {
       router.push("/login");
     }
   }, [user]);
@@ -59,6 +59,7 @@ const Nav = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownRef]);
+  console.log(user);
 
   return (
     <nav
@@ -143,7 +144,7 @@ const Nav = () => {
       )}
 
       {/* Conditional Elements: Signup/Login OR User Dropdown for Dashboard */}
-      {user==="nothing" ? (
+      {(user === "nothing" || user === null ) ? (
         <div className="flex space-x-2 p-1">
           {pathname !== "/signup" && (
             <Link
@@ -198,7 +199,9 @@ const Nav = () => {
               <FaUserCircle className="text-4xl" />
 
               {/* Username and Chevron */}
-              <span className="text-white ml-2">Omair Mairaj</span>
+              <span className="text-white ml-2">
+                {(user && user.first_name) ? user.first_name + " " + user.last_name : ""}
+              </span>
               <FiChevronDown className="text-white" />
             </button>
 
@@ -207,7 +210,7 @@ const Nav = () => {
               <div
                 className="absolute right-0 mt-2 w-48 bg-[#0C1922] text-white rounded-lg py-2 z-10"
                 style={{
-                  zIndex:100,
+                  zIndex: 100,
                   boxShadow:
                     "0px 4px 20px rgba(0, 0, 0, 0.6), 0px 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
@@ -217,13 +220,13 @@ const Nav = () => {
                   className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                 >
                   Account
-                </a>  
+                </a>
                 <a
                   href="/dashboard"
                   className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                 >
                   Dashboard
-                </a>  
+                </a>
                 <div
                   onClick={() => {
                     setDropdownOpen(false);
@@ -231,7 +234,7 @@ const Nav = () => {
                     localStorage.clear();
                     router.push("/");
                   }}
-                  style={{cursor:"pointer"}}
+                  style={{ cursor: "pointer" }}
                   className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                 >
                   Logout
