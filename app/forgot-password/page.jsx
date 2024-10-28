@@ -1,9 +1,10 @@
 "use client"; // This ensures the page is rendered on the client
 
-import React, { useState, Suspense } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter to use client-side navigation
 import { Exo_2 } from "next/font/google";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 
 const exo2 = Exo_2({
   weight: ["700", "800"],
@@ -17,10 +18,7 @@ const ForgotPasswordContent = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const URL =
-      process.env.NEXT_PUBLIC_BACKEND_URL +
-      "user/change-password?email=" +
-      email;
+    const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "user/change-password?email=" + email;
     axios
       .get(URL)
       .then((res) => {
@@ -37,34 +35,28 @@ const ForgotPasswordContent = () => {
   };
 
   return (
-    <div className="min-h-[88vh] flex flex-col items-center justify-center mb-[40]">
-      <div className="max-w-lg mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg mb-500">
-        <h1 className={`text-4xl font-bold italic ${exo2.className}`}>
-          FORGOT PASSWORD
-        </h1>
-        <form onSubmit={handleSubmit}>
-          <div className="mt-8 mb-4 space-y-4">
+    <div className="min-h-[88vh] flex flex-col items-center justify-center px-4 sm:px-8 md:px-16">
+      <div className="w-full max-w-sm sm:max-w-lg bg-[#0C1922] p-8 sm:p-12 md:p-16 rounded-3xl shadow-lg">
+        <h1 className={`text-2xl sm:text-4xl font-bold italic ${exo2.className}`}>FORGOT PASSWORD</h1>
+        <form onSubmit={handleSubmit} className="mt-0 md:mt-8">
+          <div className="mt-4 mb-4 space-y-4">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email*"
-              className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-orange-500 text-white"
+              className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-orange-500 text-white text-sm md:text-base"
               required
               autoComplete="off"
               autoFocus
             />
-            <br />
-            <div>
-              An email would be sent to your inbox with instructions to reset
-              your password.
-            </div>
+            <p className="text-white text-sm md:text-base">An email would be sent to your inbox with instructions to reset your password.</p>
           </div>
           <button
             type="submit"
-            className={`w-full mt-8 py-3 bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] rounded-full text-white font-bold text-lg hover:bg-[#FF8A00] transition-all ${exo2.className}`}
+            className={`w-full mt-2 py-2 md:py-3 rounded-full text-white font-bold text-base md:text-lg transition-all ${exo2.className} bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] hover:bg-[#FF8A00]`}
           >
-            SUBMIT
+            Submit
           </button>
         </form>
       </div>
@@ -74,9 +66,7 @@ const ForgotPasswordContent = () => {
 
 const ForgotPassword = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ForgotPasswordContent />
-    </Suspense>
+    <ForgotPasswordContent />
   );
 };
 

@@ -40,24 +40,22 @@ const VerifyContent = () => {
   }, []);
 
   return (
-    <div className="min-h-[88vh] flex flex-col items-center justify-center">
-      <div className="max-w-xl mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg">
+    <div className="min-h-[88vh] flex flex-col items-center justify-center px-6 sm:px-8 md:px-16">
+      <div className="w-full max-w-xl bg-[#0C1922] p-8 sm:p-12 md:p-16 rounded-3xl shadow-lg">
         <h1
           style={{ textAlign: "center" }}
-          className={`text-4xl font-bold italic ${exo2.className}`}
+          className={`text-3xl sm:text-4xl font-bold italic ${exo2.className}`}
         >
           EMAIL VERIFICATION
         </h1>
-        <div className="mt-8">
+        <div className="mt-6 md:mt-8">
           <div
-            className={`text-4xl font-bold italic ${exo2.className}`}
+            className={`text-lg sm:text-xl md:text-2xl font-bold italic ${exo2.className}`}
             style={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              height: "40vh",
-              fontSize: "x-large",
-              fontWeight: "400",
+              height: "30vh",
               textAlign: "center",
               whiteSpace: "pre-line",
             }}

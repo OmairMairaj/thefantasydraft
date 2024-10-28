@@ -13,10 +13,12 @@ const exo2 = Exo_2({
 const Hero = () => {
     return (
         <section className="hero-section relative overflow-hidden">
-            <div className=" md:flex md:items-center md:justify-between">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+
+
                 {/* Left Content - Headline and Text */}
-                <div className="text-content py-40 w-1/2">
-                    <h1 className={`text-4xl lg:text-4xl xl:text-6xl font-bold leading-tight mb-4 text-white italic ${exo2.className}`}>
+                <div className="text-content py-10 md:py-40 w-full md:w-1/2 text-center md:text-left">
+                    <h1 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 text-white italic ${exo2.className}`}>
                         FANTASY FOOTBALL, <br />
                         BUT <span className="text-[#FF8A00]">BETTER</span>
                     </h1>
@@ -29,7 +31,7 @@ const Hero = () => {
                 </div>
 
                 {/* Right Content - Image */}
-                <div className="image-content relative w-1/2">
+                <div className="image-content relative w-full md:w-1/2">
                     <Image
                         src={bannerImage}
                         alt="Fantasy Football Players"
@@ -40,7 +42,6 @@ const Hero = () => {
                     />
                 </div>
             </div>
-
         </section>
     );
 };

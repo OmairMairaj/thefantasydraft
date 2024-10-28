@@ -46,7 +46,7 @@ const SignUp = () => {
         console.log(res);
         alert(res.data.message);
         if (!res.data.error) {
-            router.push("/login");
+          router.push("/login");
         }
       })
       .catch((err) => {
@@ -56,31 +56,29 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-[88vh] flex flex-col items-center justify-center">
-      <div className="max-w-xl mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg">
-        <h1 className={`text-4xl font-bold italic ${exo2.className}`}>
-          SIGN UP
-        </h1>
-        <form onSubmit={handleSubmit} className="mt-8">
-          <div className="w-full mb-4 flex justify-between space-x-4">
-            <div className="w-1/2">
+    <div className="min-h-[88vh] flex flex-col items-center justify-center px-6 sm:px-8 md:px-16">
+      <div className="w-full max-w-sm sm:max-w-lg bg-[#0C1922] p-8 sm:p-12 md:p-16 rounded-3xl shadow-lg">
+        <h1 className={`text-3xl sm:text-4xl font-bold italic ${exo2.className}`}>SIGN UP</h1>
+        <form onSubmit={handleSubmit} className="mt-4 md:mt-8">
+          <div className="w-full mb-4 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="w-full sm:w-1/2">
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First Name*"
-                className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
+                className="w-full text-sm md:text-base p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
                 required
                 autoFocus
               />
             </div>
-            <div className="w-1/2">
+            <div className="w-full sm:w-1/2">
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last Name*"
-                className="w-full p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
+                className="w-full text-sm md:text-base p-3 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
                 required
                 autoComplete="off"
               />
@@ -91,7 +89,7 @@ const SignUp = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email*"
-            className="w-full p-3 mb-4 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
+            className="w-full text-sm md:text-base p-3 mb-4 rounded-lg bg-[#0C1922] border border-[#30363D] focus:outline-none focus:border-orange-500 text-white"
             required
             autoComplete="off"
           />
@@ -102,7 +100,7 @@ const SignUp = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password*"
-              className="w-full p-3 text-white bg-[#0C1922] border border-[#30363D] rounded-lg focus:outline-none focus:border-orange-500"
+              className="w-full text-sm md:text-base p-3 text-white bg-[#0C1922] border border-[#30363D] rounded-lg focus:outline-none focus:border-orange-500"
               required
             />
             <div
@@ -124,7 +122,7 @@ const SignUp = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm Password*"
-              className="w-full p-3 text-white bg-[#0C1922] border border-[#30363D] rounded-lg focus:outline-none focus:border-orange-500"
+              className="w-full text-sm md:text-base p-3 text-white bg-[#0C1922] border border-[#30363D] rounded-lg focus:outline-none focus:border-orange-500"
               required
             />
             <div
@@ -139,17 +137,17 @@ const SignUp = () => {
             </div>
           </div>
 
-          <div className="flex items-start mb-4 space-x-2">
+          <div className="flex items-start mb-2 space-x-2">
             <input
               type="checkbox"
               checked={agreedToTerms}
               onChange={(e) => setAgreedToTerms(e.target.checked)}
               className="align-top m-1 size-4"
             />
-            <label className="text-white">
+            <label className="text-white text-sm md:text-base">
               By creating an account, you agree to our &nbsp;
               <a
-                href="/terms-and-conditions"
+                href="/terms-and-conditions" target="_blank"
                 className="text-orange-500 underline hover:text-orange-400"
               >
                 Terms & Conditions
@@ -159,11 +157,10 @@ const SignUp = () => {
           <button
             type="submit"
             disabled={!agreedToTerms}
-            className={`w-full mt-8 py-3 rounded-full text-white font-bold text-lg transition-all ${
-              agreedToTerms
-                ? "bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-[#FF8A00]"
-                : "bg-gray-500 cursor-default"
-            }`}
+            className={`w-full mt-2 py-2 md:py-3 rounded-full text-white font-bold text-base md:text-lg transition-all ${agreedToTerms
+              ? "bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-[#FF8A00]"
+              : "bg-gray-500 cursor-default"
+              }`}
           >
             Create Account
           </button>
