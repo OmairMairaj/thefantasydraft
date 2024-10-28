@@ -853,7 +853,7 @@ while paginate:
             "seasonID": seasonID,
             "gameweekID": match["round"]["id"],
             "gameweekName": match["round"]["name"],
-            "name": match["id"],
+            "name": match["name"],
             "starting_at": match["starting_at"],
             "result_info": match["result_info"],
             "state": match["state"]["name"],
