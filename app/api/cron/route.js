@@ -2,9 +2,8 @@ import { Match } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
-export const GET = async (req) => {
+export async function GET(req) {
     try {
-
         let va = Date.now().toString()
         console.log(va)
         await connectToDb();
