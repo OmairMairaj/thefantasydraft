@@ -6,6 +6,7 @@ export const GET = async (req) => {
     try {
 
         let va = Date.now().toString()
+        console.log(va)
         await connectToDb();
         const matches = await Match.findOneAndUpdate(
             { id: 19146698 },
