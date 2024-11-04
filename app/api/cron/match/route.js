@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req) {
     try {
-        const seasonID = "23690"
+        const seasonID = process.env.NEXT_PUBLIC_SEASON_ID
         const api_url = "https://api.sportmonks.com/v3/football/fixtures/?include=round;stage;league;venue;state;lineups;events;timeline;statistics;periods;participants;scores;&per_page=50&filters=fixtureSeasons:"
         const agent = new https.Agent({
             rejectUnauthorized: false,
@@ -755,16 +755,17 @@ export async function GET(req) {
                 headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json",
-                    "Authorization": "r12ehV6MXGs916TGG0VGNrbH0IFi6VxACO0Z3UnOvGrhAI93jKrQs2Y4wIY3"
+                    "Authorization": process.env.NEXT_PUBLIC_SPORTMONKS_TOKEN
                 },
                 agent: agent
             })
+            // console.log(response)
             if (response.status === 200) {
                 match_data = response.data;
             } else {
                 console.log("Failed to fetch data from API");
             }
-            console.log(match_data.pagination);
+            // console.log(match_data.pagination);
             const match_array = match_data.data;
 
             for (const match of match_array) {
@@ -827,7 +828,7 @@ export async function GET(req) {
                 // Consolidating data into QUERY Object
                 const query = {
                     id: match.id,
-                    seasonID: seasonID,
+                    seasonID: Number(seasonID),
                     gameweekID: match.round.id,
                     gameweekName: match.round.name,
                     name: match.name,
@@ -839,11 +840,12 @@ export async function GET(req) {
                     teams: teams,
                     scores: scores,
                 };
-
+                // console.log(query)
                 await connectToDb();
-                Match.updateOne({ id: match.id }, { $set: query }, { upsert: true });
-                console.log(query.id);
+                const res = await Match.updateOne({ id: match.id }, { $set: query }, { upsert: true });
+                // console.log(res);
             }
+            // paginate = false;
             paginate = match_data.pagination.has_more;
             full_URL = match_data.pagination.next_page;
         }

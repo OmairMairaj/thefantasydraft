@@ -33,6 +33,7 @@ const Dashboard = () => {
     axios
       .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/match?gameweek=${gameweek}`)
       .then((response) => {
+        console.log(response.data.data)
         setMatches(response.data.data);
         setTotalPages(response.data.totalPages);
       })
@@ -67,7 +68,7 @@ const Dashboard = () => {
                         <div className="px-2 sm:px-3 md:px-5">{match.teams[0]?.team_name || "N/A"}</div>
                       </div>
                       <div className="h-full w-1/5 py-3 sm:py-4 md:py-6 text-center">
-                        {match.state === "Full Time"
+                        {match.state !== "Not Started"
                           ? `${match.scores.find((score) => score.score_type_name === "Current" && score.team_id === match.teams[0]?.team_id)?.goals ?? 0} - ${match.scores.find((score) => score.score_type_name === "Current" && score.team_id === match.teams[1]?.team_id)?.goals ?? 0}`
                           : new Date(match.starting_at).toLocaleString()}
                       </div>

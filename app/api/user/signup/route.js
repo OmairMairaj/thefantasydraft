@@ -1,4 +1,4 @@
-import { User } from "@/lib/models";
+import { GameWeek, Match, Team, User } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse, userAgent } from "next/server";
 import { validateRegisterInput, getConfirmationCode, hashPassword } from "@/lib/helpers"
@@ -6,7 +6,7 @@ import { sendEmail } from "@/lib/mail";
 
 export const GET = async (req, res) => {
   connectToDb();
-  const x = await User.deleteMany({})
+  const x = await Team.deleteMany({})
   return NextResponse.json({
     x: x,
   })
