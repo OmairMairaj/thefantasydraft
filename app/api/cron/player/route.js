@@ -1,4 +1,4 @@
-import { GameWeek, Match } from "@/lib/models";
+import { GameWeek, Match, Player, Team } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import https from "https";
@@ -9,48 +9,72 @@ export const dynamic = 'force-dynamic'
 export async function GET(req) {
     try {
         const seasonID = process.env.NEXT_PUBLIC_SEASON_ID
-        const api_url = "https://api.sportmonks.com/v3/football/players/537121?include=country;nationality;city;position;detailedPosition;teams;sport;"
+        const api_url = "https://api.sportmonks.com/v3/football/players/"
+        const url_options = "?include=nationality;position;detailedPosition;teams;"
         const agent = new https.Agent({
             rejectUnauthorized: false,
         });
         axios.defaults.httpsAgent = agent
-        let full_URL = api_url + seasonID
-
-
-
-        let gameweek_data = [];
-        let response = await axios.get(full_URL, {
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Authorization": process.env.NEXT_PUBLIC_SPORTMONKS_TOKEN
-            },
-            agent: agent
+        let data_to_insert = [];
+        const teams = await Team.find({})
+        // console.log(teams)
+        const playerIDs = []
+        teams.map((team) => {
+            team.players.map((player) => {
+                playerIDs.push({
+                    playerID: player,
+                    teamID: team.id,
+                    team_name: team.name,
+                    team_image_path: team.image_path
+                })
+            })
         })
-        if (response.status === 200) {
-            gameweek_data = response.data.data;
-        } else {
-            console.log("Failed to fetch data from API");
-        }
-
-        for (const gameweek of gameweek_data) {
-            // Consolidating data into QUERY Object
+        // console.log(playerIDs)
+        // playerIDs.map((playerID) => {
+        for (const player of playerIDs) {
+            let full_URL = api_url + player.playerID + url_options
+            let response = await axios.get(full_URL, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": process.env.NEXT_PUBLIC_SPORTMONKS_TOKEN
+                },
+                agent: agent
+            })
+            if (response.status !== 200) {
+                console.log("Failed to fetch data from API");
+                return NextResponse.json({
+                    error: true,
+                    message: "An unexpected error occurred. Please try again later.",
+                });
+            }
+            let player_data = response.data.data;
+            // console.log("player_data")
+            // console.log(player_data)
             const query = {
-                id: gameweek.id,
-                seasonID: seasonID,
-                name: gameweek.name,
-                finished: gameweek.finished,
-                is_current: gameweek.is_current,
-                starting_at: gameweek.starting_at,
-                ending_at: gameweek.ending_at,
-                games_in_current_week: gameweek.games_in_current_week,
+                "id": player_data?.id,
+                "name": player_data?.name,
+                "common_name": player_data?.common_name,
+                "image_path": player_data?.image_path,
+                "nationality": player_data?.nationality?.name,
+                "nationality_image_path": player_data?.nationality?.image_path,
+                "positionID": player_data?.position?.id,
+                "position_name": player_data?.position?.name,
+                "detailed_position": player_data?.detailedposition?.name,
+                "teamID": player?.teamID,
+                "team_name": player?.team_name,
+                "team_image_path": player?.team_image_path,
+                "fpl": null,
+                "points": null,
             };
-            console.log(query)
-            await connectToDb();
-            const res = await GameWeek.updateOne({ id: gameweek.id }, { $set: query }, { upsert: true });
-            console.log(res);
+            data_to_insert.push(query);
+            console.log(query.name);
         }
+        console.log(data_to_insert.length);
+        await connectToDb();
+        const res = await Player.insertMany(data_to_insert, { ordered: false });
         return NextResponse.json({
+            res:res,
             error: false,
             message: "done",
         });
