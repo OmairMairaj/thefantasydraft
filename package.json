@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@nestjs/schedule": "^4.1.1",
     "@next/font": "^14.2.14",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
