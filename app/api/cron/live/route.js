@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(req) {
     try {
         const seasonID = process.env.NEXT_PUBLIC_SEASON_ID;
-        const api_url = "https://api.sportmonks.com/v3/football/livescores/latest?include=round;stage;league;venue;state;lineups;events;timeline;statistics;periods;participants;scores;&per_page=50"
+        const api_url = "https://api.sportmonks.com/v3/football/livescores?include=round;stage;league;venue;state;lineups;events;timeline;statistics;periods;participants;scores;"
         const agent = new https.Agent({
             rejectUnauthorized: false,
         });
@@ -759,10 +759,98 @@ export async function GET(req) {
             },
             agent: agent
         })
-        // console.log(response)
+        // console.log(response.data)
+        // console.log(response.status)
+        // console.log(response.data.data)
+        // return NextResponse.json({
+        //     error: false,
+        // });
         if (response.status === 200) {
-            if (response.data) {
+            if (response.data && response.data.data) {
                 match_data = response.data;
+                const match_array = match_data.data;
+
+                for (const match of match_array) {
+                    // LINE-UPS
+                    const lineups = match.lineups.map(lineup => ({
+                        player_id: lineup.player_id,
+                        player_name: lineup.player_name,
+                        team_id: lineup.team_id,
+                        team_name: match.participants.find(x => x.id === lineup.team_id).name,
+                        position_id: lineup.position_id,
+                        position_name: event_type_ids[lineup.position_id] || "Unknown",
+                        formation_position: lineup.formation_position,
+                        jersey_number: lineup.jersey_number,
+                    }));
+
+                    // EVENTS
+                    const events = match.events.map(event => ({
+                        team_id: event.participant_id,
+                        team_name: match.participants.find(x => x.id === event.participant_id).name,
+                        event_id: event.type_id,
+                        event_name: event_type_ids[event.type_id] || "Unknown",
+                        player_id: event.player_id,
+                        player_name: event.player_name,
+                        related_player_id: event.related_player_id,
+                        related_player_name: event.related_player_name,
+                        result: event.result,
+                        info: event.info,
+                        addition: event.addition,
+                        minute: event.minute,
+                        sort_order: event.sort_order,
+                    }));
+
+                    // TEAMS
+                    const teams = match.participants.map(team => {
+                        let team_short_code = team.short_code;
+                        if (!team_short_code) {
+                            team_short_code = team.name.slice(0, 3).toUpperCase();
+                        }
+
+                        return {
+                            team_id: team.id,
+                            team_name: team.name,
+                            short_code: team_short_code,
+                            image_path: team.image_path,
+                            location: team.meta.location,
+                            winner: team.meta.winner,
+                        };
+                    });
+
+                    // SCORES
+                    const scores = match.scores.map(score => ({
+                        score_type_id: score.type_id,
+                        score_type_name: event_type_ids[score.type_id] || "Unknown",
+                        team_id: score.participant_id,
+                        team_name: match.participants.find(x => x.id === score.participant_id).name,
+                        team_type: score.score.participant,
+                        goals: score.score.goals,
+                    }));
+
+                    // Consolidating data into QUERY Object
+                    const query = {
+                        id: match.id,
+                        seasonID: Number(seasonID),
+                        gameweekID: match.round.id,
+                        gameweekName: match.round.name,
+                        name: match.name,
+                        starting_at: match.starting_at,
+                        result_info: match.result_info,
+                        state: match.state.name,
+                        lineups: lineups,
+                        events: events,
+                        teams: teams,
+                        scores: scores,
+                    };
+                    // console.log(query)
+                    await connectToDb();
+                    const res = await Match.updateOne({ id: match.id }, { $set: query }, { upsert: true });
+                    // console.log(res);
+                }
+                return NextResponse.json({
+                    error: false,
+                    message: "done",
+                });
             } else {
                 return NextResponse.json({
                     error: false,
@@ -773,93 +861,11 @@ export async function GET(req) {
             console.log("Failed to fetch data from API");
         }
         // console.log(match_data.pagination);
-        const match_array = match_data.data;
-
-        for (const match of match_array) {
-            // LINE-UPS
-            const lineups = match.lineups.map(lineup => ({
-                player_id: lineup.player_id,
-                player_name: lineup.player_name,
-                team_id: lineup.team_id,
-                team_name: match.participants.find(x => x.id === lineup.team_id).name,
-                position_id: lineup.position_id,
-                position_name: event_type_ids[lineup.position_id] || "Unknown",
-                formation_position: lineup.formation_position,
-                jersey_number: lineup.jersey_number,
-            }));
-
-            // EVENTS
-            const events = match.events.map(event => ({
-                team_id: event.participant_id,
-                team_name: match.participants.find(x => x.id === event.participant_id).name,
-                event_id: event.type_id,
-                event_name: event_type_ids[event.type_id] || "Unknown",
-                player_id: event.player_id,
-                player_name: event.player_name,
-                related_player_id: event.related_player_id,
-                related_player_name: event.related_player_name,
-                result: event.result,
-                info: event.info,
-                addition: event.addition,
-                minute: event.minute,
-                sort_order: event.sort_order,
-            }));
-
-            // TEAMS
-            const teams = match.participants.map(team => {
-                let team_short_code = team.short_code;
-                if (!team_short_code) {
-                    team_short_code = team.name.slice(0, 3).toUpperCase();
-                }
-
-                return {
-                    team_id: team.id,
-                    team_name: team.name,
-                    short_code: team_short_code,
-                    image_path: team.image_path,
-                    location: team.meta.location,
-                    winner: team.meta.winner,
-                };
-            });
-
-            // SCORES
-            const scores = match.scores.map(score => ({
-                score_type_id: score.type_id,
-                score_type_name: event_type_ids[score.type_id] || "Unknown",
-                team_id: score.participant_id,
-                team_name: match.participants.find(x => x.id === score.participant_id).name,
-                team_type: score.score.participant,
-                goals: score.score.goals,
-            }));
-
-            // Consolidating data into QUERY Object
-            const query = {
-                id: match.id,
-                seasonID: Number(seasonID),
-                gameweekID: match.round.id,
-                gameweekName: match.round.name,
-                name: match.name,
-                starting_at: match.starting_at,
-                result_info: match.result_info,
-                state: match.state.name,
-                lineups: lineups,
-                events: events,
-                teams: teams,
-                scores: scores,
-            };
-            // console.log(query)
-            await connectToDb();
-            const res = await Match.updateOne({ id: match.id }, { $set: query }, { upsert: true });
-            // console.log(res);
-        }
         // paginate = false;
         // paginate = match_data.pagination.has_more;
         // full_URL = match_data.pagination.next_page;
         // }
-        return NextResponse.json({
-            error: false,
-            message: "done",
-        });
+
     } catch (err) {
         console.log(err);
         return NextResponse.json({
