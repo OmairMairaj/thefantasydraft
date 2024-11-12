@@ -37,6 +37,15 @@ const Dashboard = () => {
     setLeagueDetails(null);
   }
 
+  const clearPay = () => {
+    let leagueDetails = JSON.parse(sessionStorage.getItem('leagueDetails'));
+    if (leagueDetails) {
+      leagueDetails.paid = false;
+      sessionStorage.setItem('leagueDetails', JSON.stringify(leagueDetails));
+      setLeagueDetails(leagueDetails);
+    }
+  }
+
   useEffect(() => {
     // Check if league details exist in session storage
     const savedLeagueDetails = JSON.parse(sessionStorage.getItem('leagueDetails'));
@@ -291,12 +300,21 @@ const Dashboard = () => {
 
 
         <div className="absolute right-0 bottom-0">
-          <button className="p-4 text-white" onClick={setLeague}>
-            Set League
-          </button>
-          <button className="p-4 text-white" onClick={clearLeague}>
-            Clear League
-          </button>
+          {leagueDetails && leagueDetails.paid && (
+            <button className="p-4 text-white" onClick={clearPay}>
+              Mark Unpaid
+            </button>
+          )}
+          {leagueDetails && (
+            <button className="p-4 text-white" onClick={clearLeague}>
+              Clear League
+            </button>
+          )}
+          {!leagueDetails && (
+            <button className="p-4 text-white" onClick={setLeague}>
+              Set League
+            </button>
+          )}
         </div>
       </div>
     </div >
