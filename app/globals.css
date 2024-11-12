@@ -46,8 +46,82 @@ p {
   /* Clip the background and border separately */
   /* display: inline-block; */
   transition: ease-out 0.3s;
-  margin: 0 2px
+  /* margin: 0 2px */
 }
+
+.custom-radio {
+  @apply appearance-none w-5 h-5 border-2 border-[#c2c2c2] rounded-full cursor-pointer;
+}
+
+.custom-radio:checked {
+  @apply border-[#FF8A00];
+}
+
+.custom-radio:checked::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background-color: #FF8A00;
+  /* Orange color */
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* .custom-radio {
+  @apply w-5 h-5 border-2 border-white rounded-full relative bg-transparent focus:outline-none;
+}
+
+.custom-radio:checked {
+  @apply border-[#FF8A00];
+}
+
+.custom-radio:checked::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background-color: #FF8A00; /* Orange color for inner circle */
+/* border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+} */
+
+.custom-dash-spacing {
+  position: relative;
+  /* padding: 20px; */
+  border-radius: 20px;
+}
+
+.custom-dash-spacing::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 3px dashed #6b7280;
+  /* Adjust thickness and color as needed */
+  border-radius: 20px;
+  /* Same as the original div border-radius */
+  pointer-events: none;
+  border-spacing: 40px;
+  /* Allows the content inside to be interactable */
+  /* z-index: -1; */
+}
+
+.slick-dots li button:before {
+  color: #FF8A00 !important;
+}
+
+/* .slick-dots li.slick-active button:before {
+  opacity: .75;
+  color: #FF8A00;
+} */
+
 
 tr,
 td {

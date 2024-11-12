@@ -81,7 +81,7 @@ const Nav = () => {
       </div>
 
       {/* Nav Links */}
-      {pathname !== "/dashboard" ? (
+      {(user === "nothing" || user === null) ? (
         <div
           className={`md:flex ${menuOpen ? "block" : "hidden"} md:space-x-6`}
         >
@@ -119,6 +119,12 @@ const Nav = () => {
             className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
           >
             RULES
+          </Link>
+          <Link
+            href="/fixtures"
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+          >
+            FIXTURES
           </Link>
         </div>
       )}

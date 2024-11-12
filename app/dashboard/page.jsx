@@ -1,9 +1,13 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useRouter } from 'next/navigation';
 import { Exo_2 } from 'next/font/google';
+import { FaExclamationCircle } from 'react-icons/fa';
+import { AiOutlineExclamationCircle } from "react-icons/ai";
+import Link from "next/link";
+import Image from "next/image";
+import CircularProgress from "../../components/CircularProgress/CircularProgress";
 
 const exo2 = Exo_2({
   weight: ['700', '800'],
@@ -12,104 +16,290 @@ const exo2 = Exo_2({
 });
 
 const Dashboard = () => {
-  const [matches, setMatches] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const router = useRouter();
-  const [gameweekName, setGameweekName] = useState(1);
+  const [leagueDetails, setLeagueDetails] = useState(null);
+
+  const setLeague = () => {
+    // Mock league details that you would actually fetch from an API
+    const leagueData = {
+      name: 'My League',
+      owner: 'User123',
+      leagueId: '123456',
+      leagueLogo: '/images/barcelona-logo.svg',
+      paid: false,  // Change to true if user has paid
+    };
+    // Set league details in session storage
+    sessionStorage.setItem('leagueDetails', JSON.stringify(leagueData));
+    setLeagueDetails(leagueData);
+  };
+
+  const clearLeague = () => {
+    sessionStorage.removeItem('leagueDetails');
+    setLeagueDetails(null);
+  }
 
   useEffect(() => {
-    // Check if user is authenticated
-    const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
-    if (!userData) {
-      // If no user is found, redirect to login
-      router.push("/login");
-    } else {
-      // Fetch matches data for the current gameweek
-      fetchMatches(gameweekName);
+    // Check if league details exist in session storage
+    const savedLeagueDetails = JSON.parse(sessionStorage.getItem('leagueDetails'));
+    if (savedLeagueDetails) {
+      setLeagueDetails(savedLeagueDetails);
     }
-  }, [gameweekName]);
-
-  const fetchMatches = (gameweek) => {
-    axios
-      .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/match?gameweek=${gameweek}`)
-      .then((response) => {
-        console.log(response.data.data)
-        setMatches(response.data.data);
-        setTotalPages(response.data.totalPages);
-      })
-      .catch((err) => console.error("Error fetching match data: ", err));
-  };
-
-  const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      setGameweekName(newPage);
-    }
-  };
+  }, []);
 
   return (
-    <div className="min-h-[88vh] flex flex-col items-center justify-center space-y-8 ">
-      {/* Matches Table */}
-      <div className="w-full max-w-5xl px-6 sm:px-20 my-20">
-        <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-10 ${exo2.className}`}>{`Gameweek - ${gameweekName}`}</h2>
-        <div className="overflow-x-auto">
-          {matches && matches.length > 0 ? (
-            <div className="min-w-full text-white">
-              <div className={`flex flex-row justify-between border-b border-gray-600 ${exo2.className} text-xs sm:text-sm md:text-lg lg:text-xl`}>
-                <h1 className="w-2/5 py-2 px-4 text-center font-bold text-white">Home</h1>
-                <h1 className="w-1/5 py-2 px-4 text-center font-bold text-white">Score/Time</h1>
-                <h1 className="w-2/5 py-2 px-4 text-center font-bold text-white">Away</h1>
-              </div>
-              <div>
-                {matches.map((match) => (
-                  match.teams && match.teams.length > 0 ? (
-                    <div key={match.id} className="border-b border-gray-600 items-center flex flex-row justify-between text-xs sm:text-sm md:text-lg lg:text-xl">
-                      <div className="h-full w-2/5 py-3 sm:py-4 md:py-6 flex items-center justify-start">
-                        <img src={match.teams[0]?.image_path} alt={match.teams[0]?.team_name} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14" />
-                        <div className="px-2 sm:px-3 md:px-5">{match.teams[0]?.team_name || "N/A"}</div>
-                      </div>
-                      <div className="h-full w-1/5 py-3 sm:py-4 md:py-6 text-center">
-                        {match.state !== "Not Started"
-                          ? `${match.scores.find((score) => score.score_type_name === "Current" && score.team_id === match.teams[0]?.team_id)?.goals ?? 0} - ${match.scores.find((score) => score.score_type_name === "Current" && score.team_id === match.teams[1]?.team_id)?.goals ?? 0}`
-                          : new Date(match.starting_at).toLocaleString()}
-                      </div>
-                      <div className="h-full py-3 sm:py-4 md:py-6 w-2/5 flex items-center justify-end">
-                        <div className="px-2 sm:px-3 md:px-5">{match.teams[1]?.team_name || "N/A"}</div>
-                        <img src={match.teams[1]?.image_path} alt={match.teams[1]?.team_name} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14" />
+    <div className="min-h-[88vh] flex flex-col my-16 items-center text-white px-6 md:px-10 lg:px-16 xl:px-20 pb-24">
+      <div className="relative w-full">
+        {leagueDetails && (
+          <div
+            className={`flex flex-wrap justify-between w-full relative ${!leagueDetails.paid ? "blur-sm pointer-events-none" : ""
+              }`}
+          >
+            <div className="w-full flex space-x-4 h-80">
+              {/* Team Name Card */}
+              <div className="w-1/2 p-8 rounded-3xl shadow-lg mb-6 relative flex flex-col justify-between"
+                style={{
+                  backgroundImage: "url('/images/myteamimage.png')",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}>
+                <div className="flex justify-between mb-4">
+                  <div className="flex items-center">
+                    <img
+                      src="/images/barcelona-logo.svg" // Replace with your team logo URL
+                      alt="Team Logo"
+                      className="w-20 h-20 object-cover mr-4"
+                    />
+                    <div>
+                      <h3 className={`text-4xl font-bold text-[#FF8A00] ${exo2.className}`}>Team Name</h3>
+                      {/* <p className="text-white">Current Points: 120</p> */}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center px-8 py-2 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
+                    <p className="text-white">Current Points: 120</p>
+                    <div className="flex space-x-2 mt-1">
+                      <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                      <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                      <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                      <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                      <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                      <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-white font-bold">Next Opponent:</p>
+                  <div className="flex items-center mt-2 w-max px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
+                    <img
+                      src="/images/man-city-logo.svg" // Replace with your opponent logo URL
+                      alt="Opponent Logo"
+                      className="w-20 h-20 object-cover rounded-full mr-4"
+                    />
+                    <div>
+                      <p className="text-white">Man City</p>
+                      <div className="flex space-x-2 mt-3">
+                        <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                        <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                        <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                        <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                        <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                        <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
                       </div>
                     </div>
-                  ) : (
-                    <div key={match.id} className="py-4 text-center">No teams found for this match</div>
-                  )
-                ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Match Centre Card */}
+              <div className="w-1/2 p-8 rounded-3xl shadow-lg mb-6 relative"
+                style={{
+                  backgroundImage: "url('/images/matchcenterimage.png')",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}>
+                <h3 className={`text-4xl font-bold text-[#FF8A00] mb-2 ${exo2.className}`}>MATCH CENTRE</h3>
+                <p className="text-base text-gray-300">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                <div className="mt-6 p-4 w-2/3 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
+                  <table className="w-full text-white">
+                    <thead className="border-b border-[#5b5b5b]">
+                      <tr className="text-[#FF8A00] pb-4">
+                        <th className="w-2/5 text-left">Players</th>
+                        <th className="text-center">Played</th>
+                        <th className="text-center">Won</th>
+                        <th className="text-center">Lost</th>
+                      </tr>
+                      <tr className="h-2"></tr>
+                    </thead>
+                    <tr className="h-2"></tr>
+                    <tbody className="pt-4">
+                      <tr>
+                        <td className="w-2/5">Omar</td>
+                        <td className="text-center">23</td>
+                        <td className="text-center">22</td>
+                        <td className="text-center">1</td>
+                      </tr>
+                      <tr>
+                        <td className="w-2/5">Haris</td>
+                        <td className="text-center">15</td>
+                        <td className="text-center">2</td>
+                        <td className="text-center">13</td>
+                      </tr>
+                      <tr>
+                        <td className="w-2/5">Maryam</td>
+                        <td className="text-center">10</td>
+                        <td className="text-center">5</td>
+                        <td className="text-center">5</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          ) : (
-            <p className="text-center text-white">Loading matches or no matches found...</p>
-          )}
+
+
+            <div className="w-full flex space-x-4 h-80">
+              {/* Transfers Card */}
+              <div className="w-1/3 p-8 rounded-3xl shadow-lg mb-6 relative"
+                style={{
+                  backgroundImage: "url('/images/transfersimage.png')",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}>
+                <h3 className={`text-4xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>TRANSFERS</h3>
+                <p className="text-base">Manage your transfers to get the best team performance.</p>
+                <div className="absolute bottom-0 left-0 right-0 p-8 rounded-b-3xl">
+                  <Image
+                    src="/images/transfericon.svg"
+                    alt="Transfer Icon"
+                    width={100}
+                    height={100}
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+
+              {/* Current Game Week Card */}
+              <div className="w-1/3 p-8 rounded-3xl shadow-lg mb-6 flex flex-col justify-between"
+                style={{
+                  backgroundImage: "url('/images/gameweekimage.png')",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}>
+                <h3 className={`text-4xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>CURRENT GAME WEEK</h3>
+                <ul class="w-[80%] text-white space-y-1">
+                  <li class="flex items-center justify-between py-1 rounded-md shadow-md">
+                    <div class="flex items-center">
+                      <img src="/images/man-city-logo.svg" alt="Man City Logo" class="w-10 h-10 mr-4" />
+                      <span class="text-base">Man City</span>
+                    </div>
+                    <span class="text-[#FF8A00] text-xl mx-2">v/s</span>
+                    <div class="flex items-center">
+                      <span class="text-base mr-4">FC Barcelona</span>
+                      <img src="/images/barcelona-logo.svg" alt="FC Barcelona Logo" class="w-10 h-10" />
+                    </div>
+                  </li>
+                  <li class="flex items-center justify-between py-1 rounded-md shadow-md">
+                    <div class="flex items-center">
+                      <img src="/images/man-city-logo.svg" alt="Man City Logo" class="w-10 h-10 mr-4" />
+                      <span class="text-base">Man City</span>
+                    </div>
+                    <span class="text-[#FF8A00] text-xl mx-2">v/s</span>
+                    <div class="flex items-center">
+                      <span class="text-base mr-4">FC Barcelona</span>
+                      <img src="/images/barcelona-logo.svg" alt="FC Barcelona Logo" class="w-10 h-10" />
+                    </div>
+                  </li>
+                  <li class="flex items-center justify-between py-1 rounded-md shadow-md">
+                    <div class="flex items-center">
+                      <img src="/images/man-city-logo.svg" alt="Man City Logo" class="w-10 h-10 mr-4" />
+                      <span class="text-base">Man City</span>
+                    </div>
+                    <span class="text-[#FF8A00] text-xl mx-2">v/s</span>
+                    <div class="flex items-center">
+                      <span class="text-base mr-4">FC Barcelona</span>
+                      <img src="/images/barcelona-logo.svg" alt="FC Barcelona Logo" class="w-10 h-10" />
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Achievements Card */}
+              <div className="w-1/3 p-8 rounded-3xl shadow-lg mb-6"
+                style={{
+                  backgroundImage: "url('/images/achievementsimage.png')",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}>
+                <h3 className={`text-4xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>ACHIEVEMENTS</h3>
+                <p className="text-base text-gray-300 mb-4">Track your team's achievements throughout the league.</p>
+                <div className="flex items-center mt-8">
+                  <CircularProgress percentage={52} />
+                  <div className="ml-2">
+                    <p className="text-xl font-bold text-white">21/40</p>
+                    <p className="text-sm text-gray-300">Total Achievements Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+        }
+        {leagueDetails && !leagueDetails.paid && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 rounded-3xl text-center text-white z-20">
+            <div className="w-1/2 flex flex-col text-white py-16 rounded-md items-center custom-dash-spacing">
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center space-x-2">
+                  <AiOutlineExclamationCircle className="text-6xl text-[#FF8A00]" />
+                  <h1 className={`text-4xl font-bold ${exo2.className}`}>League Payment Pending</h1>
+                </div>
+                <p>Your league is not yet paid. Please complete the payment to access league features.</p>
+              </div>
+              <button
+                onClick={() => {
+                  let leagueDetails = JSON.parse(sessionStorage.getItem('leagueDetails'));
+                  if (leagueDetails) {
+                    leagueDetails.paid = true;
+                    sessionStorage.setItem('leagueDetails', JSON.stringify(leagueDetails));
+                    setLeagueDetails(leagueDetails);
+                  }
+                }}
+                className=" mt-8 py-3 bg-[#FF8A00A3] px-8 text-white rounded-full font-bold hover:bg-[#ff8a00ee] hover:scale-105 transition-transform trasition-all ease-in-out"
+              >
+                Mark Payment as Completed
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+
+      <div className={`w-full relative bg-[#070A0A] custom-dash-spacing rounded-3xl shadow-lg flex flex-col items-center ${leagueDetails ? 'space-y-8 my-8 py-16' : 'space-y-12 my-8 py-36'}`}>
+        <div className="flex items-center space-x-4">
+          <FaExclamationCircle className="text-4xl text-[#FF8A00]" />
+          <h2 className={`text-3xl md:text-4xl font-bold ${exo2.className}`}>CREATE OR JOIN A LEAGUE</h2>
+        </div>
+        <p className="text-center text-lg md:text-xl max-w-3xl">
+          {` ${leagueDetails ? 'You can create a new league or join another existing one!.'
+            : 'Welcome to the ultimate fantasy sports platform. You can create a new league or join an existing one. Take your fantasy experience to the next level!'}`}
+        </p>
+        <div className="flex space-x-8">
+          <Link href="/create-league-process" className={`fade-gradient px-6 md:px-8 lg:px-12 py-3 rounded-full text-white font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className} bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00]`}>
+            CREATE A LEAGUE
+          </Link>
+          <Link href="/join-league-process" className={`fade-gradient px-6 md:px-8 lg:px-12 py-3 rounded-full text-white font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className} bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00]`}>
+            JOIN A LEAGUE
+          </Link>
         </div>
 
-        {/* Pagination Controls */}
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={() => handlePageChange(gameweekName - 1)}
-            disabled={gameweekName === 1}
-            className="bg-orange-500 text-white py-2 px-4 sm:px-6 md:px-10 rounded-lg hover:bg-orange-400 disabled:opacity-50 text-xs sm:text-sm md:text-lg"
-          >
-            Previous
+
+        <div className="absolute right-0 bottom-0">
+          <button className="p-4 text-white" onClick={setLeague}>
+            Set League
           </button>
-          <span className="text-white text-xs sm:text-sm md:text-lg">
-            Gameweek {gameweekName} of {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(gameweekName + 1)}
-            disabled={gameweekName === totalPages}
-            className="bg-orange-500 text-white py-2 px-6 sm:px-6 md:px-10 rounded-lg hover:bg-orange-400 disabled:opacity-50 text-xs sm:text-sm md:text-lg"
-          >
-            Next
+          <button className="p-4 text-white" onClick={clearLeague}>
+            Clear League
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
