@@ -120,7 +120,7 @@ const Dashboard = () => {
               {/* Match Centre Card */}
               <div className="w-1/2 p-8 rounded-3xl shadow-lg mb-6 relative"
                 style={{
-                  backgroundImage: "url('/images/matchcenterimage.png')",
+                  backgroundImage: "url('/images/matchcenterImage.png')",
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}>
