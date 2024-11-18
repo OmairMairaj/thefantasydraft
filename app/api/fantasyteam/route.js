@@ -1,11 +1,11 @@
-import { FantasyLeague } from "@/lib/models";
+import { FantasyTeam, FantasyTeam } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 export const GET = async (req, res) => {
   try {
     await connectToDb();
-    const data = await FantasyLeague.find();
+    const data = await FantasyTeam.find();
     return NextResponse.json({ error: false, data: data });
   } catch (err) {
     console.log(err);
@@ -21,8 +21,8 @@ export const POST = async (req, res) => {
   try {
     await connectToDb();
     const payload = await req.json();
-    const newFantasyLeague = await FantasyLeague.create(payload);
-    return NextResponse.json({ error: false, data: newFantasyLeague });
+    const newFantasyTeam = await FantasyTeam.create(payload);
+    return NextResponse.json({ error: false, data: newFantasyTeam });
   } catch (err) {
     console.log(err);
     return NextResponse.json({

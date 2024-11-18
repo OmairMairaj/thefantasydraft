@@ -47,12 +47,14 @@ const CreateLeagueProcess = () => {
         format: league.format,
       },
       league_fixtures: [],
-      teams: [{ user: user._id, team: null }],
+      teams: [{ userID: user._id, user_email: user.email, team: null }],
+      teamData: team,
     };
 
     //API Call
     try {
-      const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "league";
+      console.log(body);
+      const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague";
       axios.post(URL, body).then((response) => {
         if (response.data && response.data.error === false) {
           alert("League successfully created!");
@@ -65,7 +67,9 @@ const CreateLeagueProcess = () => {
         }
       });
     } catch {
-      alert("An unexpected error occurred when creating league. Please check your internet connection");
+      alert(
+        "An unexpected error occurred when creating league. Please check your internet connection"
+      );
     }
   };
 
