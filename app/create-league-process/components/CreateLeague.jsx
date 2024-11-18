@@ -231,7 +231,7 @@ const CreateLeague = ({ onNext }) => {
                     onClick={handleSubmit}
                     className={`absolute right-0 bottom-0 fade-gradient py-4 px-20 mx-6 md:mx-10 lg:mx-16 xl:mx-20 mt-36 rounded-full text-white font-bold text-lg transition-all ease-in-out ${exo2.className}`}
                 >
-                    NEXT : Create Your League
+                    NEXT : Create Your Team
                 </button>
             </div>
         </div>
