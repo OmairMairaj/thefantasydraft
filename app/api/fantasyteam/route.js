@@ -1,4 +1,4 @@
-import { FantasyTeam, FantasyTeam } from "@/lib/models";
+import { FantasyTeam } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
