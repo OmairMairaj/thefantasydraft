@@ -12,7 +12,7 @@ const exo2 = Exo_2({
   subsets: ["latin"],
 });
 
-export default function Login() {
+const LoginContent = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
@@ -116,4 +116,14 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};
+
+const Login = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
+  );
+};
+
+export default Login;
