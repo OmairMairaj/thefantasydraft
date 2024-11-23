@@ -10,7 +10,8 @@ export const GET = async (req) => {
     const totalGameweeks = await Match.distinct("gameweekName");
     const totalPages = totalGameweeks.length;
 
-    const matches = await Match.find({ gameweekName: `${gameweek}` });
+    // Find matches for the given gameweek and sort them by starting_at field in ascending order
+    const matches = await Match.find({ gameweekName: `${gameweek}` }).sort({ starting_at: 1 });
 
     return NextResponse.json({
       error: false,

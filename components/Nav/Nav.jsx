@@ -126,13 +126,19 @@ const Nav = () => {
           >
             FIXTURES
           </Link>
+          <Link
+            href="/table"
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+          >
+            TABLE
+          </Link>
         </div>
       )}
 
       {/* Conditional Elements: Signup/Login OR User Dropdown for Dashboard */}
       {(user === "nothing" || user === null) ? (
-        <div className="flex space-x-2 p-1">
-          <div className="hidden md:flex">
+        <div className="flex  p-1">
+          <div className="hidden space-x-2 md:flex">
             {pathname !== "/signup" && (
               <Link
                 href="/signup"
@@ -233,7 +239,7 @@ const Nav = () => {
       ) : (
         <div className="flex items-center space-x-4">
           {/* Notification Icon */}
-          <div className="relative flex justify-center items-center w-14 h-14 rounded-full border-2 border-transparent fade-gradient p-1 cursor-pointer">
+          <div className="relative flex justify-center items-center w-11 sm:w-14 h-11 sm:h-14 rounded-full border-2 border-transparent fade-gradient p-1 cursor-pointer">
             <div className="flex justify-center items-center w-full h-full rounded-full">
               <FaBell className="text-white text-lg" />
             </div>
@@ -256,7 +262,7 @@ const Nav = () => {
                                 />
                             </div> */}
 
-              <FaUserCircle className="text-4xl" />
+              <FaUserCircle className="text-2xl sm:text-4xl" />
 
               {/* Username and Chevron */}
               <span className="hidden md:flex text-white ml-2">
@@ -305,9 +311,21 @@ const Nav = () => {
                   </a>
                   <a
                     href="/dashboard"
-                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                    className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                   >
                     Dashboard
+                  </a>
+                  <a
+                    href="/fixtures"
+                    className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Fixtures
+                  </a>
+                  <a
+                    href="/table"
+                    className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Table
                   </a>
                   <div
                     onClick={() => {

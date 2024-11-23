@@ -15,29 +15,70 @@ const Fixtures = () => {
     const [matches, setMatches] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const router = useRouter();
-    const [gameweekName, setGameweekName] = useState(1);
+    const [gameweekName, setGameweekName] = useState(null);
+    const [gameweekDetails, setGameweekDetails] = useState({});
 
     useEffect(() => {
         // Check if user is authenticated
         const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
         if (!userData) {
-            // If no user is found, redirect to login
             router.push("/login");
         } else {
-            // Fetch matches data for the current gameweek
+            fetchCurrentGameweek();
+        }
+    }, []);
+
+    useEffect(() => {
+        if (gameweekName) {
+            console.log("Fetching data for gameweek: ", gameweekName);
             fetchMatches(gameweekName);
+            fetchGameweekDetails(gameweekName);
         }
     }, [gameweekName]);
 
+    const fetchCurrentGameweek = () => {
+        axios
+            .get(`/api/gameweek/current`)
+            .then((response) => {
+                const currentGameweek = response.data.data;
+                console.log(currentGameweek);
+                if (currentGameweek) {
+                    setGameweekName(parseInt(currentGameweek.name, 10)); // Convert gameweek name to integer
+                    setGameweekDetails(currentGameweek);
+                    fetchTotalGameweeks();
+                }
+            })
+            .catch((err) => console.error("Error fetching current gameweek data: ", err));
+    };
+
+    const fetchTotalGameweeks = () => {
+        axios
+            .get(`/api/gameweek/count`)
+            .then((response) => {
+                setTotalPages(response.data.totalGameweeks);
+                console.log("Total gameweeks: ", response.data.totalGameweeks);
+            })
+            .catch((err) => console.error("Error fetching total gameweeks: ", err));
+    };
+
     const fetchMatches = (gameweek) => {
         axios
-            .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/match?gameweek=${gameweek}`)
+            .get(`/api/match?gameweek=${gameweek}`)
             .then((response) => {
-                console.log(response.data.data)
                 setMatches(response.data.data);
-                setTotalPages(response.data.totalPages);
+                console.log(response.data.data);
             })
             .catch((err) => console.error("Error fetching match data: ", err));
+    };
+
+    const fetchGameweekDetails = (gameweek) => {
+        axios
+            .get(`/api/gameweek/${gameweek}`)
+            .then((response) => {
+                console.log(response.data.data);
+                setGameweekDetails(response.data.data);
+            })
+            .catch((err) => console.error("Error fetching gameweek data: ", err));
     };
 
     const handlePageChange = (newPage) => {
@@ -47,10 +88,17 @@ const Fixtures = () => {
     };
 
     return (
-        <div className="min-h-[88vh] flex flex-col items-center space-y-8 ">
-            {/* Matches Table */}
+        <div className="min-h-[88vh] flex flex-col items-center space-y-8">
             <div className="w-full max-w-5xl px-6 sm:px-20 my-20">
-                <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-10 ${exo2.className}`}>{`Gameweek - ${gameweekName}`}</h2>
+                <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-2 ${exo2.className}`}>Gameweek {gameweekName ? `- ${gameweekName}` : null}</h2>
+                <div className="text-sm sm:text-base md:text-lg mb-10 text-gray-300">
+                    {gameweekDetails?.starting_at && (
+                        <p>{`Starting at: ${new Date(gameweekDetails.starting_at).toLocaleString()}`}</p>
+                    )}
+                    {/* {gameweekDetails?.finished && gameweekDetails?.ending_at && (
+                        <p>{`Ending at: ${new Date(gameweekDetails.ending_at).toLocaleString()}`}</p>
+                    )} */}
+                </div>
                 <div className="overflow-x-auto">
                     {matches && matches.length > 0 ? (
                         <div className="min-w-full text-white">
@@ -73,7 +121,7 @@ const Fixtures = () => {
                                                     : new Date(match.starting_at).toLocaleString()}
                                             </div>
                                             <div className="h-full py-3 sm:py-4 md:py-6 w-2/5 flex items-center justify-end">
-                                                <div className="px-2 sm:px-3 md:px-5">{match.teams[1]?.team_name || "N/A"}</div>
+                                                <div className="px-2 sm:px-3 md:px-5 text-right">{match.teams[1]?.team_name || "N/A"}</div>
                                                 <img src={match.teams[1]?.image_path} alt={match.teams[1]?.team_name} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14" />
                                             </div>
                                         </div>
@@ -84,26 +132,24 @@ const Fixtures = () => {
                             </div>
                         </div>
                     ) : (
-                        <p className="text-center text-white">Loading matches or no matches found...</p>
+                        <p className="text-center text-white">Loading matches...</p>
                     )}
                 </div>
-
-                {/* Pagination Controls */}
-                <div className="flex justify-between mt-4">
+                <div className="flex justify-between mt-4 items-center">
                     <button
                         onClick={() => handlePageChange(gameweekName - 1)}
                         disabled={gameweekName === 1}
-                        className="bg-orange-500 text-white py-2 px-4 sm:px-6 md:px-10 rounded-lg hover:bg-orange-400 disabled:opacity-50 text-xs sm:text-sm md:text-lg"
+                        className="bg-orange-500 text-white py-2 w-28 sm:w-36 md:w-40 rounded-lg hover:bg-orange-400 disabled:opacity-50 text-xs sm:text-sm md:text-lg"
                     >
                         Previous
                     </button>
-                    <span className="text-white text-xs sm:text-sm md:text-lg">
+                    <span className="text-white text-xs sm:text-sm md:text-lg text-center flex-grow">
                         Gameweek {gameweekName} of {totalPages}
                     </span>
                     <button
                         onClick={() => handlePageChange(gameweekName + 1)}
                         disabled={gameweekName === totalPages}
-                        className="bg-orange-500 text-white py-2 px-6 sm:px-6 md:px-10 rounded-lg hover:bg-orange-400 disabled:opacity-50 text-xs sm:text-sm md:text-lg"
+                        className="bg-orange-500 text-white py-2 w-28 sm:w-36 md:w-40 rounded-lg hover:bg-orange-400 disabled:opacity-50 text-xs sm:text-sm md:text-lg"
                     >
                         Next
                     </button>

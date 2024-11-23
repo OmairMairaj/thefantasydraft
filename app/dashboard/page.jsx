@@ -117,14 +117,14 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Match Centre Card */}
+              {/* League Table Card */}
               <div className="w-1/2 p-8 rounded-3xl shadow-lg mb-6 relative"
                 style={{
                   backgroundImage: "url('/images/matchcenterImage.png')",
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}>
-                <h3 className={`text-4xl font-bold text-[#FF8A00] mb-2 ${exo2.className}`}>MATCH CENTRE</h3>
+                <h3 className={`text-4xl font-bold text-[#FF8A00] mb-2 ${exo2.className}`}>LEAGUE TABLE</h3>
                 <p className="text-base text-gray-300">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
                 <div className="mt-6 p-4 w-2/3 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
                   <table className="w-full text-white">
@@ -185,14 +185,14 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Current Game Week Card */}
+              {/* Match Center Card */}
               <div className="w-1/3 p-8 rounded-3xl shadow-lg mb-6 flex flex-col justify-between"
                 style={{
                   backgroundImage: "url('/images/gameweekimage.png')",
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}>
-                <h3 className={`text-4xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>CURRENT GAME WEEK</h3>
+                <h3 className={`text-4xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>MATCH CENTER</h3>
                 <ul class="w-[80%] text-white space-y-1">
                   <li class="flex items-center justify-between py-1 rounded-md shadow-md">
                     <div class="flex items-center">
