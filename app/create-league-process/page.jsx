@@ -32,6 +32,7 @@ const CreateLeagueProcess = () => {
       league_name: league.leagueName,
       league_image_path: league.leagueLogo,
       creator: user.email,
+      creator_name: user.first_name + " " + user.last_name,
       users_invited: invite.emails,
       users_onboard: [user.email],
       draft_order: [user.email],

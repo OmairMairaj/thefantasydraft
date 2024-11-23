@@ -4,17 +4,30 @@ import { NextResponse } from "next/server";
 import { generateInviteCode } from "../../../lib/helpers";
 import { sendMultipleEmails } from "../../../lib/mail";
 
-export const GET = async (req, res) => {
+export const GET = async (req) => {
   try {
     await connectToDb();
-    const data = await FantasyLeague.find();
-    return NextResponse.json({ error: false, data: data });
+
+    // Extract email from query parameters
+    const email = req.nextUrl.searchParams.get("email");
+
+    let leagues;
+
+    // Check if email parameter is provided
+    if (email) {
+      // Find all leagues where the user's email is included in the users_onboard array
+      leagues = await FantasyLeague.find({ users_onboard: { $in: [email] } });
+    } else {
+      // Return all fantasy leagues if no email is provided
+      leagues = await FantasyLeague.find();
+    }
+
+    return NextResponse.json({ error: false, data: leagues });
   } catch (err) {
-    console.log(err);
+    console.error("Error fetching leagues: ", err);
     return NextResponse.json({
       error: true,
-      err: err,
-      message: "An unexpected error occurred please try again later"
+      message: "An unexpected error occurred, please try again later.",
     });
   }
 };

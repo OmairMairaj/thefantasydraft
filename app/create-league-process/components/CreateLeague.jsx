@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { FaImage, FaInfoCircle } from 'react-icons/fa';
 import Image from 'next/image';
 import { Exo_2 } from 'next/font/google';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const exo2 = Exo_2({
     weight: ['700', '800'],
@@ -20,6 +22,7 @@ const CreateLeague = ({ onNext }) => {
     const [secPerPick, setSecPerPick] = useState(savedLeagueData.secPerPick || 30);
     const [format, setFormat] = useState(savedLeagueData.format || 'Classic');
     const [startDraft, setStartDraft] = useState(savedLeagueData.startDraft || 'Manual');
+    const [draftTime, setDraftTime] = useState(savedLeagueData.draftTime ? new Date(savedLeagueData.draftTime) : null);
     const [formatToolTipVisible, setFormatToolTipVisible] = useState(false);
     const [draftToolTipVisible, setDraftToolTipVisible] = useState(false);
 
@@ -46,7 +49,7 @@ const CreateLeague = ({ onNext }) => {
     const handleSubmit = () => {
         sessionStorage.setItem(
             'leagueData',
-            JSON.stringify({ leagueName, leagueLogo, maxTeams, secPerPick, format, startDraft })
+            JSON.stringify({ leagueName, leagueLogo, maxTeams, secPerPick, format, startDraft, draftTime })
         );
         onNext();  // Move to next step
     };
@@ -57,11 +60,6 @@ const CreateLeague = ({ onNext }) => {
             setLeagueLogo(savedLeagueData.leagueLogo);
         }
     }, []);
-
-    // useEffect(() => {
-    //     formatToolTipVisible && setTimeout(() => setFormatToolTipVisible(false), 1000);
-    //     draftToolTipVisible && setTimeout(() => setDraftToolTipVisible(false), 1000);
-    // }, [formatToolTipVisible, draftToolTipVisible]);
 
     return (
         <div className="min-h-[88vh] flex flex-col space-y-8 text-white mt-8">
@@ -134,7 +132,7 @@ const CreateLeague = ({ onNext }) => {
                             <div className="bg-[#0C1922] w-[200px] h-[200px] flex items-center justify-center rounded-lg p-2">
                                 {leagueLogo ? (
                                     <Image
-                                        src={leagueLogo} // Directly use the Base64 image from session storage
+                                        src={leagueLogo}
                                         alt="League Logo"
                                         width={200}
                                         height={200}
@@ -157,7 +155,7 @@ const CreateLeague = ({ onNext }) => {
                                 />
                             </label>
                             {formatToolTipVisible && (
-                                <div className="absolute -top-24  bg-white text-black text-sm p-3 rounded-lg shadow-md max-w-lg">
+                                <div className="absolute -top-24 bg-white text-black text-sm p-3 rounded-lg shadow-md max-w-lg">
                                     In head to head leagues, each team plays another team each week. You earn 3 points for a win, and 1 point for a draw. In classic leagues, teams are ranked by total points scored.
                                 </div>
                             )}
@@ -196,7 +194,7 @@ const CreateLeague = ({ onNext }) => {
                                 />
                             </label>
                             {draftToolTipVisible && (
-                                <div className="absolute -top-20  bg-white text-black text-sm p-3 rounded-lg shadow-md w-72">
+                                <div className="absolute -top-20 bg-white text-black text-sm p-3 rounded-lg shadow-md w-72">
                                     The draft can either be started manually or scheduled to start automatically.
                                 </div>
                             )}
@@ -223,6 +221,20 @@ const CreateLeague = ({ onNext }) => {
                                 </label>
                             </div>
                         </div>
+
+                        {/* Draft Date and Time Picker */}
+                        {startDraft === 'Scheduled' && (
+                            <div className="flex flex-col mb-8 space-y-2">
+                                <label className="font-bold text-lg">Draft Date and Time</label>
+                                <DatePicker
+                                    selected={draftTime}
+                                    onChange={(date) => setDraftTime(date)}
+                                    showTimeSelect
+                                    dateFormat="Pp"
+                                    className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white"
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
 

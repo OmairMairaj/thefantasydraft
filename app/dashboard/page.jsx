@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Exo_2 } from 'next/font/google';
-import { FaExclamationCircle } from 'react-icons/fa';
+import { FaCog, FaDraft2Digital, FaExclamationCircle } from 'react-icons/fa';
 import { AiOutlineExclamationCircle } from "react-icons/ai";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,6 +17,48 @@ const exo2 = Exo_2({
 
 const Dashboard = () => {
   const [leagueDetails, setLeagueDetails] = useState(null);
+  const [leagueData, setLeagueData] = useState(null);
+  const [user, setUser] = useState({});
+
+  useEffect(() => {
+    // Check if window is defined to ensure we are on the client side
+    if (typeof window !== 'undefined') {
+      let userData = null;
+
+      if (sessionStorage.getItem("user")) {
+        userData = JSON.parse(sessionStorage.getItem("user"));
+      } else if (localStorage.getItem("user")) {
+        userData = JSON.parse(localStorage.getItem("user"));
+      }
+
+      if (userData && userData.user) {
+        setUser(userData.user);
+      }
+    }
+  }, []);
+
+  const fetchLeaguesByUser = async (userEmail) => {
+    try {
+      const response = await axios.get(`/api/fantasyleague?email=${userEmail}`);
+      if (!response.data.error) {
+        setLeagueData(response.data.data);
+        // Do something with the leagues data, like setting it in the state
+        console.log(response.data.data);
+      } else {
+        console.error("Error fetching leagues: ", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching leagues: ", error);
+    }
+  };
+
+  const readData = async () => {
+    fetchLeaguesByUser(user.email);
+  };
+
+  const clearData = () => {
+    setLeagueData(null);
+  };
 
   const setLeague = () => {
     // Mock league details that you would actually fetch from an API
@@ -78,7 +120,7 @@ const Dashboard = () => {
                       className="w-20 h-20 object-cover mr-4"
                     />
                     <div>
-                      <h3 className={`text-4xl font-bold text-[#FF8A00] ${exo2.className}`}>Team Name</h3>
+                      <h3 className={`text-4xl font-bold text-[#FF8A00] ${exo2.className}`}>MY TEAM</h3>
                       {/* <p className="text-white">Current Points: 120</p> */}
                     </div>
                   </div>
@@ -162,7 +204,6 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-
 
             <div className="w-full flex space-x-4 h-80">
               {/* Transfers Card */}
@@ -249,6 +290,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
         )
         }
         {leagueDetails && !leagueDetails.paid && (
@@ -277,16 +319,245 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+
+
+
+
+        {leagueData && (
+          <div
+            className={`flex flex-wrap justify-between w-full relative `}
+          // ${!leagueDetails.paid ? "blur-sm pointer-events-none" : ""}
+
+          >
+            <div className="w-full flex flex-col">
+              <div className="w-full flex items-center justify-between fade-gradient hover:bg-none hover:transform-none cursor-default p-6 rounded-xl shadow-md mb-8">
+                {/* League Logo and Name */}
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={leagueData[0].league_image_path}
+                    alt="League Logo"
+                    className="w-24 h-24 object-cover rounded-lg"
+                  />
+                  <div className="flex flex-col space-y-2">
+                    <h2 className={`text-4xl font-bold ${exo2.className}`}>
+                      {leagueData[0].league_name}
+                    </h2>
+                    <div className="flex"><strong className="mr-2">Owner:</strong>{leagueData[0].creator}</div>
+                  </div>
+                </div>
+
+                {/* Configurations and Drafting Buttons */}
+                <div className="flex space-x-4">
+                  <button className="fade-gradient flex items-center space-x-2 px-6 py-3  text-white rounded-full font-bold transition-all ease-in-out">
+                    <FaCog size={20} />
+                    <span>Configurations</span>
+                  </button>
+                  <a href="/drafting" className="fade-gradient flex items-center space-x-2 px-6 py-3 text-white rounded-full font-bold transition-all ease-in-out">
+                    <FaDraft2Digital size={20} />
+                    <span>Drafting</span>
+                  </a>
+                </div>
+              </div>
+              <div className="w-full flex space-x-4 h-80">
+                {/* Team Name Card */}
+                <div className="w-1/2 p-8 rounded-3xl shadow-lg mb-6 relative flex flex-col justify-between"
+                  style={{
+                    backgroundImage: "url('/images/myteamimage.png')",
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}>
+                  <div className="flex justify-between mb-4">
+                    <div className="flex items-center">
+                      <img
+                        src="/images/barcelona-logo.svg" // Replace with your team logo URL
+                        alt="Team Logo"
+                        className="w-20 h-20 object-cover mr-4"
+                      />
+                      <div>
+                        <h3 className={`text-4xl font-bold text-[#FF8A00] ${exo2.className}`}>Team Name</h3>
+                        {/* <p className="text-white">Current Points: 120</p> */}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center px-8 py-2 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
+                      <p className="text-white">Current Points: 120</p>
+                      <div className="flex space-x-2 mt-1">
+                        <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                        <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                        <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                        <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                        <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                        <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-white font-bold">Next Opponent:</p>
+                    <div className="flex items-center mt-2 w-max px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
+                      <img
+                        src="/images/man-city-logo.svg" // Replace with your opponent logo URL
+                        alt="Opponent Logo"
+                        className="w-20 h-20 object-cover rounded-full mr-4"
+                      />
+                      <div>
+                        <p className="text-white">Man City</p>
+                        <div className="flex space-x-2 mt-3">
+                          <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                          <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                          <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                          <span className="bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center">L</span>
+                          <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                          <span className="bg-green-500 text-white rounded-md w-6 h-6 flex items-center justify-center">W</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* League Table Card */}
+                <div className="w-1/2 p-8 rounded-3xl shadow-lg mb-6 relative"
+                  style={{
+                    backgroundImage: "url('/images/matchcenterImage.png')",
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}>
+                  <h3 className={`text-4xl font-bold text-[#FF8A00] mb-2 ${exo2.className}`}>LEAGUE TABLE</h3>
+                  <p className="text-base text-gray-300">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                  <div className="mt-6 p-4 w-2/3 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
+                    <table className="w-full text-white">
+                      <thead className="border-b border-[#5b5b5b]">
+                        <tr className="text-[#FF8A00] pb-4">
+                          <th className="w-2/5 text-left">Players</th>
+                          <th className="text-center">Played</th>
+                          <th className="text-center">Won</th>
+                          <th className="text-center">Lost</th>
+                        </tr>
+                        <tr className="h-2"></tr>
+                      </thead>
+                      <tr className="h-2"></tr>
+                      <tbody className="pt-4">
+                        <tr>
+                          <td className="w-2/5">Omar</td>
+                          <td className="text-center">23</td>
+                          <td className="text-center">22</td>
+                          <td className="text-center">1</td>
+                        </tr>
+                        <tr>
+                          <td className="w-2/5">Haris</td>
+                          <td className="text-center">15</td>
+                          <td className="text-center">2</td>
+                          <td className="text-center">13</td>
+                        </tr>
+                        <tr>
+                          <td className="w-2/5">Maryam</td>
+                          <td className="text-center">10</td>
+                          <td className="text-center">5</td>
+                          <td className="text-center">5</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full flex space-x-4 h-80">
+                {/* Transfers Card */}
+                <div className="w-1/3 p-8 rounded-3xl shadow-lg mb-6 relative"
+                  style={{
+                    backgroundImage: "url('/images/transfersimage.png')",
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}>
+                  <h3 className={`text-4xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>TRANSFERS</h3>
+                  <p className="text-base">Manage your transfers to get the best team performance.</p>
+                  <div className="absolute bottom-0 left-0 right-0 p-8 rounded-b-3xl">
+                    <Image
+                      src="/images/transfericon.svg"
+                      alt="Transfer Icon"
+                      width={100}
+                      height={100}
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Match Center Card */}
+                <div className="w-1/3 p-8 rounded-3xl shadow-lg mb-6 flex flex-col justify-between"
+                  style={{
+                    backgroundImage: "url('/images/gameweekimage.png')",
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}>
+                  <h3 className={`text-4xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>MATCH CENTER</h3>
+                  <ul class="w-[80%] text-white space-y-1">
+                    <li class="flex items-center justify-between py-1 rounded-md shadow-md">
+                      <div class="flex items-center">
+                        <img src="/images/man-city-logo.svg" alt="Man City Logo" class="w-10 h-10 mr-4" />
+                        <span class="text-base">Man City</span>
+                      </div>
+                      <span class="text-[#FF8A00] text-xl mx-2">v/s</span>
+                      <div class="flex items-center">
+                        <span class="text-base mr-4">FC Barcelona</span>
+                        <img src="/images/barcelona-logo.svg" alt="FC Barcelona Logo" class="w-10 h-10" />
+                      </div>
+                    </li>
+                    <li class="flex items-center justify-between py-1 rounded-md shadow-md">
+                      <div class="flex items-center">
+                        <img src="/images/man-city-logo.svg" alt="Man City Logo" class="w-10 h-10 mr-4" />
+                        <span class="text-base">Man City</span>
+                      </div>
+                      <span class="text-[#FF8A00] text-xl mx-2">v/s</span>
+                      <div class="flex items-center">
+                        <span class="text-base mr-4">FC Barcelona</span>
+                        <img src="/images/barcelona-logo.svg" alt="FC Barcelona Logo" class="w-10 h-10" />
+                      </div>
+                    </li>
+                    <li class="flex items-center justify-between py-1 rounded-md shadow-md">
+                      <div class="flex items-center">
+                        <img src="/images/man-city-logo.svg" alt="Man City Logo" class="w-10 h-10 mr-4" />
+                        <span class="text-base">Man City</span>
+                      </div>
+                      <span class="text-[#FF8A00] text-xl mx-2">v/s</span>
+                      <div class="flex items-center">
+                        <span class="text-base mr-4">FC Barcelona</span>
+                        <img src="/images/barcelona-logo.svg" alt="FC Barcelona Logo" class="w-10 h-10" />
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Achievements Card */}
+                <div className="w-1/3 p-8 rounded-3xl shadow-lg mb-6"
+                  style={{
+                    backgroundImage: "url('/images/achievementsimage.png')",
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}>
+                  <h3 className={`text-4xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>ACHIEVEMENTS</h3>
+                  <p className="text-base text-gray-300 mb-4">Track your team's achievements throughout the league.</p>
+                  <div className="flex items-center mt-8">
+                    <CircularProgress percentage={52} />
+                    <div className="ml-2">
+                      <p className="text-xl font-bold text-white">21/40</p>
+                      <p className="text-sm text-gray-300">Total Achievements Completed</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+        }
       </div>
 
 
-      <div className={`w-full relative bg-[#070A0A] custom-dash-spacing rounded-3xl shadow-lg flex flex-col items-center ${leagueDetails ? 'space-y-8 my-8 py-16' : 'space-y-12 my-8 py-36'}`}>
+      <div className={`w-full relative bg-[#070A0A] custom-dash-spacing rounded-3xl shadow-lg flex flex-col items-center ${leagueDetails || leagueData ? 'space-y-8 my-8 py-16' : 'space-y-12 my-8 py-36'}`}>
         <div className="flex items-center space-x-4">
           <FaExclamationCircle className="text-4xl text-[#FF8A00]" />
           <h2 className={`text-3xl md:text-4xl font-bold ${exo2.className}`}>CREATE OR JOIN A LEAGUE</h2>
         </div>
         <p className="text-center text-lg md:text-xl max-w-3xl">
-          {` ${leagueDetails ? 'You can create a new league or join another existing one!.'
+          {` ${leagueDetails || leagueData ? 'You can create a new league or join another existing one!.'
             : 'Welcome to the ultimate fantasy sports platform. You can create a new league or join an existing one. Take your fantasy experience to the next level!'}`}
         </p>
         <div className="flex space-x-8">
@@ -300,6 +571,16 @@ const Dashboard = () => {
 
 
         <div className="absolute right-0 bottom-0">
+          {!leagueData && !leagueDetails && (
+            <button className="p-4 text-white" onClick={readData}>
+              Fetch Data
+            </button>
+          )}
+          {leagueData && (
+            <button className="p-4 text-white" onClick={clearData}>
+              Clear Data
+            </button>
+          )}
           {leagueDetails && leagueDetails.paid && (
             <button className="p-4 text-white" onClick={clearPay}>
               Mark Unpaid
@@ -310,7 +591,7 @@ const Dashboard = () => {
               Clear League
             </button>
           )}
-          {!leagueDetails && (
+          {!leagueDetails && !leagueData && (
             <button className="p-4 text-white" onClick={setLeague}>
               Set League
             </button>
