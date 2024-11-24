@@ -120,7 +120,14 @@ const JoinLeague = ({ onNext }) => {
                   >{`Draft Start Date :`}</div>
                   <div className={`text-lg ${exo2.className}`}>{`${new Date(
                     leagueDetails.draft_configuration.start_date
-                  ).toGMTString()}`}</div>
+                  ).toLocaleString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}`}</div>
                 </div>
               </div>
               <div className="w-max text-right">
