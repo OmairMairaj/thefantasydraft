@@ -118,7 +118,7 @@ const JoinLeague = ({ onNext }) => {
                   <div
                     className={`text-lg ${exo2.className}`}
                   >{`Draft Start Date :`}</div>
-                  <div className={`text-lg ${exo2.className}`}>{`${new Date(
+                  <div className={`text-base ${exo2.className}`}>{`${new Date(
                     leagueDetails.draft_configuration.start_date
                   ).toLocaleString("en-US", {
                     weekday: "long",
@@ -132,7 +132,7 @@ const JoinLeague = ({ onNext }) => {
               </div>
               <div className="w-max text-right">
                 <p className={`font-medium text-sm ${exo2.className}`}>Owner</p>
-                <div className={`font-bold text-lg ${exo2.className}`}>
+                <div className={`font-bold text-base ${exo2.className}`}>
                   {leagueDetails.creator}
                 </div>
               </div>
