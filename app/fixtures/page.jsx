@@ -164,6 +164,7 @@ const Fixtures = () => {
                               )?.goals ?? 0
                             }`
                           : new Date(match.starting_at).toLocaleString('en-US',{
+                            timeZone:'Australia/Brisbane', //Keeping this to cancel out the UK GMT
                             weekday: "long",
                             month: "short",
                             day: "numeric",

@@ -1,4 +1,4 @@
-import { Match, Standing } from "@/lib/models";
+import { GameWeek, Match, Standing } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import https from "https";
@@ -743,6 +743,50 @@ export async function GET(req) {
         1695: "Shot",
     }
 
+
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    //Updating Gameweek
+    console.log("Updating Gameweek");
+    try {
+        const seasonID = process.env.NEXT_PUBLIC_SEASON_ID
+        const api_url = "https://api.sportmonks.com/v3/football/rounds/seasons/"
+        const agent = new https.Agent({ rejectUnauthorized: false });
+        axios.defaults.httpsAgent = agent
+        let full_URL = api_url + seasonID
+        let gameweek_data = [];
+        let response = await axios.get(full_URL, {
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": process.env.NEXT_PUBLIC_SPORTMONKS_TOKEN
+            },
+            agent: agent
+        })
+        if (response.status === 200) {
+            gameweek_data = response.data.data;
+            for (const gameweek of gameweek_data) {
+                const query = {
+                    id: gameweek.id,
+                    seasonID: seasonID,
+                    name: gameweek.name,
+                    finished: gameweek.finished,
+                    is_current: gameweek.is_current,
+                    starting_at: gameweek.starting_at,
+                    ending_at: gameweek.ending_at,
+                    games_in_current_week: gameweek.games_in_current_week,
+                };
+                await connectToDb();
+                const res = await GameWeek.updateOne({ id: gameweek.id }, { $set: query }, { upsert: true });
+            }
+            console.log("Gameweeks done");
+        } else {
+            console.log("Failed to fetch data from API");
+        }
+    } catch (err) {
+        console.log(err);
+        console.log("Error updating gameweek");
+    }
+
     //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     //Updating Scores
     console.log("Updating Scores");
@@ -913,6 +957,7 @@ export async function GET(req) {
                         "cleansheets": stats.filter((item) => item.type_id == 194)[0].value.all.count,
                     }
                     await connectToDb();
+                    // console.log(standing)
                     const res = await Standing.updateOne({ id: standing.id }, { $set: standing }, { upsert: true });
                 }
             } else {

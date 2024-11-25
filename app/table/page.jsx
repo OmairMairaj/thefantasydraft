@@ -57,6 +57,7 @@ const Table = () => {
                                     <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">GA</th>
                                     <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">GD</th>
                                     <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">Points</th>
+                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">Form</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -75,6 +76,7 @@ const Table = () => {
                                         <td className="py-3 px-2 sm:px-4 text-center">{team.goals_conceded}</td>
                                         <td className="py-3 px-2 sm:px-4 text-center">{team.goals_scored - team.goals_conceded}</td>
                                         <td className="py-3 px-2 sm:px-4 text-center font-bold">{team.points}</td>
+                                        <td className="py-3 px-2 sm:px-4">{team.form.sort((a, b) => b.sort_order - a.sort_order).slice(0,5).map((item)=>item.form+" ")}</td>
                                     </tr>
                                 ))}
                             </tbody>
