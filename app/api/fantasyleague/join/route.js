@@ -1,4 +1,4 @@
-import { FantasyLeague, FantasyTeam } from "@/lib/models";
+import { FantasyLeague, FantasyTeam, FantasyDraft } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
@@ -25,26 +25,38 @@ export const POST = async (req, res) => {
       userTeam = await FantasyTeam.create(teamObj);
     }
     let leagueData = await FantasyLeague.findOne({ invite_code: payload.leagueData.inviteCode });
-    leagueData.draft_order.push(payload.userData.email);
-    leagueData.teams.push({
+    let draftData = await FantasyDraft.findOne({ _id: leagueData.draftID });
+
+    draftData.order.push(payload.userData.email);
+    draftData.teams.push({
       "team": userTeam._id,
       "userID": payload.userData._id,
       "user_email": payload.userData.email
     });
     leagueData.users_onboard.push(payload.userData.email);
-    const savedData = await leagueData.save()
+    leagueData.teams.push({
+      "team": userTeam._id,
+      "userID": payload.userData._id,
+      "user_email": payload.userData.email
+    });
+
+    const savedDataLeague = await leagueData.save()
+    const savedDataDraft = await draftData.save()
 
     return NextResponse.json({
       error: false,
-      data: savedData
+      message:"Successfully joined League!",
+      dataLeague: savedDataLeague,
+      dataDraft: savedDataDraft
     });
     // payload.teams[0].team = userTeam._id;
 
   } catch (err) {
+    console.log(err.message)
     return NextResponse.json({
       error: true,
       err: err.message,
-      message: "Error creating league, please try again."
+      message: "Error joining league, please try again."
     });
   }
 };

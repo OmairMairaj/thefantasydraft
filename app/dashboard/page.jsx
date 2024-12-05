@@ -191,7 +191,7 @@ const Dashboard = () => {
   const markPaymentAsCompleted = (leagueDetails) => {
     const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague/payment";
     axios.post(URL, { league: leagueDetails }).then((response) => {
-      addAlert(res.data.message, res.data.error ? "error" : "success");
+      addAlert(response.data.message, response.data.error ? "error" : "success");
       if (response.data.error == false) {
         setSelectedLeague(response.data.data);
         setShowUnpaid(false);
@@ -234,7 +234,7 @@ const Dashboard = () => {
                         <FaCog size={20} />
                         <span>Configurations</span>
                       </button>
-                      <Link href="/drafting" className="fade-gradient flex items-center space-x-2 px-4 md:px-6 py-2 md:py-3 text-white rounded-full font-bold transition-all ease-in-out">
+                      <Link href={"/drafting?leagueID="+selectedLeague._id} className="fade-gradient flex items-center space-x-2 px-4 md:px-6 py-2 md:py-3 text-white rounded-full font-bold transition-all ease-in-out">
                         <FaDraft2Digital size={20} />
                         <span>Drafting</span>
                       </Link>

@@ -34,12 +34,12 @@ const JoinLeagueProcess = () => {
     const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague/join";
     axios.post(URL, body).then((response) => {
       console.log(response);
+      addAlert(response.data.message, response.data.error ? "error": "success");
       if (response.data.error == false) {
-        addAlert("Successfully joined the league!", "success");
         sessionStorage.removeItem("joinLeagueData");
         sessionStorage.removeItem("joinLeagueTeamData");
         router.push("/dashboard");
-      } else addAlert(res.data.message, res.data.error ? "error" : "success");
+      }
     });
   };
 

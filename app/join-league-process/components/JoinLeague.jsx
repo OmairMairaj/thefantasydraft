@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation"; // Import useRoute
 import { FaSpinner, FaImage } from "react-icons/fa";
 import Image from "next/image";
 import axios from "axios";
+import { useAlert } from "../../../components/AlertContext/AlertContext";
 
 const exo2 = Exo_2({
   weight: ["400", "500", "700", "800"],
@@ -62,7 +63,10 @@ const JoinLeague = ({ onNext }) => {
         } else {
           setValidated(false);
           setLeagueDetails(null);
-          addAlert(res.data.message, res.data.error ? "error" : "success");
+          addAlert(
+            response.data.message,
+            response.data.error ? "error" : "success"
+          );
         }
       });
     } catch (error) {
@@ -118,9 +122,9 @@ const JoinLeague = ({ onNext }) => {
                   </h2>
                   <div
                     className={`text-lg ${exo2.className}`}
-                  >{`Draft Start Date :`}</div>
+                  >{`League Create Date :`}</div>
                   <div className={`text-base ${exo2.className}`}>{`${new Date(
-                    leagueDetails.draft_configuration.start_date
+                    leagueDetails.createdAt
                   ).toLocaleString("en-US", {
                     weekday: "long",
                     year: "numeric",
@@ -148,9 +152,11 @@ const JoinLeague = ({ onNext }) => {
                   </strong>
                 </p>
                 <p>
-                  Seconds per Pick:{" "}
+                  Auto Subs:{" "}
                   <strong className="text-lg text-white ml-2">
-                    {leagueDetails.draft_configuration.time_per_pick}
+                    {leagueDetails.league_configuration.auto_subs
+                      ? "Yes"
+                      : "No"}
                   </strong>
                 </p>
               </div>
