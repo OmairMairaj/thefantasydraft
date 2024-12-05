@@ -1,4 +1,4 @@
-import { FantasyLeague, FantasyTeam } from "@/lib/models";
+import { FantasyDraft, FantasyLeague, FantasyTeam } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { generateInviteCode } from "../../../lib/helpers";
@@ -37,6 +37,8 @@ export const POST = async (req, res) => {
     await connectToDb();
     let payload = await req.json();
     let userTeam = {};
+
+    //create first team
     if (payload.teamData) {
       const teamObj = {
         team_name: payload.teamData.teamName,
@@ -48,13 +50,35 @@ export const POST = async (req, res) => {
       }
       userTeam = await FantasyTeam.create(teamObj);
     }
+
+    //create league object
     payload.teams[0].team = userTeam._id;
     payload.invite_code = await generateInviteCode();
-    const newFantasyLeague = await FantasyLeague.create(payload);
-    if (newFantasyLeague.invite_code) {
-      const email_body = `<body><h3>Hello there!</h3><br /><p> You have been invited to Play Draft Fantasy! Please follow the link below to join ${newFantasyLeague.league_name}.</p><br /><p> Please accept your invite by following this link :</p><br /><br /><a href="${process.env.NEXT_PUBLIC_FRONTEND_URL}join-league-process?code=${newFantasyLeague.invite_code}">VIEW INVITE</a><br /><br /><p>If you have questions or you did not initiate this request, we are here to help. Email us at ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}</p><br /><br /><p>Regards,</p><p>Team Fantasy Draft</p></body>`
-      const emails = await sendMultipleEmails(newFantasyLeague.users_invited, "Fantasy League Invitation", email_body);
-      return NextResponse.json({ error: false, leagueData: newFantasyLeague, teamData: userTeam, emailData: emails });
+    let newFantasyLeague = await FantasyLeague.create(payload);
+    if (newFantasyLeague) {
+      let emails;
+      if (newFantasyLeague.invite_code) {
+        const email_body = `<body><h3>Hello there!</h3><br /><p> You have been invited to Play Draft Fantasy! Please follow the link below to join ${newFantasyLeague.league_name}.</p><br /><p> Please accept your invite by following this link :</p><br /><br /><a href="${process.env.NEXT_PUBLIC_FRONTEND_URL}join-league-process?code=${newFantasyLeague.invite_code}">VIEW INVITE</a><br /><br /><p>If you have questions or you did not initiate this request, we are here to help. Email us at ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}</p><br /><br /><p>Regards,</p><p>Team Fantasy Draft</p></body>`
+        emails = await sendMultipleEmails(newFantasyLeague.users_invited, "Fantasy League Invitation", email_body);
+      }
+      const newDraftObj = await FantasyDraft.create({
+        leagueID: newFantasyLeague._id,
+        creator: newFantasyLeague.creator,
+        order: newFantasyLeague.users_onboard,
+        time_per_pick: payload.draft_configuration.time_per_pick,
+        state: payload.draft_configuration.state,
+        start_date: payload.draft_configuration.start_date,
+        teams: newFantasyLeague.teams
+      });
+      
+      userTeam.leagueID = newFantasyLeague._id;
+      userTeam.save()
+
+      newFantasyLeague.draftID = newDraftObj._id;
+      newFantasyLeague = newFantasyLeague.save()
+
+      return NextResponse.json({ error: false, leagueData: newFantasyLeague, draftData: newDraftObj, teamData: userTeam, emailData: emails });
+
     }
   } catch (err) {
     return NextResponse.json({
