@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Exo_2 } from "next/font/google";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 import axios from "axios";
+import { useAlert } from "../../components/AlertContext/AlertContext";
 
 const exo2 = Exo_2({
   weight: ["700", "800"],
@@ -15,6 +16,7 @@ const exo2 = Exo_2({
 const Profile = () => {
   const [user, setUser] = useState(null);
   const router = useRouter();
+  const { addAlert } = useAlert();
 
   // console.log("we here");
   // console.log();
@@ -41,7 +43,7 @@ const Profile = () => {
       .post(URL, body)
       .then((res) => {
         console.log(res);
-        alert(res.data.message);
+        addAlert(res.data.message, res.data.error ? "error" : "success");
         if (res.data.data) {
           setUser(res.data.data);
           if (sessionStorage.getItem("user")) {
@@ -62,14 +64,14 @@ const Profile = () => {
       })
       .catch((err) => {
         console.log(err);
-        alert("An unexpected error occurred. Please try again later");
+        addAlert("An unexpected error occurred. Please try again later", "error");
       });
   };
 
   if (user)
     return (
       <div className="min-h-[88vh] flex flex-col items-center justify-center">
-        <div style={{width:"100%"}}className="max-w-xl mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg">
+        <div style={{ width: "100%" }} className="max-w-xl mx-20 bg-[#0C1922] p-16 rounded-3xl shadow-lg">
           <h1 className={`text-4xl font-bold italic ${exo2.className}`}>
             USER PROFILE
           </h1>
@@ -127,7 +129,7 @@ const Profile = () => {
               UPDATE
             </button>
             <div
-              style={{textAlign:"center"}}
+              style={{ textAlign: "center" }}
               className={`w-full mt-8 py-3 rounded-full text-white font-bold text-lg transition-all bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-[#FF8A00]`}
               onClick={() => {
                 router.push("/forgot-password");

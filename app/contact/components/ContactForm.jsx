@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Exo_2 } from 'next/font/google';
+import { useAlert } from '../../../components/AlertContext/AlertContext';
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],
@@ -19,6 +20,7 @@ const ContactForm = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const { addAlert } = useAlert();
 
     // Handle input changes
     const handleInputChange = (e) => {
@@ -78,7 +80,7 @@ const ContactForm = () => {
                 phone: '',
                 message: ''
             });
-            alert('Message sent successfully!');
+            addAlert('Message sent successfully!', "success");
         }
     };
 

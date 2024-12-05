@@ -225,7 +225,7 @@ const Nav = () => {
                     Sign Up
                   </a>
                   <a
-                    href="/Login"
+                    href="/login"
                     className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                   >
                     Login

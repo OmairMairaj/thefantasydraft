@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Exo_2 } from "next/font/google";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { ImSpinner2 } from "react-icons/im"; // Import loading spinner icon
+import { useAlert } from "../../components/AlertContext/AlertContext";
 import axios from "axios";
 
 const exo2 = Exo_2({
@@ -19,39 +21,54 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // For confirm password field
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state
   const router = useRouter();
+  const { addAlert } = useAlert(); // Use the alert context
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!agreedToTerms) {
-      alert("You must agree to the Terms & Conditions");
+
+    // Validate that passwords match before sending the request
+    if (password !== confirmPassword) {
+      addAlert("Passwords do not match", "error");
       return;
     }
+
+    if (!agreedToTerms) {
+      addAlert("You must agree to the Terms & Conditions", "info");
+      return;
+    }
+
+    setLoading(true); // Set loading to true to show the spinner
+
     // Logic to register the user (you can call an API here)
     const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "user/signup";
-    console.log(URL);
     const body = {
       first_name: firstName,
       last_name: lastName,
       email: email,
       password: password,
-      confirm_password: confirmPassword,
+      confirm_password: confirmPassword
     };
-    // console.log(body);
+
     axios
       .post(URL, body)
       .then((res) => {
-        console.log(res);
-        alert(res.data.message);
+        // Add an alert for success or error
+        addAlert(res.data.message, res.data.error ? "error" : "success");
         if (!res.data.error) {
-          router.push("/login");
+          setTimeout(() => {
+            router.push("/login");
+          }, [1000]);
         }
       })
       .catch((err) => {
-        console.log(err);
-        alert("An unexpected error occurred. Please try again later");
+        addAlert("An unexpected error occurred. Please try again later", "error");
+      })
+      .finally(() => {
+        setLoading(false); // Set loading to false once the API call is completed
       });
   };
 
@@ -93,10 +110,11 @@ const SignUp = () => {
             required
             autoComplete="off"
           />
+
           {/* Password Field with Toggle */}
           <div className="relative w-full mb-4">
             <input
-              type={showPassword ? "text" : "password"} // Toggle between password and text input types
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password*"
@@ -147,22 +165,31 @@ const SignUp = () => {
             <label className="text-white text-sm md:text-base">
               By creating an account, you agree to our &nbsp;
               <a
-                href="/terms-and-conditions" target="_blank"
+                href="/terms-and-conditions"
+                target="_blank"
                 className="text-orange-500 underline hover:text-orange-400"
               >
                 Terms & Conditions
               </a>
             </label>
           </div>
+
           <button
             type="submit"
-            disabled={!agreedToTerms}
-            className={`w-full mt-2 py-2 md:py-3 rounded-full text-white font-bold text-base md:text-lg transition-all ${agreedToTerms
-              ? "bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] cursor-pointer hover:bg-[#FF8A00]"
-              : "bg-gray-500 cursor-default"
+            disabled={loading || !agreedToTerms}
+            className={`w-full mt-2 py-2 md:py-3 rounded-full text-white font-bold text-base md:text-lg transition-all ${loading || !agreedToTerms
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] hover:bg-[#FF8A00] cursor-pointer"
               }`}
           >
-            Create Account
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <ImSpinner2 className="animate-spin mr-2" />
+                Processing...
+              </div>
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
       </div>

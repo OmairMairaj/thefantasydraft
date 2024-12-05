@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"; // Import useRouter to use client-s
 import { Exo_2 } from "next/font/google";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import { useAlert } from "../../components/AlertContext/AlertContext";
 
 const exo2 = Exo_2({
   weight: ["700", "800"],
@@ -15,6 +16,7 @@ const exo2 = Exo_2({
 const ForgotPasswordContent = () => {
   const [email, setEmail] = useState("");
   const router = useRouter(); // Make sure useRouter is called within the client component
+  const { addAlert } = useAlert();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -23,14 +25,14 @@ const ForgotPasswordContent = () => {
       .get(URL)
       .then((res) => {
         console.log(res);
-        alert(res.data.message);
+        addAlert(res.data.message, res.data.error ? "error" : "success");
         if (!res.data.error) {
           router.push("/login");
         }
       })
       .catch((err) => {
         console.log(err);
-        alert("An unexpected error occurred. Please try again later");
+        addAlert("An unexpected error occurred. Please try again later", "error");
       });
   };
 

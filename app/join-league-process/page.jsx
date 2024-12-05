@@ -7,12 +7,14 @@ import JoinLeague from "./components/JoinLeague";
 import CreateTeam from "./components/CreateTeam";
 import Confirmation from "./components/Confirmation";
 import { useRouter } from "next/navigation";
+import { useAlert } from "../../components/AlertContext/AlertContext";
 
 const JoinLeagueProcess = () => {
   const router = useRouter();
 
   const [step, setStep] = useState(1);
   const totalSteps = 4;
+  const { addAlert } = useAlert();
 
   const handleNext = () => setStep(step + 1);
   const handleBack = () => setStep(step - 1);
@@ -33,11 +35,11 @@ const JoinLeagueProcess = () => {
     axios.post(URL, body).then((response) => {
       console.log(response);
       if (response.data.error == false) {
-        alert("Successfully joined the league!");
+        addAlert("Successfully joined the league!", "success");
         sessionStorage.removeItem("joinLeagueData");
         sessionStorage.removeItem("joinLeagueTeamData");
         router.push("/dashboard");
-      } else alert(response.data.message);
+      } else addAlert(res.data.message, res.data.error ? "error" : "success");
     });
   };
 

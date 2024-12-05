@@ -4,6 +4,7 @@ import React, { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation"; // Import useRouter to use client-side navigation
 import { Exo_2 } from "next/font/google";
 import axios from "axios";
+import { useAlert } from "../../components/AlertContext/AlertContext";
 
 const exo2 = Exo_2({
   weight: ["700", "800"],
@@ -18,6 +19,7 @@ const ChangePasswordContent = () => {
   const code = searchParams.get("code");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
+  const { addAlert } = useAlert();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,14 +34,14 @@ const ChangePasswordContent = () => {
       .post(URL, body)
       .then((res) => {
         console.log(res);
-        alert(res.data.message);
+        addAlert(res.data.message, res.data.error ? "error" : "success");
         if (!res.data.error) {
           router.push("/login");
         }
       })
       .catch((err) => {
         console.log(err);
-        alert("An unexpected error occurred. Please try again later");
+        addAlert("An unexpected error occurred. Please try again later", "error");
       });
   };
 

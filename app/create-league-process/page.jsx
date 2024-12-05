@@ -8,12 +8,14 @@ import InviteMembers from "./components/InviteMembers";
 import Confirmation from "./components/Confirmation";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useAlert } from "../../components/AlertContext/AlertContext";
 
 const CreateLeagueProcess = () => {
   const router = useRouter();
 
   const [step, setStep] = useState(1);
   const totalSteps = 5; // Number of steps in the process
+  const { addAlert } = useAlert();
 
   const handleNext = () => setStep(step + 1);
   const handleBack = () => setStep(step - 1);
@@ -58,18 +60,18 @@ const CreateLeagueProcess = () => {
       const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague";
       axios.post(URL, body).then((response) => {
         if (response.data && response.data.error === false) {
-          alert("League successfully created!");
+          addAlert("League successfully created!", "success");
           sessionStorage.removeItem("leagueData");
           sessionStorage.removeItem("teamData");
           sessionStorage.removeItem("inviteData");
           router.push("/dashboard");
         } else {
-          alert("Please recheck inputs and submit again or try to re-login");
+          addAlert("Please recheck inputs and submit again or try to re-login", "error");
         }
       });
     } catch {
-      alert(
-        "An unexpected error occurred when creating league. Please check your internet connection"
+      addAlert(
+        "An unexpected error occurred when creating league. Please check your internet connection", "error"
       );
     }
   };

@@ -20,6 +20,7 @@ const JoinLeague = ({ onNext }) => {
   const [leagueDetails, setLeagueDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [validated, setValidated] = useState(false);
+  const { addAlert } = useAlert();
 
   let user = null;
   if (sessionStorage.getItem("user"))
@@ -35,7 +36,7 @@ const JoinLeague = ({ onNext }) => {
 
   const fetchLeagueDetails = async () => {
     if (!inviteCode || inviteCode.length < 8) {
-      alert("Please type in a valid invite code");
+      addAlert("Please type in a valid invite code", "error");
       setLoading(false);
       return;
     }
@@ -61,11 +62,11 @@ const JoinLeague = ({ onNext }) => {
         } else {
           setValidated(false);
           setLeagueDetails(null);
-          alert(response.data.message);
+          addAlert(res.data.message, res.data.error ? "error" : "success");
         }
       });
     } catch (error) {
-      alert("An unexpected error occurred. Please try again");
+      addAlert("An unexpected error occurred. Please try again", "error");
     } finally {
       setLoading(false);
     }

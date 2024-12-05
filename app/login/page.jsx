@@ -4,6 +4,8 @@ import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { ImSpinner2 } from "react-icons/im";
+import { useAlert } from "../../components/AlertContext/AlertContext";
 import { Exo_2 } from "next/font/google";
 
 const exo2 = Exo_2({
@@ -17,11 +19,14 @@ const LoginContent = () => {
   const [password, setPassword] = useState("");
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { addAlert } = useAlert();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoading(true);
     const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "user/login";
     const body = {
       email: email,
@@ -30,7 +35,7 @@ const LoginContent = () => {
     axios
       .post(URL, body)
       .then((res) => {
-        alert(res.data.message);
+        addAlert(res.data.message, res.data.error ? "error" : "success");
         if (!res.data.error) {
           if (stayLoggedIn) {
             localStorage.setItem("user", JSON.stringify(res.data));
@@ -39,23 +44,30 @@ const LoginContent = () => {
           }
           if (searchParams.get("redirect"))
             router.push(searchParams.get("redirect"));
-          else router.push("/dashboard");
+          else {
+            setTimeout(() => {
+              router.push("/dashboard");
+            }, [2000])
+          }
         }
       })
       .catch((err) => {
-        alert("An unexpected error occurred. Please try again later");
+        addAlert("An unexpected error occurred. Please try again later", "error");
+      })
+      .finally(() => {
+        setLoading(false); // Set loading to false once the API call is completed
       });
   };
 
   return (
-    <div className="min-h-[88vh] flex flex-col items-center justify-center px-4 sm:px-8 md:px-16">
+    <div className="min-h-[88vh] flex flex-col items-center justify-center px-6 sm:px-8 md:px-16">
       <div className="w-full max-w-sm sm:max-w-lg bg-[#0C1922] p-8 px-6 sm:p-12 md:p-16 rounded-3xl shadow-lg">
         <h1
           className={`text-3xl sm:text-4xl font-bold italic ${exo2.className}`}
         >
           LOGIN
         </h1>
-        <form onSubmit={handleSubmit} className="mt-6 md:mt-8">
+        <form onSubmit={handleSubmit} className="mt-4 md:mt-8">
           <div className="space-y-4">
             <input
               type="email"
@@ -108,9 +120,18 @@ const LoginContent = () => {
           </div>
           <button
             type="submit"
-            className={`w-full mt-6 py-2 md:py-3 bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] rounded-full text-white font-bold text-base md:text-lg hover:bg-[#FF8A00] transition-all ${exo2.className}`}
+            disabled={loading} // Disable the button when loading
+            className={`w-full mt-6 py-2 md:py-3 bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] rounded-full text-white font-bold text-base md:text-lg hover:bg-[#FF8A00] transition-all ${exo2.className} ${loading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
           >
-            Login
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <ImSpinner2 className="animate-spin mr-2" />
+                Processing...
+              </div>
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
       </div>
