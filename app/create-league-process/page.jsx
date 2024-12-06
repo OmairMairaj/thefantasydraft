@@ -41,7 +41,7 @@ const CreateLeagueProcess = () => {
       draft_configuration: {
         time_per_pick: league.secPerPick,
         state: league.startDraft,
-        start_date: "2025-01-01T00:00:00.000+00:00", //Date Picker Value here,
+        start_date: league.draftTime, //Date Picker Value here,
       },
       league_configuration: {
         auto_subs: true,

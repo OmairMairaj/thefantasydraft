@@ -50,7 +50,7 @@ const CircularProgress = ({ percentage }) => {
           style={{
             transform: 'rotate(-90deg)',
             transformOrigin: 'center',
-            transition: 'stroke-dashoffset 0.5s ease-in-out',
+            transition: 'stroke-dashoffset 2s ease-in-out',
           }}
         />
       </svg>

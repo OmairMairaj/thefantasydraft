@@ -63,9 +63,9 @@ const Nav = () => {
 
   return (
     <nav
-      className={`max-h-[120px] flex justify-between items-center border-b border-white py-10 m-auto mx-6 md:mx-10 lg:mx-16 xl:mx-20  relative`}
+      className={`max-h-[120px] flex justify-between items-center border-b border-white py-10 m-auto mx-4 sm:mx-8 md:mx-10 lg:mx-16 xl:mx-20  relative`}
     >
-      <div className="flex space-x-5 items-center">
+      <div className="flex space-x-1 items-center">
         <Link href="/">
           <Image
             src="/images/logo.svg"
@@ -75,7 +75,7 @@ const Nav = () => {
             alt="The Fantasy Draft Logo"
           />
         </Link>
-        <h1 className={`md:hidden text-xl sm:text-2xl lg:text-4xl xl:text-6xl font-bold leading-tight ml-2 text-white italic ${exo2.className}`}>
+        <h1 className={`md:hidden text-xl sm:text-2xl lg:text-4xl xl:text-6xl font-bold leading-tight ml-0 text-white italic ${exo2.className}`}>
           THE <span className="text-[#FF8A00]">FANTASY</span> <br disabled />DRAFT
         </h1>
       </div>

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Exo_2 } from 'next/font/google';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import moment from 'moment-timezone';
 
 const exo2 = Exo_2({
     weight: ['700', '800'],
@@ -25,6 +26,7 @@ const CreateLeague = ({ onNext }) => {
     const [draftTime, setDraftTime] = useState(savedLeagueData.draftTime ? new Date(savedLeagueData.draftTime) : null);
     const [formatToolTipVisible, setFormatToolTipVisible] = useState(false);
     const [draftToolTipVisible, setDraftToolTipVisible] = useState(false);
+    const [timeZone, setTimeZone] = useState(moment.tz.guess());
 
     const capitalizeWords = (str) => {
         return str.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -47,9 +49,10 @@ const CreateLeague = ({ onNext }) => {
     };
 
     const handleSubmit = () => {
+        const draftTimeUTC = startDraft === "Scheduled" && draftTime ? moment(draftTime).utc().format() : null;
         sessionStorage.setItem(
             'leagueData',
-            JSON.stringify({ leagueName, leagueLogo, maxTeams, secPerPick, format, startDraft, draftTime })
+            JSON.stringify({ leagueName, leagueLogo, maxTeams, secPerPick, format, startDraft, draftTime: draftTimeUTC })
         );
         onNext();  // Move to next step
     };
@@ -109,42 +112,6 @@ const CreateLeague = ({ onNext }) => {
                                 className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white"
                             />
                         </div>
-                    </div>
-
-                    <div className="flex flex-col space-x-4">
-                        {/* League Logo Upload */}
-                        <div className="flex items-start space-x-4">
-                            <div className="flex flex-col space-y-4">
-                                <label className="font-bold text-lg" htmlFor="league-logo">League Logo</label>
-                                <label
-                                    htmlFor="league-logo"
-                                    className="cursor-pointer py-2 px-8 mr-24 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border hover:bg-[#FF8A00] hover:border-[#FF8A00] transition-all"
-                                >
-                                    Choose File
-                                </label>
-                                <input
-                                    id="league-logo"
-                                    type="file"
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                />
-                            </div>
-                            <div className="bg-[#0C1922] w-[200px] h-[200px] flex items-center justify-center rounded-lg p-2">
-                                {leagueLogo ? (
-                                    <Image
-                                        src={leagueLogo}
-                                        alt="League Logo"
-                                        width={200}
-                                        height={200}
-                                        className="object-cover rounded-lg"
-                                    />
-                                ) : (
-                                    <FaImage size={80} className="text-[#828282]" />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Format Selection */}
                         <div className="flex flex-col mb-8 space-y-2 relative">
                             <label className="font-bold text-lg flex items-center ">
                                 Format
@@ -182,6 +149,43 @@ const CreateLeague = ({ onNext }) => {
                                 </label>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="flex flex-col space-x-4">
+                        {/* League Logo Upload */}
+                        <div className="flex items-start space-x-4">
+                            <div className="flex flex-col space-y-4">
+                                <label className="font-bold text-lg" htmlFor="league-logo">League Logo</label>
+                                <label
+                                    htmlFor="league-logo"
+                                    className="cursor-pointer py-2 px-8 mr-24 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border hover:bg-[#FF8A00] hover:border-[#FF8A00] transition-all"
+                                >
+                                    Choose File
+                                </label>
+                                <input
+                                    id="league-logo"
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                />
+                            </div>
+                            <div className="bg-[#0C1922] w-[200px] h-[200px] flex items-center justify-center rounded-lg p-2">
+                                {leagueLogo ? (
+                                    <Image
+                                        src={leagueLogo}
+                                        alt="League Logo"
+                                        width={200}
+                                        height={200}
+                                        className="object-cover rounded-lg"
+                                    />
+                                ) : (
+                                    <FaImage size={80} className="text-[#828282]" />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Format Selection */}
+
 
                         {/* Start Draft Selection */}
                         <div className="flex flex-col mb-8 space-y-2 relative">
@@ -225,7 +229,7 @@ const CreateLeague = ({ onNext }) => {
                         {/* Draft Date and Time Picker */}
                         {startDraft === 'Scheduled' && (
                             <div className="flex flex-col mb-8 space-y-2">
-                                <label className="font-bold text-lg">Draft Date and Time</label>
+                                <label className="font-bold text-lg">Draft Date and Time (Local Time Zone: {timeZone})</label>
                                 <DatePicker
                                     selected={draftTime}
                                     onChange={(date) => setDraftTime(date)}
@@ -233,6 +237,11 @@ const CreateLeague = ({ onNext }) => {
                                     dateFormat="Pp"
                                     className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white"
                                 />
+                                {draftTime && (
+                                    <p className="text-sm text-gray-400">
+                                        Your draft will be scheduled for: {moment(draftTime).tz(timeZone).format('LLLL')} ({timeZone})
+                                    </p>
+                                )}
                             </div>
                         )}
                     </div>
