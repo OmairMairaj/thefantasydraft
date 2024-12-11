@@ -43,6 +43,8 @@ const Fixtures = () => {
     axios
       .get(`/api/gameweek/current`)
       .then((response) => {
+        console.log("current")
+        console.log(response)
         if (!response.data.error) {
           const currentGameweek = response.data.data;
           console.log(currentGameweek);
