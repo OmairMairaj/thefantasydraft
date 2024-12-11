@@ -49,12 +49,12 @@ const CreateLeague = ({ onNext }) => {
     };
 
     const handleSubmit = () => {
-        const draftTimeUTC = startDraft === "Scheduled" && draftTime ? moment(draftTime).utc().format() : null;
+        const draftTimeUTC = startDraft === 'Scheduled' && draftTime ? moment(draftTime).utc().format() : null;
         sessionStorage.setItem(
             'leagueData',
             JSON.stringify({ leagueName, leagueLogo, maxTeams, secPerPick, format, startDraft, draftTime: draftTimeUTC })
         );
-        onNext();  // Move to next step
+        onNext(); // Move to next step
     };
 
     useEffect(() => {
@@ -65,68 +65,70 @@ const CreateLeague = ({ onNext }) => {
     }, []);
 
     return (
-        <div className="min-h-[88vh] flex flex-col space-y-8 text-white mt-8">
-            <div className="w-full relative rounded-3xl shadow-lg px-6 md:px-10 lg:px-16 xl:px-20 pb-24">
-                <h1 className={`text-3xl md:text-4xl font-bold ${exo2.className}`}>
-                    Step 1: Create League
-                </h1>
-                <p className='my-4 w-2/3'>
+        <div className="min-h-[88vh] flex flex-col space-y-8 text-white mt-8 px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-24">
+            <div className="w-full relative pb-20">
+                <h1 className={`text-2xl md:text-4xl font-bold ${exo2.className}`}>Step 1: Create League</h1>
+                <p className="my-4 text-sm md:text-base lg:text-lg max-w-3xl">
                     Enter the details for your new league. Customize the name, logo, number of teams, and how your draft will start. This information will define your league and its structure, ensuring all participants have a clear understanding before joining.
                 </p>
 
-                <div className='mt-8 grid grid-cols-2 gap-x-12'>
-                    <div className='flex flex-col space-y-8'>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8">
+                    <div className="flex flex-col space-y-6 max-w-sm lg:max-w-lg">
                         {/* League Name Input */}
-                        <div className="flex flex-col w-[60%] space-y-2">
-                            <label className="font-bold text-lg" htmlFor="league-name">League Name</label>
+                        <div className="flex flex-col">
+                            <label className="font-bold text-sm md:text-lg mb-2" htmlFor="league-name">League Name</label>
                             <input
                                 id="league-name"
                                 type="text"
                                 value={leagueName}
                                 onChange={(e) => setLeagueName(capitalizeWords(e.target.value))}
                                 placeholder="Enter your league name"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                             />
                         </div>
+
                         {/* Maximum Number of Teams Input */}
-                        <div className="flex flex-col w-[60%] mt-4 space-y-2">
-                            <label className="font-bold text-lg" htmlFor="max-teams">Maximum Number of Teams</label>
+                        <div className="flex flex-col">
+                            <label className="font-bold text-sm md:text-lg mb-2" htmlFor="max-teams">Maximum Number of Teams</label>
                             <input
                                 id="max-teams"
-                                type="text"
+                                type="number"
                                 value={maxTeams}
                                 onChange={(e) => setMaxTeams(e.target.value)}
                                 placeholder="Enter the Maximum Number of Teams"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                             />
                         </div>
+
                         {/* Seconds Per Pick Input */}
-                        <div className="flex flex-col w-[60%] mt-4 space-y-2">
-                            <label className="font-bold text-lg" htmlFor="sec-per-pick">Seconds per Pick</label>
+                        <div className="flex flex-col">
+                            <label className="font-bold text-sm md:text-lg mb-2" htmlFor="sec-per-pick">Seconds per Pick</label>
                             <input
                                 id="sec-per-pick"
-                                type="text"
+                                type="number"
                                 value={secPerPick}
                                 onChange={(e) => setSecPerPick(e.target.value)}
                                 placeholder="Enter seconds per pick for the draft"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                             />
                         </div>
-                        <div className="flex flex-col mb-8 space-y-2 relative">
-                            <label className="font-bold text-lg flex items-center ">
+
+                        {/* Format Selection */}
+                        <div className="flex flex-col relative">
+                            <label className="font-bold text-sm md:text-lg flex items-center">
                                 Format
                                 <FaInfoCircle
-                                    className="ml-2 mb-1 cursor-pointer"
+                                    className="ml-2 cursor-pointer"
                                     onMouseOver={() => setFormatToolTipVisible(true)}
                                     onMouseLeave={() => setFormatToolTipVisible(false)}
                                 />
                             </label>
                             {formatToolTipVisible && (
-                                <div className="absolute -top-24 bg-white text-black text-sm p-3 rounded-lg shadow-md max-w-lg">
-                                    In head to head leagues, each team plays another team each week. You earn 3 points for a win, and 1 point for a draw. In classic leagues, teams are ranked by total points scored.
+                                <div className="absolute top-[-70px] left-0 bg-white text-black text-xs p-3 rounded-lg shadow-md max-w-md">
+                                    In head-to-head leagues, each team plays another team each week. You earn 3 points for a win, and 1 point for a draw. In classic leagues, teams are ranked by total points scored.
                                 </div>
                             )}
-                            <div className="flex flex-col justify-center space-y-2">
+                            <div className="flex flex-row space-x-4 mt-2">
                                 <label className="flex items-center">
                                     <input
                                         type="radio"
@@ -135,7 +137,7 @@ const CreateLeague = ({ onNext }) => {
                                         onChange={(e) => setFormat(e.target.value)}
                                         className="custom-radio relative focus:outline-none"
                                     />
-                                    <span className="ml-2 text-[#c2c2c2] text-lg mt-1">Classic</span>
+                                    <span className="ml-2 text-sm md:text-base">Classic</span>
                                 </label>
                                 <label className="flex items-center">
                                     <input
@@ -145,20 +147,20 @@ const CreateLeague = ({ onNext }) => {
                                         onChange={(e) => setFormat(e.target.value)}
                                         className="custom-radio relative focus:outline-none"
                                     />
-                                    <span className="ml-2 text-[#c2c2c2] text-lg mt-1">Head to Head</span>
+                                    <span className="ml-2 text-sm md:text-base">Head to Head</span>
                                 </label>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col space-x-4">
+                    <div className="flex flex-col space-y-6 max-w-sm lg:max-w-lg">
                         {/* League Logo Upload */}
-                        <div className="flex items-start space-x-4">
-                            <div className="flex flex-col space-y-4">
-                                <label className="font-bold text-lg" htmlFor="league-logo">League Logo</label>
+                        <div className="flex flex-col space-y-4">
+                            <label className="font-bold text-sm md:text-lg">League Logo</label>
+                            <div className="flex items-center space-x-4">
                                 <label
                                     htmlFor="league-logo"
-                                    className="cursor-pointer py-2 px-8 mr-24 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border hover:bg-[#FF8A00] hover:border-[#FF8A00] transition-all"
+                                    className="cursor-pointer py-2 px-6 rounded-full text-white font-bold text-sm md:text-base border border-[#fff] hover:bg-[#FF8A00] hover:border-[#FF8A00] transition-all"
                                 >
                                     Choose File
                                 </label>
@@ -168,41 +170,37 @@ const CreateLeague = ({ onNext }) => {
                                     onChange={handleFileChange}
                                     className="hidden"
                                 />
-                            </div>
-                            <div className="bg-[#0C1922] w-[200px] h-[200px] flex items-center justify-center rounded-lg p-2">
-                                {leagueLogo ? (
-                                    <Image
-                                        src={leagueLogo}
-                                        alt="League Logo"
-                                        width={200}
-                                        height={200}
-                                        className="object-cover rounded-lg"
-                                    />
-                                ) : (
-                                    <FaImage size={80} className="text-[#828282]" />
-                                )}
+                                <div className="w-32 h-32 md:w-40 md:h-40 bg-[#0C1922] flex items-center justify-center relative rounded-lg">
+                                    {leagueLogo ? (
+                                        <Image
+                                            src={leagueLogo}
+                                            alt="League Logo"
+                                            fill
+                                            className="object-cover object-center rounded-lg relative"
+                                        />
+                                    ) : (
+                                        <FaImage size={50} className="text-[#828282]" />
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Format Selection */}
-
-
                         {/* Start Draft Selection */}
-                        <div className="flex flex-col mb-8 space-y-2 relative">
-                            <label className="font-bold text-lg flex items-center ">
+                        <div className="flex flex-col relative">
+                            <label className="font-bold text-sm md:text-lg flex items-center">
                                 Start Draft
                                 <FaInfoCircle
-                                    className="ml-2 mb-1 cursor-pointer"
+                                    className="ml-2 cursor-pointer"
                                     onMouseOver={() => setDraftToolTipVisible(true)}
                                     onMouseLeave={() => setDraftToolTipVisible(false)}
                                 />
                             </label>
                             {draftToolTipVisible && (
-                                <div className="absolute -top-20 bg-white text-black text-sm p-3 rounded-lg shadow-md w-72">
+                                <div className="absolute top-[-50px] left-0 bg-white text-black text-xs p-3 rounded-lg shadow-md w-64">
                                     The draft can either be started manually or scheduled to start automatically.
                                 </div>
                             )}
-                            <div className="flex flex-col justify-center space-y-2">
+                            <div className="flex flex-row space-x-4 mt-2">
                                 <label className="flex items-center">
                                     <input
                                         type="radio"
@@ -211,7 +209,7 @@ const CreateLeague = ({ onNext }) => {
                                         onChange={(e) => setStartDraft(e.target.value)}
                                         className="custom-radio relative focus:outline-none"
                                     />
-                                    <span className="ml-2 text-[#c2c2c2] text-lg mt-1">Manual</span>
+                                    <span className="ml-2 text-sm md:text-base">Manual</span>
                                 </label>
                                 <label className="flex items-center">
                                     <input
@@ -221,24 +219,24 @@ const CreateLeague = ({ onNext }) => {
                                         onChange={(e) => setStartDraft(e.target.value)}
                                         className="custom-radio relative focus:outline-none"
                                     />
-                                    <span className="ml-2 text-[#c2c2c2] text-lg mt-1">Scheduled</span>
+                                    <span className="ml-2 text-sm md:text-base">Scheduled</span>
                                 </label>
                             </div>
                         </div>
 
                         {/* Draft Date and Time Picker */}
                         {startDraft === 'Scheduled' && (
-                            <div className="flex flex-col mb-8 space-y-2">
-                                <label className="font-bold text-lg">Draft Date and Time (Local Time Zone: {timeZone})</label>
+                            <div className="flex flex-col">
+                                <label className="font-bold text-sm md:text-lg mb-2">Draft Date and Time (Local Time Zone: {timeZone})</label>
                                 <DatePicker
                                     selected={draftTime}
                                     onChange={(date) => setDraftTime(date)}
                                     showTimeSelect
                                     dateFormat="Pp"
-                                    className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white"
+                                    className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                                 />
                                 {draftTime && (
-                                    <p className="text-sm text-gray-400">
+                                    <p className="text-xs md:text-sm text-gray-400 mt-2">
                                         Your draft will be scheduled for: {moment(draftTime).tz(timeZone).format('LLLL')} ({timeZone})
                                     </p>
                                 )}
@@ -249,10 +247,10 @@ const CreateLeague = ({ onNext }) => {
 
                 {/* Submit Button */}
                 <button
+                    className={`absolute bottom-0 right-0 mt-10 fade-gradient py-2 px-4 md:py-3 md:px-12 rounded-full text-white font-bold text-sm md:text-lg transition-all ease-in-out ${exo2.className}`}
                     onClick={handleSubmit}
-                    className={`absolute right-0 bottom-0 fade-gradient py-4 px-20 mx-6 md:mx-10 lg:mx-16 xl:mx-20 mt-36 rounded-full text-white font-bold text-lg transition-all ease-in-out ${exo2.className}`}
                 >
-                    NEXT : Create Your Team
+                    NEXT: Create Your Team
                 </button>
             </div>
         </div>

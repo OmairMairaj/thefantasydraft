@@ -129,6 +129,13 @@ p {
   /* z-index: -1; */
 }
 
+@media screen and (max-width: 640px){
+  .slick-dots{
+    position: relative !important;
+    bottom: 0px !important;
+  }
+}
+
 .slick-dots li button:before {
   color: #FF8A00 !important;
 }

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Exo_2 } from "next/font/google";
+import { useAlert } from "@/components/AlertContext/AlertContext";
 
 const exo2 = Exo_2({
   weight: ["700", "800"],
@@ -17,6 +18,7 @@ const Fixtures = () => {
   const router = useRouter();
   const [gameweekName, setGameweekName] = useState(null);
   const [gameweekDetails, setGameweekDetails] = useState({});
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     // Check if user is authenticated
@@ -41,12 +43,18 @@ const Fixtures = () => {
     axios
       .get(`/api/gameweek/current`)
       .then((response) => {
-        const currentGameweek = response.data.data;
-        console.log(currentGameweek);
-        if (currentGameweek) {
-          setGameweekName(parseInt(currentGameweek.name, 10)); // Convert gameweek name to integer
-          setGameweekDetails(currentGameweek);
-          fetchTotalGameweeks();
+        if (!response.data.error) {
+          const currentGameweek = response.data.data;
+          console.log(currentGameweek);
+          if (currentGameweek) {
+            setGameweekName(parseInt(currentGameweek.name, 10)); // Convert gameweek name to integer
+            setGameweekDetails(currentGameweek);
+            fetchTotalGameweeks();
+          }
+        }
+        else {
+          addAlert(response.data.message, "error");
+          console.log(response.data.message);
         }
       })
       .catch((err) =>
@@ -102,13 +110,13 @@ const Fixtures = () => {
           {gameweekDetails?.starting_at && (
             <p>{`Starting at: ${new Date(
               gameweekDetails.starting_at
-            ).toLocaleString('en-US',{
+            ).toLocaleString('en-US', {
               weekday: "long",
               year: "numeric",
               month: "long",
               day: "numeric",
-              hour:"numeric",
-              minute:"2-digit"
+              hour: "numeric",
+              minute: "2-digit"
             })}`}</p>
           )}
           {/* {gameweekDetails?.finished && gameweekDetails?.ending_at && (
@@ -150,26 +158,24 @@ const Fixtures = () => {
                       </div>
                       <div className="h-full w-1/5 py-3 sm:py-4 md:py-6 text-center">
                         {match.state !== "Not Started"
-                          ? `${
-                              match.scores.find(
-                                (score) =>
-                                  score.score_type_name === "Current" &&
-                                  score.team_id === match.teams[0]?.team_id
-                              )?.goals ?? 0
-                            } - ${
-                              match.scores.find(
-                                (score) =>
-                                  score.score_type_name === "Current" &&
-                                  score.team_id === match.teams[1]?.team_id
-                              )?.goals ?? 0
-                            }`
-                          : new Date(match.starting_at).toLocaleString('en-US',{
-                            timeZone:'Australia/Brisbane', //Keeping this to cancel out the UK GMT
+                          ? `${match.scores.find(
+                            (score) =>
+                              score.score_type_name === "Current" &&
+                              score.team_id === match.teams[0]?.team_id
+                          )?.goals ?? 0
+                          } - ${match.scores.find(
+                            (score) =>
+                              score.score_type_name === "Current" &&
+                              score.team_id === match.teams[1]?.team_id
+                          )?.goals ?? 0
+                          }`
+                          : new Date(match.starting_at).toLocaleString('en-US', {
+                            timeZone: 'Australia/Brisbane', //Keeping this to cancel out the UK GMT
                             weekday: "long",
                             month: "short",
                             day: "numeric",
-                            hour:"numeric",
-                            minute:"2-digit"
+                            hour: "numeric",
+                            minute: "2-digit"
                           })}
                       </div>
                       <div className="h-full py-3 sm:py-4 md:py-6 w-2/5 flex items-center justify-end">
