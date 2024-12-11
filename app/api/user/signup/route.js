@@ -4,13 +4,13 @@ import { NextResponse, userAgent } from "next/server";
 import { validateRegisterInput, getConfirmationCode, hashPassword } from "@/lib/helpers"
 import { sendEmail } from "@/lib/mail";
 
-export const GET = async (req, res) => {
-  connectToDb();
-  const x = await Player.deleteMany({})
-  return NextResponse.json({
-    x: x,
-  })
-};
+// export const GET = async (req, res) => {
+//   connectToDb();
+//   const x = await Player.deleteMany({})
+//   return NextResponse.json({
+//     x: x,
+//   })
+// };
 
 export const POST = async (req, res) => {
   try {
