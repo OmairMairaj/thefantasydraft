@@ -41,7 +41,7 @@ const Fixtures = () => {
 
   const fetchCurrentGameweek = () => {
     axios
-      .get(`/api/gameweek/current`)
+      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`,{ cache: 'no-store' })
       .then((response) => {
         console.log("current")
         console.log(response)

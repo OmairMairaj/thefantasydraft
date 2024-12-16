@@ -2,7 +2,9 @@ import { GameWeek } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
-export const GET = async () => {
+export const dynamic = "force-dynamic";
+
+export const GET = async (request) => {
     try {
         await connectToDb();
         const currentGameweek = await GameWeek.findOne({ is_current: true });
