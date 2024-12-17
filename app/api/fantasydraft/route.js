@@ -26,3 +26,23 @@ export const GET = async (req) => {
     });
   }
 };
+
+
+export const POST = async (req, res) => {
+  try {
+    await connectToDb();
+    let payload = await req.json();
+    if (payload.draftData && payload.draftData._id) {
+      const res = await FantasyDraft.findByIdAndUpdate(payload.draftData._id,payload.draftData,{ new: true });
+      return NextResponse.json({ error: false, data: res });
+    } else {
+      return NextResponse.json({ error: true, message: "Please send a complete draft Object" });
+    }
+  } catch (err) {
+    return NextResponse.json({
+      error: true,
+      err: err.message,
+      message: "Error creating league, please try again."
+    });
+  }
+};

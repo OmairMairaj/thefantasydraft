@@ -13,6 +13,12 @@ export const POST = async (req, res) => {
         message: "You are already a member of this league."
       });
     }
+    if (payload.leagueData.leagueDetails.data.max_teams && (payload.leagueData.leagueDetails.data.users_onboard.length > payload.leagueData.leagueDetails.data.max_teams)) {
+      return NextResponse.json({
+        error: true,
+        message: "The limit set for maximum teams has been reached. Please ask admin to increase maximum teams limit."
+      });
+    }
     if (payload.teamData) {
       const teamObj = {
         team_name: payload.teamData.teamName,

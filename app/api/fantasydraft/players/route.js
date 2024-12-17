@@ -3,14 +3,47 @@ import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { sendMultipleEmails } from "../../../../lib/mail";
 import { TfiControlShuffle } from "react-icons/tfi";
+import { ConnectionStates } from "mongoose";
 
 export const GET = async (req) => {
   try {
     await connectToDb();
+    // Get parameters from URL
     const draftID = req.nextUrl.searchParams.get("draftID");
+    const teamID = req.nextUrl.searchParams.get("teamID");
+
+    // Get objects from DB
     let draft = await FantasyDraft.findOne({ _id: draftID });
-    let players = await Player.find({ _id: { $nin: draft.selected_players } })
-    return NextResponse.json({ error: false, data: players });
+    let team = await FantasyTeam.findOne({ _id: teamID });
+    const selectedPlayers = team.players;
+    // Get all Players from DB
+    let allPlayers = await Player.find()
+
+    // Extract selected players by position
+    const selectedPositions = selectedPlayers.reduce((acc, player) => {
+      acc[player.position_name] = (acc[player.position_name] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Filter out selected players of this team
+    let remainingPlayers = allPlayers.filter(player => !selectedPlayers.some(selected => selected.playerID === player.id));
+    // Filter out selected players of other teams
+    remainingPlayers = remainingPlayers.filter(player => !draft.players_selected.some(selected => selected === player.id));
+    
+    console.log(draft.squad_configurations)
+    // Apply maximum position limits
+    const positionLimits = {
+      Goalkeeper: draft.squad_configurations.goalkeepers,
+      Defender: draft.squad_configurations.defenders,
+      Midfielder: draft.squad_configurations.midfielders,
+      Attacker: draft.squad_configurations.attackers
+    };
+    remainingPlayers = remainingPlayers.filter(player => {
+      return (selectedPositions[player.position_name] || 0) < positionLimits[player.position_name];
+    });
+    
+    return NextResponse.json({ error: false, data: remainingPlayers, });
+
   } catch (err) {
     console.error("Error fetching drafts: ", err.message);
     return NextResponse.json({
