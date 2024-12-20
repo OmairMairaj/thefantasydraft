@@ -1,6 +1,7 @@
 import { FantasyLeague, FantasyTeam, FantasyDraft } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
+import mongoose  from "mongoose";
 
 export const POST = async (req, res) => {
   try {
@@ -19,19 +20,21 @@ export const POST = async (req, res) => {
         message: "The limit set for maximum teams has been reached. Please ask admin to increase maximum teams limit."
       });
     }
+    let leagueData = await FantasyLeague.findOne({ invite_code: payload.leagueData.inviteCode });
+    let draftData = await FantasyDraft.findOne({ _id: leagueData.draftID });
     if (payload.teamData) {
       const teamObj = {
         team_name: payload.teamData.teamName,
         team_image_path: payload.teamData.teamLogo,
         ground_name: payload.teamData.groundName,
         ground_image_path: payload.teamData.selectedGround,
-        userID: payload.userData._id,
+        userID: new mongoose.Types.ObjectId(payload.userData._id),
+        leagueID: new mongoose.Types.ObjectId(leagueData._id),
         user_email: payload.userData.email,
       }
       userTeam = await FantasyTeam.create(teamObj);
     }
-    let leagueData = await FantasyLeague.findOne({ invite_code: payload.leagueData.inviteCode });
-    let draftData = await FantasyDraft.findOne({ _id: leagueData.draftID });
+
 
     draftData.order.push(payload.userData.email);
     draftData.teams.push({

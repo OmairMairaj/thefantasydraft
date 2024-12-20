@@ -3,6 +3,7 @@ import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { generateInviteCode } from "../../../lib/helpers";
 import { sendMultipleEmails } from "../../../lib/mail";
+import mongoose from "mongoose"
 
 export const GET = async (req) => {
   try {
@@ -45,14 +46,15 @@ export const POST = async (req, res) => {
         team_image_path: payload.teamData.teamLogo,
         ground_name: payload.teamData.groundName,
         ground_image_path: payload.teamData.selectedGround,
-        userID: payload.teams[0].userID,
+        userID: new mongoose.Types.ObjectId(payload.teams[0].userID),
         user_email: payload.teams[0].user_email,
       }
       userTeam = await FantasyTeam.create(teamObj);
     }
 
     //create league object
-    payload.teams[0].team = userTeam._id;
+    payload.teams[0].team = new mongoose.Types.ObjectId(userTeam._id);
+    payload.teams[0].userID = new mongoose.Types.ObjectId(payload.teams[0].userID);
     payload.invite_code = await generateInviteCode();
     let newFantasyLeague = await FantasyLeague.create(payload);
     if (newFantasyLeague) {
@@ -62,7 +64,7 @@ export const POST = async (req, res) => {
         emails = await sendMultipleEmails(newFantasyLeague.users_invited, "Fantasy League Invitation", email_body);
       }
       const newDraftObj = await FantasyDraft.create({
-        leagueID: newFantasyLeague._id,
+        leagueID: new mongoose.Types.ObjectId(newFantasyLeague._id),
         creator: newFantasyLeague.creator,
         order: newFantasyLeague.users_onboard,
         time_per_pick: payload.draft_configuration.time_per_pick,
@@ -71,11 +73,14 @@ export const POST = async (req, res) => {
         teams: newFantasyLeague.teams
       });
       
-      userTeam.leagueID = newFantasyLeague._id;
+      userTeam.leagueID = new mongoose.Types.ObjectId(newFantasyLeague._id);
       userTeam.save()
 
-      newFantasyLeague.draftID = newDraftObj._id;
-      newFantasyLeague = newFantasyLeague.save()
+      newFantasyLeague.draftID = new mongoose.Types.ObjectId(newDraftObj._id);
+      console.log(newFantasyLeague)
+      newFantasyLeague.save()
+      console.log("After save")
+      console.log(newFantasyLeague)
 
       return NextResponse.json({ error: false, leagueData: newFantasyLeague, draftData: newDraftObj, teamData: userTeam, emailData: emails });
 

@@ -51,7 +51,7 @@ const JoinLeague = ({ onNext }) => {
         user.email;
 
       const response = await axios.get(URL);
-
+      console.log(response);
       if (!response.data.error) {
         setLeagueDetails(response.data.data);
         setValidated(true);
@@ -111,23 +111,26 @@ const JoinLeague = ({ onNext }) => {
             <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:justify-between">
               <div className="flex items-center space-x-4">
                 <div className="relative w-24 h-24 md:w-32 md:h-32 overflow-hidden rounded-lg">
-                  <Image
-                    src={leagueDetails.league_image_path}
-                    alt="League Logo"
-                    fill
-                    className="object-cover object-center"
-                  />
+                  {leagueDetails.league_image_path ? (
+                    <Image
+                      src={leagueDetails.league_image_path}
+                      alt="League Logo"
+                      fill
+                      className="object-cover object-center"
+                    />
+                  ) : null}
                 </div>
                 <div className="flex flex-col">
-                  <h2 className={`text-xl md:text-2xl font-bold ${exo2.className}`}>
+                  <h2
+                    className={`text-xl md:text-2xl font-bold ${exo2.className}`}
+                  >
                     {leagueDetails.league_name}
                   </h2>
                   <div
                     className={`text-sm md:text-base ${exo2.className}`}
                   >{`League Created On:`}</div>
                   <div className={`text-xs md:text-sm ${exo2.className}`}>
-                    {new Date(leagueDetails.createdAt
-                    ).toLocaleString("en-US", {
+                    {new Date(leagueDetails.createdAt).toLocaleString("en-US", {
                       weekday: "long",
                       year: "numeric",
                       month: "long",
@@ -139,14 +142,20 @@ const JoinLeague = ({ onNext }) => {
                 </div>
               </div>
               <div className="w-max flex flex-row space-x-2 md:flex-col md:text-right md:pl-8">
-                <p className={`font-medium text-sm ${exo2.className}`}>Owner<span className="md:hidden">:</span></p>
-                <div className={`font-bold text-sm md:text-base ${exo2.className}`}>
+                <p className={`font-medium text-sm ${exo2.className}`}>
+                  Owner<span className="md:hidden">:</span>
+                </p>
+                <div
+                  className={`font-bold text-sm md:text-base ${exo2.className}`}
+                >
                   {leagueDetails.creator}
                 </div>
               </div>
             </div>
 
-            <div className={`${exo2.className} grid grid-cols-1 md:grid-cols-2 gap-2`}>
+            <div
+              className={`${exo2.className} grid grid-cols-1 md:grid-cols-2 gap-2`}
+            >
               <div className="space-y-2 text-sm md:text-base">
                 <p>
                   Players Joined:{" "}

@@ -21,6 +21,8 @@ export const POST = async (req, res) => {
   try {
     await connectToDb();
     const payload = await req.json();
+    payload.userID = new mongoose.Types.ObjectId(payload.userID);
+    payload.leagueID = new mongoose.Types.ObjectId(payload.leagueID);
     const newFantasyTeam = await FantasyTeam.create(payload);
     return NextResponse.json({ error: false, data: newFantasyTeam });
   } catch (err) {

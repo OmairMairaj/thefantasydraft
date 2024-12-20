@@ -59,6 +59,7 @@ const CreateLeagueProcess = () => {
       console.log(body);
       const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague";
       axios.post(URL, body).then((response) => {
+        console.log(response)
         if (response.data && response.data.error === false) {
           addAlert("League successfully created!", "success");
           sessionStorage.removeItem("leagueData");
