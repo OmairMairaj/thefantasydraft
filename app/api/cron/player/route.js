@@ -49,8 +49,8 @@ export async function GET(req) {
                 });
             }
             let player_data = response.data.data;
-            // console.log("player_data")
-            // console.log(player_data)
+            console.log("player_data")
+            console.log(player_data)
             const query = {
                 "id": player_data?.id,
                 "name": player_data?.name,

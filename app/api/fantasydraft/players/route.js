@@ -14,24 +14,39 @@ export const GET = async (req) => {
 
     // Get objects from DB
     let draft = await FantasyDraft.findOne({ _id: draftID });
-    let team = await FantasyTeam.findOne({ _id: teamID });
+    console.log("draft")
+    console.log(draft)
+    let team = await FantasyTeam.findOne({ _id: teamID }).populate("pick_list");
+    // console.log("team")
+    // console.log(team)
     const selectedPlayers = team.players;
     // Get all Players from DB
-    let allPlayers = await Player.find()
+    let allPlayers = team.pick_list;
 
     // Extract selected players by position
     const selectedPositions = selectedPlayers.reduce((acc, player) => {
       acc[player.position_name] = (acc[player.position_name] || 0) + 1;
       return acc;
     }, {});
+    //  // Extract selected players by club
+    //  const selectedClubs = selectedPlayers.reduce((acc, player) => {
+    //   acc[player.club] = (acc[player.club] || 0) + 1;
+    //   return acc;
+    // }, {});
 
     // Filter out selected players of this team
     let remainingPlayers = allPlayers.filter(player => !selectedPlayers.some(selected => selected.playerID === player.id));
     // Filter out selected players of other teams
     remainingPlayers = remainingPlayers.filter(player => !draft.players_selected.some(selected => selected === player.id));
-    
-    console.log(draft.squad_configurations)
+
+    // console.log(draft.squad_configurations)
     // Apply maximum position limits
+    if (!draft.squad_configurations) draft.squad_configurations = {
+      goalkeepers: 2,
+      defenders: 5,
+      midfielders: 5,
+      attackers: 3,
+    }
     const positionLimits = {
       Goalkeeper: draft.squad_configurations.goalkeepers,
       Defender: draft.squad_configurations.defenders,
@@ -41,7 +56,13 @@ export const GET = async (req) => {
     remainingPlayers = remainingPlayers.filter(player => {
       return (selectedPositions[player.position_name] || 0) < positionLimits[player.position_name];
     });
-    
+
+    // // Apply maximum club limits
+    // const clubLimit = 3;
+    // remainingPlayers = remainingPlayers.filter(player => {
+    //   return (selectedClubs[player.club] || 0) < clubLimit;
+    // });
+
     return NextResponse.json({ error: false, data: remainingPlayers, });
 
   } catch (err) {
@@ -60,7 +81,13 @@ export const POST = async (req, res) => {
     //contains DraftID, PlayerID, TeamID, PlayerObj
     let payload = await req.json();
     let draft = await FantasyDraft.findOne({ _id: payload.draftID });
-    if (draft.turn !== payload.email) {
+    if (draft.state !== "In Process") {
+      return NextResponse.json({
+        error: true,
+        message: "The draft is not in progress currently."
+      });
+    }
+    if (draft.turn !== payload.user_email) {
       return NextResponse.json({
         error: true,
         message: "It is not your turn right now to pick a player."
@@ -72,10 +99,10 @@ export const POST = async (req, res) => {
         message: "This player is already selected by another user."
       });
     }
-    let teamID = draft.teams.find(item => item.user_email === payload.email).team
-    console.log(teamID);
+    let teamID = draft.teams.find(item => item.user_email === payload.user_email).team
+    // console.log(teamID);
     let team = await FantasyTeam.findOne({ _id: teamID });
-    console.log(team);
+    // console.log(team);
     let playerObj = {
       playerID: payload.playerObj.playerID,
       player_name: payload.playerObj.player_name,
@@ -92,15 +119,24 @@ export const POST = async (req, res) => {
     if (index == -1) { throw err; }
     else if (index == (draft.order.length - 1)) {
       draft.order = draft.order.reverse();
+      draft.draft_round = draft.draft_round + 1;
       draft.turn = draft.order[0];
     } else {
       draft.turn = draft.order[index + 1]
     }
+
+    // Checking for draft end
+    if((draft.draft_round-1)===draft.squad_players){
+      draft.state = "Ended";
+      draft.start_date = null;
+      draft.turn = null;
+      draft.draft_round = 0 
+    }
+
     team.save();
     draft.save();
     // console.log(team);
     // console.log(draft);
-
     return NextResponse.json({
       error: false,
       draft: draft,

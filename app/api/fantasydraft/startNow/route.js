@@ -3,11 +3,13 @@ import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { sendMultipleEmails } from "../../../../lib/mail";
 
-export const GET = async (req) => {
+export const POST = async (req) => {
   try {
     await connectToDb();
-    const draftID = req.nextUrl.searchParams.get("draftID");
-    let draft = await FantasyDraft.findOne({ _id: draftID });
+    const payload = await req.json();
+    console.log(payload)
+    let draft = await FantasyDraft.findOne({ _id: payload.draftID });
+    if (payload.user_email !== draft.creator) return NextResponse.json({ error: true, message: "You are not the admin for this League. Please ask admin to start the draft" });
     draft.state = "In Process";
     draft.start_date = Date.now();
     draft.turn = draft.order[0];
