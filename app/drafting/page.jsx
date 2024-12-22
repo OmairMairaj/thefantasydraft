@@ -1,124 +1,456 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Exo_2 } from 'next/font/google';
 import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink } from 'react-icons/fa';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
+import { useAlert } from '@/components/AlertContext/AlertContext';
 
 const exo2 = Exo_2({
-    weight: ['700', '800'],
+    weight: ['400', '500', '700', '800'],
     style: ['italic'],
     subsets: ['latin'],
 });
 
 const Drafting = () => {
+
+    const [user, setUser] = useState(null);
+    const [leagueID, setLeagueID] = useState(null);
+    const [leagueData, setLeagueData] = useState(null);
+    const [isCreator, setIsCreator] = useState(false);
+    const [timeRemaining, setTimeRemaining] = useState(null);
+    const [players, setPlayers] = useState([]);
+    const [autoPickList, setAutoPickList] = useState([]);
+    const [search, setSearch] = useState('');
+    const [sort, setSort] = useState('name'); // Default sorting by name
+    const [filter, setFilter] = useState('');
+    const searchParams = useSearchParams();
+    const { addAlert } = useAlert();
+
+    useEffect(() => {
+        // Get user from session storage
+        const storedUser = sessionStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser).user);
+        } else {
+            console.error("User not found in session storage");
+        }
+
+        // Extract leagueID from URL
+        const leagueIDFromURL = searchParams.get('leagueID');
+        if (leagueIDFromURL) {
+            setLeagueID(leagueIDFromURL);
+        } else {
+            console.error("League ID not found in URL");
+        }
+    }, [searchParams]);
+
+    useEffect(() => {
+        // Fetch league data if user and leagueID are available
+        if (user && leagueID) {
+            const fetchLeagueData = async () => {
+                try {
+                    const response = await axios.get(
+                        `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?leagueID=${leagueID}`
+                    );
+                    if (response.data && !response.data.error) {
+                        setLeagueData(response.data.data[0]);
+                        console.log(response.data.data[0]);
+
+
+                        // Check if the current user is the creator of the league
+                        if (response.data.data[0].creator === user.email) {
+                            setIsCreator(true);
+                        } else {
+                            setIsCreator(false);
+                        }
+
+                        if (response.data.data[0].state === 'Scheduled') {
+                            const startTime = new Date(response.data.data[0].start_date).getTime();
+                            const now = Date.now();
+                            setTimeRemaining(startTime - now > 0 ? startTime - now : 0);
+                        }
+                    } else {
+                        console.error("Failed to fetch league data:", response.data.message);
+                    }
+                } catch (error) {
+                    console.error("Error fetching league data:", error);
+                }
+            };
+            fetchLeagueData();
+            fetchPlayers();
+        }
+    }, [user, leagueID]);
+
+    useEffect(() => {
+        if (leagueData?.state === 'Scheduled' && timeRemaining > 0) {
+            const interval = setInterval(() => {
+                setTimeRemaining((prev) => (prev > 1000 ? prev - 1000 : 0));
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [leagueData, timeRemaining]);
+
+    const formatTime = (ms) => {
+        const hours = String(Math.floor(ms / (1000 * 60 * 60))).padStart(2, '0');
+        const minutes = String(Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+        const seconds = String(Math.floor((ms % (1000 * 60)) / 1000)).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    };
+
+    // Fetch players from API
+    const fetchPlayers = async () => {
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/player`);
+            if (response.data && !response.data.error) {
+                setPlayers(response.data.data || []);
+                console.log("Players:", response.data.data);
+
+
+                // // Check if the current user is the creator of the league
+                // if (response.data.data[0].creator === user.email) {
+                //     setIsCreator(true);
+                // } else {
+                //     setIsCreator(false);
+                // }
+
+                // if (response.data.data[0].state === 'Scheduled') {
+                //     const startTime = new Date(response.data.data[0].start_date).getTime();
+                //     const now = Date.now();
+                //     setTimeRemaining(startTime - now > 0 ? startTime - now : 0);
+                // }
+            } else {
+                console.error("Failed to fetch league data:", response.data.message);
+            }
+
+
+        } catch (error) {
+            console.error('Failed to fetch players:', error);
+        }
+    };
+
+
+
+    const handlePick = (player) => {
+        setAutoPickList((prevList) => [...prevList, player]);
+    };
+
+    const filteredPlayers = players
+        .filter((player) =>
+            player.name.toLowerCase().includes(search.toLowerCase())
+        )
+        .sort((a, b) => {
+            if (sort === 'name') return a.name.localeCompare(b.name);
+            if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
+            return 0;
+        });
+
+
+    // const simulatedOrder = Array.from({ length: 20 }, (_, i) => `user${i + 1}@example.com`);
+    // const simulatedTeams = simulatedOrder.map((email, index) => ({
+    //     user_email: email,
+    //     team: {
+    //         team_name: `Team ${index + 1}`,
+    //         team_image_path: "https://via.placeholder.com/100", // Replace with actual URLs
+    //     },
+    // }));
+
+    const positionIcon = (position) => {
+        const positionStyles = {
+            Attacker: { bg: 'bg-[#D3E4FE]', text: 'F' },
+            Midfielder: { bg: 'bg-[#D5FDE1]', text: 'M' },
+            Defender: { bg: 'bg-[#F8E1FF]', text: 'D' },
+            Goalkeeper: { bg: 'bg-[#FEF9B6]', text: 'G' },
+        };
+
+        const { bg, text } = positionStyles[position] || { bg: 'bg-gray-500', text: '?' };
+
+        return (
+            <div
+                className={`${bg} w-7 h-7 text-black flex items-center justify-center text-sm my-4 rounded-full `}
+            >
+                {text}
+            </div>
+        );
+    };
+
+
+
     return (
         <div className="min-h-[88vh] flex flex-col my-16 text-white px-6 md:px-10 lg:px-16 xl:px-20 pb-10">
             {/* Admin Section */}
-            <div className="bg-[#1C1C1C] w-full rounded-xl shadow-lg p-6 mb-8 flex justify-between align-bottom relative">
-                <div className="flex flex-col space-y-2 w-2/3">
-                    <h2 className={`text-4xl font-bold ${exo2.className}`}>Admin</h2>
-                    <p className="text-gray-400">Actions only available to Admin.</p>
-                    {/* Invite Section */}
-                    <div className="flex space-x-4 mb-8">
-                        <input
-                            type="text"
-                            value="Invite via Link"
-                            className="bg-[#1C1C1C] w-2/3 px-4 py-3 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
-                        />
-                        <button className="fade-gradient py-3 px-6 rounded-full flex items-center space-x-2 ">
-                            <FaLink />
-                            <span>Copy Link</span>
+            {isCreator ? (
+                <div className="bg-[#1C1C1C] w-full rounded-xl shadow-lg p-6 mb-8 flex justify-between align-bottom relative">
+                    <div className="flex flex-col space-y-2 w-2/3">
+                        <h2 className={`text-4xl font-bold ${exo2.className}`}>Admin</h2>
+                        <p className="text-gray-400">Actions only available to Admin.</p>
+                        {/* Invite Section */}
+                        <div className="flex space-x-4 mb-8 items-center">
+                            <div className='text-white mr-1'>Invite Code:</div>
+                            <div
+                                className="bg-[#303030] w-1/2 px-4 py-2 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
+                            >{leagueData?.leagueID?.invite_code}</div>
+                            <button
+                                className="fade-gradient py-2 px-6 rounded-full flex items-center space-x-2"
+                                onClick={() => {
+                                    const inviteCode = leagueData?.leagueID?.invite_code || "";
+                                    if (inviteCode) {
+                                        navigator.clipboard
+                                            .writeText(inviteCode)
+                                            .then(() => {
+                                                addAlert("Invite code copied to clipboard!", "success");
+                                            })
+                                            .catch((error) => {
+                                                console.error("Failed to copy invite code:", error);
+                                                addAlert("Failed to copy invite code. Please try again.", "error");
+                                            });
+                                    } else {
+                                        addAlert("No invite code available to copy.", 'error');
+                                    }
+                                }}
+                            >
+                                <FaLink />
+                                <span>Copy Code</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex space-x-4 absolute bottom-0 right-0 p-6">
+                        <button className="bg-[#FF8A00] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
+                            <FaPlay />
+                            <span>Start Draft</span>
+                        </button>
+                        <button className="bg-[#333333] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
+                            <FaCog />
+                            <span>League Settings</span>
                         </button>
                     </div>
                 </div>
-
-                <div className="flex space-x-4 absolute bottom-0 right-0 p-6">
-                    <button className="bg-[#FF8A00] py-3 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
-                        <FaPlay />
-                        <span>Start Draft</span>
-                    </button>
-                    <button className="bg-[#333333] py-3 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
-                        <FaCog />
-                        <span>League Settings</span>
-                    </button>
-                </div>
-            </div>
+            )
+                :
+                (
+                    <h1 className={`text-4xl font-bold ${exo2.className} mb-8`}>Pre-Draft Page</h1>
+                )
+            }
 
 
 
             {/* Drafting Info Section */}
             <div className="flex justify-between mb-8">
-                <div className='flex space-x-4 w-1/2 pr-4 border-r border-[#404040]'>
-                    <div className='flex flex-col space-y-4 w-3/5'>
-                        <div className="bg-[#333333] px-4 py-4 rounded-lg text-center">
-                            <p className="text-lg">Note: The Drafting has not yet started</p>
-                        </div>
-                        <div className="flex justify-between space-x-4">
-                            <div className="bg-[#1C1C1C] w-1/2 p-4 text-center border border-[#FF8A00] rounded-lg hover:bg-[#444444]">List View</div>
-                            <div className="bg-[#1C1C1C] w-1/2 p-4 rounded-lg text-center hover:bg-[#444444]">Pitch View</div>
-                        </div>
+                <div className="flex flex-col space-y-4 w-1/3 pr-4 border-r border-[#404040]">
+                    <div className="bg-[#333333] px-4 py-4 rounded-lg text-center">
+                        {leagueData?.state === 'Manual' && (
+                            <p className="text-base">The draft is set to manual and will be started by the admin.</p>
+                        )}
+                        {leagueData?.state === 'Scheduled' && timeRemaining > 0 && (
+                            <p className="text-base">
+                                The draft is scheduled and will start on <br />
+                                {new Date(leagueData?.start_date).toLocaleString(undefined, {
+                                    weekday: 'long', // Show full day name (e.g., Monday)
+                                    year: 'numeric',
+                                    month: 'long', // Show full month name (e.g., December)
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                })}
+                                .
+                            </p>
+                        )}
+                        {leagueData?.state === 'In Process' && (
+                            <p className="text-lg">The draft is currently in progress.</p>
+                        )}
+                        {leagueData?.state === 'Ended' && (
+                            <p className="text-lg">The draft has ended.</p>
+                        )}
                     </div>
 
-                    <div className="bg-[#333333] px-8 py-4 rounded-lg text-center w-2/5">
-                        <p className="text-2xl">Time Remaining</p>
-                        <p className="text-5xl text-white mt-2">05:00 min</p>
+                    <div className="bg-[#333333] px-8 py-4 rounded-lg text-center">
+                        {leagueData?.state === 'Manual' && (
+                            <>
+                                <p className="text-2xl">Draft Type</p>
+                                <p className="text-5xl text-white mt-2">Manual</p>
+                            </>
+                        )}
+                        {leagueData?.state === 'Scheduled' && (
+                            <>
+                                <p className="text-2xl">Time Remaining</p>
+                                <p className="text-5xl text-white mt-2">{formatTime(timeRemaining)}</p>
+                            </>
+                        )}
+                        {leagueData?.state === 'In Process' && (
+                            <>
+                                <p className="text-2xl">Draft Status</p>
+                                <p className="text-5xl text-white mt-2">{leagueData?.state}</p>
+                            </>
+                        )}
+                        {leagueData?.state === 'Ended' && (
+                            <>
+                                <p className="text-2xl">Draft Status</p>
+                                <p className="text-5xl text-white mt-2">{leagueData?.state}</p>
+                            </>
+                        )}
                     </div>
                 </div>
 
-                <div className="flex flex-col space-y-2 w-1/2 pl-4">
-                    <div className='text-xl'>Draft Order:</div>
-                    <div className='flex gap-4 flex-wrap'>
-                        <div className="bg-[#1C1C1C] flex items-center justify-center text-center border border-[#FF8A00] w-1/6 rounded-lg hover:bg-[#444444]">Turn 1</div>
-                        <div className="bg-[#1C1C1C]  flex items-center justify-center text-center p-2 w-1/6 rounded-lg hover:bg-[#444444]">Turn 2</div>
-                        <div className="bg-[#1C1C1C] p-2 w-1/6 rounded-lg flex items-center justify-center text-center hover:bg-[#444444]">Turn 3</div>
-                        <div className="bg-[#1C1C1C] p-2 w-1/6 rounded-lg flex items-center justify-center text-center hover:bg-[#444444]">Turn 4</div>
-                        <div className="bg-[#1C1C1C] p-2 w-1/6 rounded-lg flex items-center justify-center text-center hover:bg-[#444444]">Turn 5</div>
-                        <div className="bg-[#1C1C1C] p-2 w-1/6 rounded-lg flex items-center justify-center text-center hover:bg-[#444444]">Turn 5</div>
-                        <div className="bg-[#1C1C1C] p-2 w-1/6 rounded-lg flex items-center justify-center text-center hover:bg-[#444444]">Turn 5</div>
-                        <div className="bg-[#1C1C1C] p-2 w-1/6 rounded-lg flex items-center justify-center text-center hover:bg-[#444444]">Turn 5</div>
-                        <div className="bg-[#1C1C1C] p-2 w-1/6 rounded-lg flex items-center justify-center text-center hover:bg-[#444444]">Turn 5</div>
-                        <div className="bg-[#1C1C1C] p-2 w-1/6 rounded-lg flex items-center justify-center text-center hover:bg-[#444444]">Turn 5</div>
+                <div className="flex flex-col space-y-2 w-2/3 pl-4">
+                    <div className={`flex text-xl items-center ${exo2.className}`}>Draft Order:<span className='text-base ml-2 text-gray-400'>{`(Round 1 order)`}</span></div>
+                    <div className="overflow-x-auto pb-2">
+                        <div className="flex gap-4 min-w-max">
+                            {leagueData?.order.map((email, index) => {
+                                // Find the team corresponding to the current email in the order
+                                const teamData = leagueData?.teams.find((team) => team.user_email === email);
+
+                                return (
+                                    <div
+                                        key={index}
+                                        className="bg-[#1C1C1C] flex flex-col items-center justify-center text-center h-[140px] w-[200px] rounded-lg hover:bg-[#444444]"
+                                    >
+                                        {teamData ? (
+                                            <>
+                                                <p className="text-sm text-[#FF8A00] mb-2">{`Turn ${index + 1}`}</p>
+                                                {/* Show the team logo */}
+                                                {teamData.team?.team_image_path && (
+                                                    <img
+                                                        src={teamData.team.team_image_path}
+                                                        alt={teamData.team.team_name}
+                                                        className="w-14 h-14 rounded-lg mb-2"
+                                                    />
+                                                )}
+                                                {/* Show the team name */}
+                                                <p className="text-sm">{teamData.team?.team_name || "Unnamed Team"}</p>
+                                            </>
+                                        ) : (
+                                            <p>No Team Found</p>
+                                        )}
+                                    </div>
+
+                                );
+                            })}
+                        </div>
                     </div>
+                    <p className='text-sm text-gray-400'>* After every round draft order will be reversed.</p>
                 </div>
+
 
             </div>
 
             {/* Main Draft Section */}
-            <div className="grid grid-cols-4 gap-8">
-                {/* Players - Take up half of the screen */}
+            <div className="grid grid-cols-5 gap-8">
+                {/* Players Section */}
+                <div className="col-span-3 bg-[#1C1C1C] rounded-3xl p-6 h-[500px] ">
+                    <div className='flex justify-between'>
+                        <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-2`}>
+                            Players
+                        </h3>
+                        {/* Search, Filter, and Sort */}
+                        <div className="flex gap-2 mb-2">
+                            <select
+                                value={sort}
+                                onChange={(e) => setSort(e.target.value)}
+                                className="p-2 rounded-lg bg-[#333333] text-white text-sm"
+                            >
+                                <option value="name">Sort by Name</option>
+                                <option value="rating">Sort by Rating</option>
+                            </select>
+                            <select
+                                value={filter}
+                                onChange={(e) => setFilter(e.target.value)}
+                                className="p-2 rounded-lg bg-[#333333] text-white text-sm"
+                            >
+                                <option value="">Filter by Position</option>
+                                <option value="forward">Forward</option>
+                                <option value="midfielder">Midfielder</option>
+                                <option value="defender">Defender</option>
+                                <option value="goalkeeper">Goalkeeper</option>
+                            </select>
+                            <input
+                                type="text"
+                                placeholder="Search by name..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="p-2 rounded-lg bg-[#333333] text-white text-sm"
+                            />
+                        </div>
+                    </div>
+                    {/* Table */}
+                    <div className="relative w-full max-h-[420px] overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]">
+                        {/* Scrollable Wrapper */}
+                        <div className="overflow-x-auto overflow-y-auto max-h-[420px] scrollbar">
+                            <table className="table-auto w-full text-left text-white">
+                                {/* Table Header */}
+                                <thead className="bg-[#2f2f2f] sticky top-0 z-10">
+                                    <tr className="text-center">
+                                        <th className="p-2 max-w-[100px]">Name</th>
+                                        <th className="p-2">Position</th>
+                                        <th className="p-2">Rating</th>
+                                        <th className="p-2 sticky right-0 z-20">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className='text-sm'>
+                                    {filteredPlayers.map((player) => (
+                                        <tr key={player.id} className="border-b border-[#333333] text-center items-center justify-center">
+                                            <td className="p-2 max-w-[100px] text-left truncate">
+                                                <div className="flex items-center space-x-2">
+                                                    {player.team_image_path && (
+                                                        <img
+                                                            src={player.team_image_path}
+                                                            alt={player.team_name || "Team Logo"}
+                                                            className="w-10 h-10 rounded-lg"
+                                                        />
+                                                    )}
+                                                    <div className="overflow-hidden">
+                                                        <p className="font-bold truncate">{player.common_name}</p>
+                                                        <p className="text-xs text-gray-400 truncate">{player.team_name}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className='h-full flex justify-center items-center' style={{ verticalAlign: "middle" }}>{positionIcon(player.position_name)}</td>
+                                            <td className="p-2">{player.rating}</td>
+                                            <td className="p-2 sticky right-0 bg-[#1C1C1C]">
+                                                <button
+                                                    className="bg-[#FF8A00] text-white px-3 py-1 rounded-lg hover:bg-[#e77d00]"
+                                                    onClick={() => handlePick(player)}
+                                                >
+                                                    Pick
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+                {/* Auto Pick List Section */}
                 <div className="col-span-2 bg-[#1C1C1C] rounded-3xl p-6 h-[500px]">
-                    <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>Players</h3>
-                    <div className="h-[85%] overflow-auto flex flex-col space-y-2">
-                        {[...Array(20)].map((_, index) => (
-                            <div key={index} className="bg-[#333333] py-3 px-4 rounded-lg">Player {index + 1}</div>
-                        ))}
-                    </div>
-                </div>
+                    <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>
+                        Auto Pick List
+                    </h3>
+                    {autoPickList.length > 0 ?
+                        <div className="h-[85%] overflow-auto flex flex-col space-y-2">
 
-                {/* Auto Pick List */}
-                <div className="bg-[#1C1C1C] rounded-3xl p-6 h-[500px]">
-                    <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>Auto Pick List</h3>
-                    <div className="h-[85%] overflow-auto flex flex-col space-y-2">
-                        {[...Array(10)].map((_, index) => (
-                            <div key={index} className="bg-[#333333] py-3 px-4 rounded-lg">Auto Pick {index + 1}</div>
-                        ))}
-                    </div>
-                </div>
+                            {autoPickList.map((player, index) => (
+                                <div key={index} className="bg-[#333333] py-3 px-4 rounded-lg">
+                                    {player.name}
+                                </div>
+                            ))}
 
-                {/* Picks */}
-                <div className="bg-[#1C1C1C] rounded-3xl p-6 h-[500px]">
-                    <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>Picks</h3>
-                    <div className="h-[85%] overflow-auto flex flex-col space-y-2">
-                        {[...Array(5)].map((_, index) => (
-                            <div key={index} className="bg-[#333333] py-3 px-4 rounded-lg">Pick {index + 1}</div>
-                        ))}
-                    </div>
+                        </div>
+                        : (
+                            <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2">
+                                <div className="text-gray-400 text-center">No players selected for auto pick.</div>
+                            </div>
+                        )}
                 </div>
             </div>
-
-
-        </div>
+        </div >
     );
 };
 

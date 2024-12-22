@@ -251,10 +251,10 @@ const Dashboard = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4 md:pb-2 z-40 sm:mt-3">
                   {!showUnpaid ? (
                     <div className="flex space-x-2 md:space-x-4">
-                      <button className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 md:py-2 lg:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
+                      <Link href={"/league-settings?leagueID=" + selectedLeague._id} className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 md:py-2 lg:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
                         <FaCog className="text-sm md:text-base lg:text-lg xl:text-xl" />
                         <span>Configurations</span>
-                      </button>
+                      </Link>
                       <Link href={"/drafting?leagueID=" + selectedLeague._id} className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 lg:py-2 md:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
                         <FaDraft2Digital className="text-sm md:text-base lg:text-lg xl:text-xl" />
                         <span>Drafting</span>
@@ -279,34 +279,36 @@ const Dashboard = () => {
                       />
                     </div>
                   )} */}
-                  <div ref={dropdownRef} className="relative w-full sm:w-48 md:w-56 xl:w-64">
-                    {/* Dropdown Button */}
-                    <button
-                      onClick={() => setDropdownOpen(!dropdownOpen)}
-                      className="w-full bg-[#070E13] border border-[#484848] rounded-lg px-2 sm:px-4 lg:px-3 py-1 sm:py-2 lg:py-2 text-left text-sm lg:text-sm xl:text-base flex justify-between items-center"
-                    >
-                      <span>
-                        {selectedLeague ? selectedLeague.league_name : "Select League"}
-                      </span>
-                      <FaChevronDown />
-                    </button>
+                  {leagues && leagues.length > 1 && (
+                    <div ref={dropdownRef} className="relative w-full sm:w-48 md:w-56 xl:w-64">
+                      {/* Dropdown Button */}
+                      <button
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        className="w-full bg-[#070E13] border border-[#484848] rounded-lg px-2 sm:px-4 lg:px-3 py-1 sm:py-2 lg:py-2 text-left text-sm lg:text-sm xl:text-base flex justify-between items-center"
+                      >
+                        <span>
+                          {selectedLeague ? selectedLeague.league_name : "Select League"}
+                        </span>
+                        <FaChevronDown />
+                      </button>
 
-                    {/* Dropdown Menu */}
-                    {dropdownOpen && (
-                      <div className="absolute w-full bg-[#0C1922] border border-[#484848] rounded-lg mt-2 z-10">
-                        {leagues &&
-                          leagues.map((league) => (
-                            <div
-                              key={league._id}
-                              onClick={() => handleLeagueChange(league)}
-                              className="px-4 py-3 hover:bg-[#FF8A00A3] cursor-pointer text-sm lg:text-sm xl:text-base"
-                            >
-                              {league.league_name}
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  </div>
+                      {/* Dropdown Menu */}
+                      {dropdownOpen && (
+                        <div className="absolute w-full bg-[#0C1922] border border-[#484848] rounded-lg mt-2 z-10">
+                          {leagues &&
+                            leagues.map((league) => (
+                              <div
+                                key={league._id}
+                                onClick={() => handleLeagueChange(league)}
+                                className="px-4 py-3 hover:bg-[#FF8A00A3] cursor-pointer text-sm lg:text-sm xl:text-base"
+                              >
+                                {league.league_name}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
