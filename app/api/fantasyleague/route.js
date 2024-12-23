@@ -41,7 +41,7 @@ export const POST = async (req, res) => {
 
     //create first team
     if (payload.teamData) {
-      const PickList = (await Player.find().sort({ rating: -1 })).map(i => i._id);
+      // const PickList = (await Player.find().sort({ rating: -1 })).map(i => i._id);
       const teamObj = {
         team_name: payload.teamData.teamName,
         team_image_path: payload.teamData.teamLogo,
@@ -49,7 +49,7 @@ export const POST = async (req, res) => {
         ground_image_path: payload.teamData.selectedGround,
         userID: new mongoose.Types.ObjectId(payload.teams[0].userID),
         user_email: payload.teams[0].user_email,
-        pick_list: PickList
+        // pick_list: PickList
       }
       userTeam = await FantasyTeam.create(teamObj);
     }
@@ -88,6 +88,7 @@ export const POST = async (req, res) => {
 
     }
   } catch (err) {
+    console.log(err);
     return NextResponse.json({
       error: true,
       err: err.message,

@@ -1,6 +1,7 @@
 IN PROCESS
 
-
 NEXT
-populate thing on players in a team
 put check on 3 players per club
+pick from pick list if time has run out
+ratings from sportmonks
+make match schedule after draft is done

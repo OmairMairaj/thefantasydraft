@@ -22,7 +22,7 @@ const Drafting = () => {
     const [isCreator, setIsCreator] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState(null);
     const [players, setPlayers] = useState([]);
-    const [autoPickList, setAutoPickList] = useState([]);
+    const [autoPickList, setAutoPickList] = useState(null);
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('name'); // Default sorting by name
     const [filter, setFilter] = useState('');
@@ -93,6 +93,10 @@ const Drafting = () => {
         }
     }, [leagueData, timeRemaining]);
 
+    useEffect(() => {
+        fetchPickList()
+    }, [leagueData]);
+
     const formatTime = (ms) => {
         const hours = String(Math.floor(ms / (1000 * 60 * 60))).padStart(2, '0');
         const minutes = String(Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
@@ -131,10 +135,50 @@ const Drafting = () => {
         }
     };
 
+        // Fetch players from API
+        const fetchPickList = async () => {
+            try {
+                let teamID = ""
+                leagueData.teams.map((item)=>{if(item.user_email===user.email) teamID=item.team._id});
+                const link = process.env.NEXT_PUBLIC_BACKEND_URL+"fantasyteam/"+teamID+"/picklist"
+                const response = await axios.get(link);
+                if (response.data && !response.data.error) {
+                    setAutoPickList(response.data.data || []);
+                    console.log("PickList:", response.data.data);
+                 } else {
+                    console.error("Failed to fetch league data:", response.data.message);
+                }    
+    
+            } catch (error) {
+                console.error('Failed to fetch players:', error);
+            }
+        };
+
 
 
     const handlePick = (player) => {
         setAutoPickList((prevList) => [...prevList, player]);
+    };
+
+    const removeFromPickList = (item) => {
+        let array = autoPickList.filter(obj => obj._id !== item._id);
+        console.log(array)
+        setAutoPickList(array)
+    };
+
+    const saveAutoPickList = async () => {
+        try {
+            let teamID = ""
+            leagueData.teams.map((item)=>{if(item.user_email===user.email) teamID=item.team._id});
+            const link = process.env.NEXT_PUBLIC_BACKEND_URL+"fantasyteam/"+teamID+"/picklist"
+            const pickList = autoPickList.map(i=>i._id)
+            const response = await axios.post(link,{id_array:pickList});
+            // console.log(response);
+            if (response.data && !response.data.error) addAlert("Auto Pick List have been saved", "success");
+            else addAlert("Auto Pick List can not be saved. Please try again", "error");
+        } catch (error) {
+            console.error('Failed to fetch players:', error);
+        }
     };
 
     const filteredPlayers = players
@@ -195,8 +239,9 @@ const Drafting = () => {
                             <button
                                 className="fade-gradient py-2 px-6 rounded-full flex items-center space-x-2"
                                 onClick={() => {
-                                    const inviteCode = leagueData?.leagueID?.invite_code || "";
-                                    if (inviteCode) {
+                                    let inviteCode
+                                    if (leagueData && leagueData.leagueID && leagueData.leagueID.invite_code ) {   
+                                        inviteCode = process.env.NEXT_PUBLIC_FRONTEND_URL+"join-league-process?code="+leagueData.leagueID.invite_code;
                                         navigator.clipboard
                                             .writeText(inviteCode)
                                             .then(() => {
@@ -212,7 +257,7 @@ const Drafting = () => {
                                 }}
                             >
                                 <FaLink />
-                                <span>Copy Code</span>
+                                <span>Copy Invite Link</span>
                             </button>
                         </div>
                     </div>
@@ -394,9 +439,9 @@ const Drafting = () => {
                                         <tr key={player.id} className="border-b border-[#333333] text-center items-center justify-center">
                                             <td className="p-2 max-w-[100px] text-left truncate">
                                                 <div className="flex items-center space-x-2">
-                                                    {player.team_image_path && (
+                                                    {player.image_path && (
                                                         <img
-                                                            src={player.team_image_path}
+                                                            src={player.image_path}
                                                             alt={player.team_name || "Team Logo"}
                                                             className="w-10 h-10 rounded-lg"
                                                         />
@@ -430,15 +475,18 @@ const Drafting = () => {
 
                 {/* Auto Pick List Section */}
                 <div className="col-span-2 bg-[#1C1C1C] rounded-3xl p-6 h-[500px]">
+                    <button onClick={()=>{saveAutoPickList()}}>Save Changes</button>
                     <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>
                         Auto Pick List
                     </h3>
-                    {autoPickList.length > 0 ?
+                    {autoPickList ?
+                    autoPickList.length > 0 ?
                         <div className="h-[85%] overflow-auto flex flex-col space-y-2">
 
                             {autoPickList.map((player, index) => (
                                 <div key={index} className="bg-[#333333] py-3 px-4 rounded-lg">
-                                    {player.name}
+                                    <div>{player.name}</div>
+                                    <button onClick={()=>{removeFromPickList(player)}}>Remove</button>
                                 </div>
                             ))}
 
@@ -447,7 +495,13 @@ const Drafting = () => {
                             <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2">
                                 <div className="text-gray-400 text-center">No players selected for auto pick.</div>
                             </div>
-                        )}
+                        )
+                        : (
+                            <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2">
+                                <div className="text-gray-400 text-center">Fetching auto pick list...</div>
+                            </div>
+                        )
+                        }
                 </div>
             </div>
         </div >

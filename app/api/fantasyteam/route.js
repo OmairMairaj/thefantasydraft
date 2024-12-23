@@ -25,8 +25,8 @@ export const POST = async (req, res) => {
     const payload = await req.json();
     payload.userID = new mongoose.Types.ObjectId(payload.userID);
     payload.leagueID = new mongoose.Types.ObjectId(payload.leagueID);
-    const PickList = (await Player.find().sort({ rating: -1 })).map(i => i._id);
-    payload.pick_list = PickList
+    // const PickList = (await Player.find().sort({ rating: -1 })).map(i => i._id);
+    // payload.pick_list = PickList
     const newFantasyTeam = await FantasyTeam.create(payload);
     return NextResponse.json({ error: false, data: newFantasyTeam });
   } catch (err) {

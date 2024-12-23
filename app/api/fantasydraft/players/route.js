@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { sendMultipleEmails } from "../../../../lib/mail";
 import { TfiControlShuffle } from "react-icons/tfi";
 import { ConnectionStates } from "mongoose";
+import mongoose from "mongoose";
 
 export const GET = async (req) => {
   try {
@@ -35,9 +36,9 @@ export const GET = async (req) => {
     // }, {});
 
     // Filter out selected players of this team
-    let remainingPlayers = allPlayers.filter(player => !selectedPlayers.some(selected => selected.playerID === player.id));
+    let remainingPlayers = allPlayers.filter(player => !selectedPlayers.some(selected => selected.playerID === player._id));
     // Filter out selected players of other teams
-    remainingPlayers = remainingPlayers.filter(player => !draft.players_selected.some(selected => selected === player.id));
+    remainingPlayers = remainingPlayers.filter(player => !draft.players_selected.some(selected => selected === player._id));
 
     // console.log(draft.squad_configurations)
     // Apply maximum position limits
@@ -93,7 +94,7 @@ export const POST = async (req, res) => {
         message: "It is not your turn right now to pick a player."
       });
     }
-    if (draft.players_selected.indexOf(payload.playerObj.playerID) !== -1) {
+    if (draft.players_selected.indexOf(payload.playerObj._id) !== -1) {
       return NextResponse.json({
         error: true,
         message: "This player is already selected by another user."
@@ -104,17 +105,15 @@ export const POST = async (req, res) => {
     let team = await FantasyTeam.findOne({ _id: teamID });
     // console.log(team);
     let playerObj = {
-      playerID: payload.playerObj.playerID,
-      player_name: payload.playerObj.player_name,
+      player: new mongoose.Types.ObjectId(payload.playerObj._id),
       in_team: payload.playerObj.in_team,
       captain: payload.playerObj.captain,
-      vice_captain: payload.playerObj.vice_captain,
-      position_name: payload.playerObj.position_name
+      vice_captain: payload.playerObj.vice_captain
     }
     // Updating Team
     team.players.push(playerObj);
     // Updating Draft
-    draft.players_selected.push(payload.playerObj.playerID)
+    draft.players_selected.push(payload.playerObj._id)
     let index = draft.order.indexOf(draft.turn)
     if (index == -1) { throw err; }
     else if (index == (draft.order.length - 1)) {
@@ -126,11 +125,11 @@ export const POST = async (req, res) => {
     }
 
     // Checking for draft end
-    if((draft.draft_round-1)===draft.squad_players){
+    if ((draft.draft_round - 1) === draft.squad_players) {
       draft.state = "Ended";
       draft.start_date = null;
       draft.turn = null;
-      draft.draft_round = 0 
+      draft.draft_round = 0
     }
 
     team.save();

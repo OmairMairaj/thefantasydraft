@@ -23,7 +23,7 @@ export const POST = async (req, res) => {
     let leagueData = await FantasyLeague.findOne({ invite_code: payload.leagueData.inviteCode });
     let draftData = await FantasyDraft.findOne({ _id: leagueData.draftID });
     if (payload.teamData) {
-      const PickList = (await Player.find().sort({ rating: -1 })).map(i => i._id);
+      // const PickList = (await Player.find().sort({ rating: -1 })).map(i => i._id);
       const teamObj = {
         team_name: payload.teamData.teamName,
         team_image_path: payload.teamData.teamLogo,
@@ -32,7 +32,7 @@ export const POST = async (req, res) => {
         userID: new mongoose.Types.ObjectId(payload.userData._id),
         leagueID: new mongoose.Types.ObjectId(leagueData._id),
         user_email: payload.userData.email,
-        pick_list: PickList
+        // pick_list: PickList
       }
       userTeam = await FantasyTeam.create(teamObj);
     }
