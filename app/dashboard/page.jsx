@@ -108,6 +108,12 @@ const Dashboard = () => {
         setUser(userData.user);
         fetchLeaguesByUser(userData.user.email)
         console.log(userData.user.email);
+
+        // Check if selectedLeagueID is in sessionStorage
+        const storedLeagueID = sessionStorage.getItem("selectedLeagueID");
+        if (storedLeagueID) {
+          setSelectedLeague({ _id: storedLeagueID }); // Temporarily set league with just ID
+        }
       }
     }
   }, []);
@@ -185,10 +191,25 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (leagues) {
-      setSelectedLeague(leagues[0])
+    // If leagues are loaded and a stored league ID exists, set selectedLeague
+    if (leagues && leagues.length > 0) {
+      const storedLeagueID = sessionStorage.getItem("selectedLeagueID");
+      const storedLeague = leagues.find((league) => league._id === storedLeagueID);
+
+      if (storedLeague) {
+        setSelectedLeague(storedLeague);
+      } else {
+        setSelectedLeague(leagues[0]); // Default to the first league if no match
+      }
     }
-  }, [leagues])
+  }, [leagues]);
+
+  useEffect(() => {
+    // Save selectedLeague to sessionStorage whenever it changes
+    if (selectedLeague) {
+      sessionStorage.setItem("selectedLeagueID", selectedLeague._id);
+    }
+  }, [selectedLeague]);
 
   const markPaymentAsCompleted = (leagueDetails) => {
     const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague/payment";
@@ -230,7 +251,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-[88vh] flex flex-col my-8 items-center text-white px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-10">
       <div className="relative w-full">
-        {selectedLeague && !showEmptyView && (
+        {leagues && selectedLeague && !showEmptyView && (
           <div className="flex flex-col md:flex-row md:justify-between w-full relative space-y-2 md:space-y-0">
             <div className="w-full flex flex-col">
               <div className="w-full flex flex-col lg:flex-row lg:items-end lg:justify-between fade-gradient-no-hover cursor-default px-4 md:px-6 py-4 rounded-xl shadow-md mb-6">

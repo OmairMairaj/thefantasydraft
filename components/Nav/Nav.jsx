@@ -39,7 +39,7 @@ const Nav = () => {
 
   React.useEffect(() => {
     if (
-      (pathname == "/dashboard" || pathname == "/profile") &&
+      (pathname != "/" && pathname != "/how-to-play" && pathname != "/contact" && pathname != "/signup") &&
       user === "nothing"
     ) {
       router.push("/login");

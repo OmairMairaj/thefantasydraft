@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^17.0.0",
     "@nestjs/schedule": "^4.1.1",
     "@next/font": "^14.2.14",
     "axios": "^1.7.7",

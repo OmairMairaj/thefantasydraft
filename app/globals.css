@@ -249,3 +249,12 @@ input:-ms-autofill {
 .scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #555; /* Thumb Hover Effect */
 }
+
+
+.draggable-row {
+  cursor: grab;
+}
+
+.draggable-row:active {
+  cursor: grabbing;
+}
