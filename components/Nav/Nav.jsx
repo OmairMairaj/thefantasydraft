@@ -101,7 +101,7 @@ const Nav = () => {
             href="/contact"
             className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
           >
-            CONTACT
+            CONTACT ME
           </Link>
         </div>
       ) : (
