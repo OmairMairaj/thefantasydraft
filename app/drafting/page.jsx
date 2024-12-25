@@ -6,7 +6,7 @@ import { Exo_2 } from 'next/font/google';
 import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink } from 'react-icons/fa';
 import { LuGrip } from "react-icons/lu";
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAlert } from '@/components/AlertContext/AlertContext';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -35,7 +35,7 @@ const Drafting = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [draftOrder, setDraftOrder] = useState(leagueData?.order || []);
     const [loading, setLoading] = useState(false);
-    const searchParams = useSearchParams();
+    // const router = useRouter();
     const { addAlert } = useAlert();
 
     useEffect(() => {
@@ -47,14 +47,18 @@ const Drafting = () => {
             console.error("User not found in session storage");
         }
 
-        // Extract leagueID from URL
-        const leagueIDFromURL = searchParams.get('leagueID');
-        if (leagueIDFromURL) {
-            setLeagueID(leagueIDFromURL);
-        } else {
-            console.error("League ID not found in URL");
+        // Extract leagueID from the URL using window.location
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const leagueIDFromURL = urlParams.get('leagueID');
+
+            if (leagueIDFromURL) {
+                setLeagueID(leagueIDFromURL);
+            } else {
+                console.error("League ID not found in URL");
+            }
         }
-    }, [searchParams]);
+    }, []);
 
     useEffect(() => {
         // Fetch league data if user and leagueID are available
