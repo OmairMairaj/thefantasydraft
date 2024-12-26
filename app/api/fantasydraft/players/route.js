@@ -8,39 +8,37 @@ import mongoose from "mongoose";
 
 export const GET = async (req) => {
   try {
-    await connectToDb();
     // Get parameters from URL
+    await connectToDb();
     const draftID = req.nextUrl.searchParams.get("draftID");
     const teamID = req.nextUrl.searchParams.get("teamID");
 
     // Get objects from DB
     let draft = await FantasyDraft.findOne({ _id: draftID });
-    console.log("draft")
-    console.log(draft)
-    let team = await FantasyTeam.findOne({ _id: teamID }).populate("pick_list");
-    // console.log("team")
-    // console.log(team)
-    const selectedPlayers = team.players;
-    // Get all Players from DB
-    let allPlayers = team.pick_list;
+    let team = await FantasyTeam.findOne({ _id: teamID }).populate("pick_list").populate("players.player");
+    let players = await Player.find({ _id: {$nin: team.pick_list} }).sort({"rating":-1});
+
+    // Process players
+    let allPlayers = team.pick_list.concat(players);
+    const selectedPlayers = team.players.map(i=>i.player);
+    
 
     // Extract selected players by position
     const selectedPositions = selectedPlayers.reduce((acc, player) => {
       acc[player.position_name] = (acc[player.position_name] || 0) + 1;
       return acc;
     }, {});
-    //  // Extract selected players by club
-    //  const selectedClubs = selectedPlayers.reduce((acc, player) => {
-    //   acc[player.club] = (acc[player.club] || 0) + 1;
-    //   return acc;
-    // }, {});
+     // Extract selected players by club
+     const selectedClubs = selectedPlayers.reduce((acc, player) => {
+      acc[player.teamID] = (acc[player.teamID] || 0) + 1;
+      return acc;
+    }, {});
 
     // Filter out selected players of this team
     let remainingPlayers = allPlayers.filter(player => !selectedPlayers.some(selected => selected.playerID === player._id));
     // Filter out selected players of other teams
     remainingPlayers = remainingPlayers.filter(player => !draft.players_selected.some(selected => selected === player._id));
 
-    // console.log(draft.squad_configurations)
     // Apply maximum position limits
     if (!draft.squad_configurations) draft.squad_configurations = {
       goalkeepers: 2,
@@ -58,11 +56,11 @@ export const GET = async (req) => {
       return (selectedPositions[player.position_name] || 0) < positionLimits[player.position_name];
     });
 
-    // // Apply maximum club limits
-    // const clubLimit = 3;
-    // remainingPlayers = remainingPlayers.filter(player => {
-    //   return (selectedClubs[player.club] || 0) < clubLimit;
-    // });
+    // Apply maximum club limits
+    const clubLimit = draft.max_players_per_club || 3;
+    remainingPlayers = remainingPlayers.filter(player => {
+      return (selectedClubs[player.teamID] || 0) < clubLimit;
+    });
 
     return NextResponse.json({ error: false, data: remainingPlayers, });
 

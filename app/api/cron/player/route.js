@@ -10,12 +10,13 @@ export async function GET(req) {
     try {
         const seasonID = process.env.NEXT_PUBLIC_SEASON_ID
         const api_url = "https://api.sportmonks.com/v3/football/players/"
-        const url_options = "?include=nationality;position;detailedPosition;teams;"
+        const url_options = "?include=nationality;position;detailedPosition;teams;statistics.details;"
         const agent = new https.Agent({
             rejectUnauthorized: false,
         });
         axios.defaults.httpsAgent = agent
         let data_to_insert = [];
+        await connectToDb();
         const teams = await Team.find({})
         // console.log(teams)
         const playerIDs = []
@@ -49,8 +50,16 @@ export async function GET(req) {
                 });
             }
             let player_data = response.data.data;
-            console.log("player_data")
-            console.log(player_data)
+            // let rating = 
+            // let rating_sum = 0;
+            // let rating_count = 0;
+            // console.log("player_data.statistics")
+            // console.log(player_data.statistics)
+            // console.log("player_data.statistics.filter(i => i.type_id === 118)")
+            // console.log(player_data.statistics.filter(i => i.type_id === 118))
+            // if (rating_count !== 0) rating = rating_sum / rating_count;
+            // console.log("player_data")
+            // console.log(player_data)
             const query = {
                 "id": player_data?.id,
                 "name": player_data?.name,
@@ -64,17 +73,19 @@ export async function GET(req) {
                 "teamID": player?.teamID,
                 "team_name": player?.team_name,
                 "team_image_path": player?.team_image_path,
+                "rating": player_data?.statistics?.filter(i => i.season_id === 23614)[0]?.details?.filter(i => i.type_id === 118)[0]?.value?.average || 0,
                 "fpl": null,
                 "points": null,
             };
             data_to_insert.push(query);
             console.log(query.name);
+            console.log(query.rating);
         }
         console.log(data_to_insert.length);
         await connectToDb();
         const res = await Player.insertMany(data_to_insert, { ordered: false });
         return NextResponse.json({
-            res:res,
+            res: res,
             error: false,
             message: "done",
         });
