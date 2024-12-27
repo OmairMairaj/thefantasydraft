@@ -6,7 +6,7 @@ import { Exo_2 } from 'next/font/google';
 import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink } from 'react-icons/fa';
 import { LuGrip } from "react-icons/lu";
 import Link from 'next/link';
-// import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAlert } from '@/components/AlertContext/AlertContext';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -22,7 +22,7 @@ const Drafting = () => {
 
     const [user, setUser] = useState(null);
     const [leagueID, setLeagueID] = useState(null);
-    const [leagueData, setLeagueData] = useState(null);
+    const [draftData, setDraftData] = useState(null);
     const [isCreator, setIsCreator] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState(null);
     const [players, setPlayers] = useState([]);
@@ -33,9 +33,9 @@ const Drafting = () => {
     const [sort, setSort] = useState('name'); // Default sorting by name
     const [filter, setFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [draftOrder, setDraftOrder] = useState(leagueData?.order || []);
+    const [draftOrder, setDraftOrder] = useState(draftData?.order || []);
     const [loading, setLoading] = useState(false);
-    // const router = useRouter();
+    const router = useRouter();
     const { addAlert } = useAlert();
 
     useEffect(() => {
@@ -63,20 +63,20 @@ const Drafting = () => {
     useEffect(() => {
         // Fetch league data if user and leagueID are available
         if (user && leagueID) {
-            fetchLeagueData();
+            fetchdraftData();
             fetchPlayers();
         }
     }, [user, leagueID]);
 
-    const fetchLeagueData = async () => {
+    const fetchdraftData = async () => {
         setLoading(true);
         try {
             const response = await axios.get(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?leagueID=${leagueID}`
             );
             if (response.data && !response.data.error) {
-                setLeagueData(response.data.data[0]);
-                console.log(response.data.data[0]);
+                setDraftData(response.data.data[0]);
+                console.log("draftData: ", response.data.data[0]);
 
 
                 // Check if the current user is the creator of the league
@@ -102,17 +102,17 @@ const Drafting = () => {
     };
 
     useEffect(() => {
-        if (leagueData?.state === 'Scheduled' && timeRemaining > 0) {
+        if (draftData?.state === 'Scheduled' && timeRemaining > 0) {
             const interval = setInterval(() => {
                 setTimeRemaining((prev) => (prev > 1000 ? prev - 1000 : 0));
             }, 1000);
             return () => clearInterval(interval);
         }
-    }, [leagueData, timeRemaining]);
+    }, [draftData, timeRemaining]);
 
     useEffect(() => {
-        if (leagueData) fetchPickList();
-    }, [leagueData]);
+        if (draftData) fetchPickList();
+    }, [draftData]);
 
     const formatTime = (ms) => {
         const hours = String(Math.floor(ms / (1000 * 60 * 60))).padStart(2, '0');
@@ -122,10 +122,10 @@ const Drafting = () => {
     };
 
     useEffect(() => {
-        if (leagueData?.order) {
-            setDraftOrder([...leagueData.order]); // Ensure it's a new array
+        if (draftData?.order) {
+            setDraftOrder([...draftData.order]); // Ensure it's a new array
         }
-    }, [leagueData]);
+    }, [draftData]);
 
     // Fetch players from API
     const fetchPlayers = async () => {
@@ -162,7 +162,7 @@ const Drafting = () => {
     const fetchPickList = async () => {
         try {
             let teamID = ""
-            leagueData.teams.map((item) => { if (item.user_email === user.email) teamID = item.team._id });
+            draftData.teams.map((item) => { if (item.user_email === user.email) teamID = item.team._id });
             const link = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyteam/" + teamID + "/picklist"
             const response = await axios.get(link);
             if (response.data && !response.data.error) {
@@ -198,7 +198,7 @@ const Drafting = () => {
     const saveAutoPickList = async () => {
         try {
             let teamID = ""
-            leagueData.teams.map((item) => { if (item.user_email === user.email) teamID = item.team._id });
+            draftData.teams.map((item) => { if (item.user_email === user.email) teamID = item.team._id });
             const link = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyteam/" + teamID + "/picklist"
             const pickList = autoPickList.map(i => i._id)
             const response = await axios.post(link, { id_array: pickList });
@@ -214,15 +214,17 @@ const Drafting = () => {
         }
     };
 
-    const debounce = (fn, delay) => {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => fn(...args), delay);
-        };
-    };
+    // const debounce = (fn, delay) => {
+    //     let timeout;
+    //     return (...args) => {
+    //         clearTimeout(timeout);
+    //         timeout = setTimeout(() => fn(...args), delay);
+    //     };
+    // };
 
-    const handleSearch = debounce((value) => setSearch(value), 300);
+    const handleSearch = (value) => {
+        setSearch(value);
+    }
 
     const filteredPlayers = players
         .filter((player) =>
@@ -233,7 +235,7 @@ const Drafting = () => {
         )
         .filter((player) =>
             // Filter by position if filter is set
-            !filter || player.position_name.toLowerCase() === filter.toLowerCase()
+            !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
         )
         .sort((a, b) => {
             if (sort === 'name') return a.name.localeCompare(b.name);
@@ -242,14 +244,14 @@ const Drafting = () => {
         });
 
 
-    const simulatedOrder = Array.from({ length: 20 }, (_, i) => `user${i + 1}@example.com`);
-    const simulatedTeams = simulatedOrder.map((email, index) => ({
-        user_email: email,
-        team: {
-            team_name: `Team ${index + 1}`,
-            team_image_path: "https://via.placeholder.com/100", // Replace with actual URLs
-        },
-    }));
+    // const simulatedOrder = Array.from({ length: 20 }, (_, i) => `user${i + 1}@example.com`);
+    // const simulatedTeams = simulatedOrder.map((email, index) => ({
+    //     user_email: email,
+    //     team: {
+    //         team_name: `Team ${index + 1}`,
+    //         team_image_path: "https://via.placeholder.com/100", // Replace with actual URLs
+    //     },
+    // }));
 
     const positionIcon = (position) => {
         const positionStyles = {
@@ -269,6 +271,20 @@ const Drafting = () => {
             </div>
         );
     };
+
+    useEffect(() => {
+        // Add or remove the "no-scroll" class to the body element based on modal state
+        if (isModalOpen) {
+            document.body.classList.add('no-scroll');
+        } else {
+            document.body.classList.remove('no-scroll');
+        }
+
+        // Cleanup when the component is unmounted
+        return () => {
+            document.body.classList.remove('no-scroll');
+        };
+    }, [isModalOpen]);
 
     const handleOrderSaveChanges = () => {
         // Call the function to update the draft order in the backend
@@ -298,6 +314,29 @@ const Drafting = () => {
         setAutoPickList(reorderedList); // Update state with new order
     };
 
+
+    const handleStart = async () => {
+        if (draftData && user) {
+            console.log("DraftID: ", draftData._id);
+            console.log("User Email: ", user.email);
+            try {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/startNow`, { draftID: draftData._id, user_email: user.email });
+                if (response.data && !response.data.error) {
+                    addAlert("Draft has been started", "success");
+                    setDraftData(response.data.data);
+                    console.log(response.data.data);
+                    router.push('/draft-start?draftID=' + draftData._id);
+                } else {
+                    addAlert(response.data.message, "error");
+                }
+            } catch (error) {
+                console.error('Failed to start draft:', error);
+            }
+
+        }
+    }
+
+
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <div className="min-h-[88vh] flex flex-col my-16 text-white px-6 md:px-10 lg:px-16 xl:px-20 pb-10">
@@ -312,13 +351,13 @@ const Drafting = () => {
                                 <div className='text-white mr-1'>Invite Code:</div>
                                 <div
                                     className="bg-[#303030] w-1/2 px-4 py-2 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
-                                >{leagueData?.leagueID?.invite_code}</div>
+                                >{draftData?.leagueID?.invite_code}</div>
                                 <button
                                     className="fade-gradient py-2 px-6 rounded-full flex items-center space-x-2"
                                     onClick={() => {
                                         let inviteCode
-                                        if (leagueData && leagueData.leagueID && leagueData.leagueID.invite_code) {
-                                            inviteCode = process.env.NEXT_PUBLIC_FRONTEND_URL + "join-league-process?code=" + leagueData.leagueID.invite_code;
+                                        if (draftData && draftData.leagueID && draftData.leagueID.invite_code) {
+                                            inviteCode = process.env.NEXT_PUBLIC_FRONTEND_URL + "join-league-process?code=" + draftData.leagueID.invite_code;
                                             navigator.clipboard
                                                 .writeText(inviteCode)
                                                 .then(() => {
@@ -340,7 +379,7 @@ const Drafting = () => {
                         </div>
 
                         <div className="flex space-x-4 absolute bottom-0 right-0 mb-6 px-6">
-                            <button className="bg-[#FF8A00] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
+                            <button onClick={() => handleStart()} className="bg-[#FF8A00] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
                                 <FaPlay />
                                 <span>Start Draft</span>
                             </button>
@@ -366,13 +405,13 @@ const Drafting = () => {
                         <div className="flex justify-between mb-8">
                             <div className="flex flex-col space-y-4 w-1/3 pr-4 border-r border-[#404040]">
                                 <div className="bg-[#333333] px-4 py-4 rounded-lg text-center">
-                                    {leagueData?.state === 'Manual' && (
+                                    {draftData?.state === 'Manual' && (
                                         <p className="text-base">The draft is set to manual and will be started by the admin.</p>
                                     )}
-                                    {leagueData?.state === 'Scheduled' && timeRemaining > 0 && (
+                                    {draftData?.state === 'Scheduled' && timeRemaining > 0 && (
                                         <p className="text-base">
                                             The draft is scheduled and will start on <br />
-                                            {new Date(leagueData?.start_date).toLocaleString(undefined, {
+                                            {new Date(draftData?.start_date).toLocaleString(undefined, {
                                                 weekday: 'long', // Show full day name (e.g., Monday)
                                                 year: 'numeric',
                                                 month: 'long', // Show full month name (e.g., December)
@@ -384,37 +423,37 @@ const Drafting = () => {
                                             .
                                         </p>
                                     )}
-                                    {leagueData?.state === 'In Process' && (
+                                    {draftData?.state === 'In Process' && (
                                         <p className="text-lg">The draft is currently in progress.</p>
                                     )}
-                                    {leagueData?.state === 'Ended' && (
+                                    {draftData?.state === 'Ended' && (
                                         <p className="text-lg">The draft has ended.</p>
                                     )}
                                 </div>
 
                                 <div className="bg-[#333333] px-8 py-4 rounded-lg text-center">
-                                    {leagueData?.state === 'Manual' && (
+                                    {draftData?.state === 'Manual' && (
                                         <>
                                             <p className="text-2xl">Draft Type</p>
                                             <p className="text-5xl text-white mt-2">Manual</p>
                                         </>
                                     )}
-                                    {leagueData?.state === 'Scheduled' && (
+                                    {draftData?.state === 'Scheduled' && (
                                         <>
                                             <p className="text-2xl">Time Remaining</p>
                                             <p className="text-5xl text-white mt-2">{formatTime(timeRemaining)}</p>
                                         </>
                                     )}
-                                    {leagueData?.state === 'In Process' && (
+                                    {draftData?.state === 'In Process' && (
                                         <>
                                             <p className="text-2xl">Draft Status</p>
-                                            <p className="text-5xl text-white mt-2">{leagueData?.state}</p>
+                                            <p className="text-5xl text-white mt-2">{draftData?.state}</p>
                                         </>
                                     )}
-                                    {leagueData?.state === 'Ended' && (
+                                    {draftData?.state === 'Ended' && (
                                         <>
                                             <p className="text-2xl">Draft Status</p>
-                                            <p className="text-5xl text-white mt-2">{leagueData?.state}</p>
+                                            <p className="text-5xl text-white mt-2">{draftData?.state}</p>
                                         </>
                                     )}
                                 </div>
@@ -429,9 +468,9 @@ const Drafting = () => {
                                 </div>
                                 <div className="overflow-x-auto pb-2 scrollbar">
                                     <div className="flex gap-4 min-w-max">
-                                        {leagueData?.order.map((email, index) => {
+                                        {draftData?.order.map((email, index) => {
                                             // Find the team corresponding to the current email in the order
-                                            const teamData = leagueData?.teams.find((team) => team.user_email === email);
+                                            const teamData = draftData?.teams.find((team) => team.user_email === email);
 
                                             return (
                                                 <div
@@ -684,7 +723,7 @@ const Drafting = () => {
                                                 className="space-y-2"
                                             >
                                                 {draftOrder.map((teamEmail, index) => {
-                                                    const teamData = leagueData?.teams.find(
+                                                    const teamData = draftData?.teams.find(
                                                         (team) => team.user_email === teamEmail
                                                     );
 

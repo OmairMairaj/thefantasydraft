@@ -129,8 +129,8 @@ p {
   /* z-index: -1; */
 }
 
-@media screen and (max-width: 640px){
-  .slick-dots{
+@media screen and (max-width: 640px) {
+  .slick-dots {
     position: relative !important;
     bottom: 0px !important;
   }
@@ -199,55 +199,64 @@ input:-ms-autofill {
 
 @keyframes slideUp {
   0% {
-      transform: translateY(100%);
-      opacity: 0;
+    transform: translateY(100%);
+    opacity: 0;
   }
+
   100% {
-      transform: translateY(0);
-      opacity: 1;
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
 @keyframes slideIn {
   0% {
-      transform: translateX(100%);
-      opacity: 0;
+    transform: translateX(100%);
+    opacity: 0;
   }
+
   100% {
-      transform: translateX(0);
-      opacity: 1;
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 
 @keyframes fadeOut {
   0% {
-      opacity: 1;
+    opacity: 1;
   }
+
   100% {
-      opacity: 0;
-      transform: translateY(100%);
+    opacity: 0;
+    transform: translateY(100%);
   }
 }
 
 
 .scrollbar {
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #888 transparent; /* For Firefox */
+  scrollbar-width: thin;
+  /* For Firefox */
+  scrollbar-color: #393939 transparent;
+  /* For Firefox */
+  /* transform: translateX(7px); */
 }
 
 /* Scrollbar for Webkit Browsers */
 .scrollbar::-webkit-scrollbar {
   height: 8px;
-  background-color: #222; /* Scrollbar Track */
+  background-color: #222;
+  /* Scrollbar Track */
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
-  background-color: #888; /* Scrollbar Thumb */
+  background-color: #888;
+  /* Scrollbar Thumb */
   border-radius: 4px;
 }
 
 .scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #555; /* Thumb Hover Effect */
+  background-color: #555;
+  /* Thumb Hover Effect */
 }
 
 
@@ -257,4 +266,28 @@ input:-ms-autofill {
 
 .draggable-row:active {
   cursor: grabbing;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.pitch-view {
+  background-image: url('../public/images/pitch.png');
+  background-size: cover;
+  background-position: top;
+  position: relative;
+  /* Additional styles */
+}
+
+.pitch-view::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background-color: rgba(0, 0, 0); */
+  /* Adjust opacity as needed */
+  z-index: -1;
 }

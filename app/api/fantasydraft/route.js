@@ -6,11 +6,24 @@ import { generateInviteCode } from "../../../lib/helpers";
 export const GET = async (req) => {
   try {
     await connectToDb();
-    // Extract leagueID from query parameters
+    // Extract leagueID and draftID from query parameters
     const leagueID = req.nextUrl.searchParams.get("leagueID");
+    const draftID = req.nextUrl.searchParams.get("draftID");
     let drafts;
-    // Check if leagueID parameter is provided
-    if (leagueID) {
+    if (draftID) {
+      drafts = await FantasyDraft.findById(draftID)
+        .populate("leagueID", "invite_code")
+        .populate({
+          path: "teams.team", // Path to the nested field
+          select: "team_name team_image_path", // Fields to retrieve
+        });
+
+      if (!drafts) {
+        return NextResponse.json({ error: true, message: "Draft not found." });
+      }
+    }
+    // Fetch by leagueID if provided
+    else if (leagueID) {
       // Find all drafts where the user's leagueID is included in the users_onboard array
       drafts = await FantasyDraft.find({ leagueID: leagueID })
         .populate("leagueID", "invite_code")
@@ -18,10 +31,11 @@ export const GET = async (req) => {
           path: "teams.team", // Path to the nested field
           select: "team_name team_image_path", // Fields to retrieve
         });
-    } else {
-      // Return all fantasy drafts if no leagueID is provided
-      drafts = await FantasyDraft.find({ leagueID });
     }
+    // else {
+    //   // Return all fantasy drafts if no leagueID is provided
+    //   drafts = await FantasyDraft.find({ leagueID });
+    // }
     return NextResponse.json({ error: false, data: drafts });
   } catch (err) {
     console.error("Error fetching drafts: ", err.message);

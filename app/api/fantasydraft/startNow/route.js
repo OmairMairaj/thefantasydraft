@@ -8,7 +8,12 @@ export const POST = async (req) => {
     await connectToDb();
     const payload = await req.json();
     console.log(payload)
-    let draft = await FantasyDraft.findOne({ _id: payload.draftID });
+    let draft = await FantasyDraft.findOne({ _id: payload.draftID })
+      .populate("leagueID", "invite_code")
+      .populate({
+        path: "teams.team", // Path to the nested field
+        select: "team_name team_image_path", // Fields to retrieve
+      });
     if (payload.user_email !== draft.creator) return NextResponse.json({ error: true, message: "You are not the admin for this League. Please ask admin to start the draft" });
     draft.state = "In Process";
     draft.start_date = Date.now();
