@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { Exo_2 } from 'next/font/google';
 import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink } from 'react-icons/fa';
 import { LuGrip } from "react-icons/lu";
-import Link from 'next/link';
+import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAlert } from '@/components/AlertContext/AlertContext';
@@ -319,18 +319,23 @@ const Drafting = () => {
         if (draftData && user) {
             console.log("DraftID: ", draftData._id);
             console.log("User Email: ", user.email);
-            try {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/startNow`, { draftID: draftData._id, user_email: user.email });
-                if (response.data && !response.data.error) {
-                    addAlert("Draft has been started", "success");
-                    setDraftData(response.data.data);
-                    console.log(response.data.data);
-                    router.push('/draft-start?draftID=' + draftData._id);
-                } else {
-                    addAlert(response.data.message, "error");
+            if (draftData.state === 'Manual' || draftData.state === 'Scheduled') {
+                try {
+                    const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/startNow`, { draftID: draftData._id, user_email: user.email });
+                    if (response.data && !response.data.error) {
+                        addAlert("Draft has been started", "success");
+                        setDraftData(response.data.data);
+                        console.log(response.data.data);
+                        router.push('/draft-start?draftID=' + draftData._id);
+                    } else {
+                        addAlert(response.data.message, "error");
+                    }
+                } catch (error) {
+                    console.error('Failed to start draft:', error);
                 }
-            } catch (error) {
-                console.error('Failed to start draft:', error);
+            } else {
+                addAlert("Draft is already in Progress", "info");
+                router.push('/draft-start?draftID=' + draftData._id);
             }
 
         }
@@ -392,7 +397,13 @@ const Drafting = () => {
                 )
                     :
                     (
-                        <h1 className={`text-4xl font-bold ${exo2.className} mb-8`}>Pre-Draft Page</h1>
+                        <div className='flex justify-between'>
+                            <h1 className={`text-4xl font-bold ${exo2.className} mb-8`}>Pre-Draft Page</h1>
+                            <Link href={'/draft-start?draftID=' + draftData?._id} className="bg-[#FF8A00] py-2 px-6 mb-8 text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
+                                <FaPlay />
+                                <span>Start Draft</span>
+                            </Link>
+                        </div>
                     )
                 }
 
