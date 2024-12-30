@@ -214,6 +214,28 @@ const Drafting = () => {
         }
     };
 
+    const saveOrder = async () => {
+        try {
+            const link = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasydraft"
+            const body = {
+                draftData:{
+                    _id:draftData._id,
+                    order:draftOrder                    
+                }
+            }
+            // console.log(body)
+            const response = await axios.post(link, body);
+            // console.log(response);
+            if (response.data && response.data.data && !response.data.error) {
+                addAlert("New order has been saved", "success");
+                // setDraftData(response.data.data);
+            }
+            else addAlert("Order can not be saved. Please try again", "error");
+        } catch (error) {
+            console.error('Failed to update order :', error);
+        }
+    };
+
     // const debounce = (fn, delay) => {
     //     let timeout;
     //     return (...args) => {
@@ -288,7 +310,8 @@ const Drafting = () => {
 
     const handleOrderSaveChanges = () => {
         // Call the function to update the draft order in the backend
-        // updateDraftOrder(draftOrder);
+        saveOrder();
+        fetchdraftData();
         setIsModalOpen(false); // Close the modal
     };
 
@@ -482,7 +505,7 @@ const Drafting = () => {
                                         {draftData?.order.map((email, index) => {
                                             // Find the team corresponding to the current email in the order
                                             const teamData = draftData?.teams.find((team) => team.user_email === email);
-
+                                            // console.log(teamData);
                                             return (
                                                 <div
                                                     key={index}
@@ -500,7 +523,7 @@ const Drafting = () => {
                                                                 />
                                                             )}
                                                             {/* Show the team name */}
-                                                            <p className="text-sm">{teamData.team?.team_name || "Unnamed Team"}</p>
+                                                            <p className="text-sm">{teamData.team.team_name || "Unnamed Team"}</p>
                                                         </>
                                                     ) : (
                                                         <p>No Team Found</p>

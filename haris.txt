@@ -1,10 +1,11 @@
 DONE
-
-IN PROCESS
-on front : pick from pick list if time has run out
-
-NEXT
+Change Order API 
 ratings from sportmonks
-make match schedule after draft is done
 check and assign captain and v.captain
 check and assign in team
+make match schedule after draft is done
+
+IN PROCESS
+on front : pick from pick list if time has run out(check flow of drafting)
+
+NEXT
