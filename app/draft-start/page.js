@@ -135,7 +135,7 @@ const DraftStart = () => {
 
             pollingInterval = setInterval(() => {
                 fetchdraftData();
-            }, 4000);
+            }, 5000);
         }
 
         return () => clearInterval(interval); // Cleanup the interval on unmount or turn change
