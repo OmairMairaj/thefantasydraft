@@ -88,11 +88,11 @@ const DraftStart = () => {
 
                 setTurnEmail(response.data.data.turn);
                 // Check if the current user is the creator of the league
-                if (response.data.data.creator === user.email) {
-                    setIsCreator(true);
-                } else {
-                    setIsCreator(false);
-                }
+                // if (response.data.data.creator === user.email) {
+                //     setIsCreator(true);
+                // } else {
+                //     setIsCreator(false);
+                // }
 
                 if (response.data.data.state === 'In Process') {
                     const now = Date.now();
@@ -113,6 +113,7 @@ const DraftStart = () => {
 
     useEffect(() => {
         let interval;
+        let pollingInterval;
         if (draftData?.state === 'In Process') {
             // Calculate the remaining time for the new turn
             const now = Date.now();
@@ -131,6 +132,10 @@ const DraftStart = () => {
                     return prevTime - 1000;
                 });
             }, 1000);
+
+            pollingInterval = setInterval(() => {
+                fetchdraftData();
+            }, 5000);
         }
 
         return () => clearInterval(interval); // Cleanup the interval on unmount or turn change

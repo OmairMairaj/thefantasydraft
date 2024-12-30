@@ -103,7 +103,7 @@ export const POST = async (req, res) => {
     console.log(teamID);
     let team = await FantasyTeam.findOne({ _id: teamID });
     // console.log(team);
-    players_length = team.players.length;
+    let players_length = team.players.length;
     let playerObj = {
       player: new mongoose.Types.ObjectId(payload.playerObj._id),
       in_team: players_length < 11 ? true : false,
