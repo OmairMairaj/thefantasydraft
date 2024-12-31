@@ -218,9 +218,9 @@ const Drafting = () => {
         try {
             const link = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasydraft"
             const body = {
-                draftData:{
-                    _id:draftData._id,
-                    order:draftOrder                    
+                draftData: {
+                    _id: draftData._id,
+                    order: draftOrder
                 }
             }
             // console.log(body)
@@ -411,10 +411,10 @@ const Drafting = () => {
                                 <FaPlay />
                                 <span>Start Draft</span>
                             </button>
-                            <button className="bg-[#333333] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
+                            <Link href={'/drafting/settings?draftID=' + draftData?._id} className="bg-[#333333] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
                                 <FaCog />
                                 <span>League Settings</span>
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 )
