@@ -164,10 +164,7 @@ export const POST = async (req, res) => {
           }
           fixtures.push(...week_fixtures);
         }
-
-        return NextResponse.json({
-          data: fixtures
-        })
+        league.league_fixtures = fixtures
       } else {
         league.league_fixtures = null
       }
