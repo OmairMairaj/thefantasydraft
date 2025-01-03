@@ -9,3 +9,7 @@ IN PROCESS
 on front : pick from pick list if time has run out(check flow of drafting)
 
 NEXT
+
+
+implement club and position filtering on picklist 
+selected player not getting removed from players list on draft

@@ -421,11 +421,17 @@ const Drafting = () => {
                     :
                     (
                         <div className='flex justify-between'>
-                            <h1 className={`text-4xl font-bold ${exo2.className} mb-8`}>Pre-Draft Page</h1>
-                            <Link href={'/draft-start?draftID=' + draftData?._id} className="bg-[#FF8A00] py-2 px-6 mb-8 text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
-                                <FaPlay />
-                                <span>Start Draft</span>
-                            </Link>
+                            <h1 className={`text-4xl font-bold ${exo2.className} mb-4`}>Pre-Draft Page</h1>
+                            <div className="flex space-x-4 mb-4 px-6">
+                                <Link href={'/draft-start?draftID=' + draftData?._id} className="bg-[#FF8A00] py-2 px-6  text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
+                                    <FaPlay />
+                                    <span>Start Draft</span>
+                                </Link>
+                                <Link href={'/drafting/settings?draftID=' + draftData?._id} className="bg-[#333333] py-2 px-6  text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
+                                    <FaCog />
+                                    <span>League Settings</span>
+                                </Link>
+                            </div>
                         </div>
                     )
                 }
