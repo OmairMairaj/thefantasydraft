@@ -30,7 +30,7 @@ const Drafting = () => {
     const [originalPickList, setOriginalPickList] = useState([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [search, setSearch] = useState('');
-    const [sort, setSort] = useState('name'); // Default sorting by name
+    const [sort, setSort] = useState('rating'); // Default sorting by name
     const [filter, setFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [draftOrder, setDraftOrder] = useState(draftData?.order || []);
