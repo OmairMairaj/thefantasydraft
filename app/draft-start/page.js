@@ -29,10 +29,12 @@ const DraftStart = () => {
     const [autoPickList, setAutoPickList] = useState([]);
     const [chosenPlayers, setChosenPlayers] = useState([]);
     const [search, setSearch] = useState('');
-    const [sort, setSort] = useState('name'); // Default sorting by name
+    const [sort, setSort] = useState('rating'); // Default sorting by name
     const [filter, setFilter] = useState('');
+    const [autoPick, setAutoPick] = useState(false);
     const [draftOrder, setDraftOrder] = useState(draftData?.order || []);
     const [loading, setLoading] = useState(false);
+    const [loadingSelect, setLoadingSelect] = useState(false);
     const [turnEmail, setTurnEmail] = useState(null);
     const [currentTurnTeam, setCurrentTurnTeam] = useState(null);
     const [pitchViewList, setPitchViewList] = useState({
@@ -61,7 +63,7 @@ const DraftStart = () => {
         if (typeof window !== 'undefined') {
             const urlParams = new URLSearchParams(window.location.search);
             const draftIDFromURL = urlParams.get('draftID');
-            console.log("DraftID from URL: ", draftIDFromURL);
+            //console.log("DraftID from URL: ", draftIDFromURL);
 
             if (draftIDFromURL) {
                 setDraftID(draftIDFromURL);
@@ -84,7 +86,7 @@ const DraftStart = () => {
             );
             if (response.data && !response.data.error) {
                 setDraftData(response.data.data);
-                console.log("draftData: ", response.data.data);
+                //console.log("draftData: ", response.data.data);
 
                 setTurnEmail(response.data.data.turn);
                 // Check if the current user is the creator of the league
@@ -99,6 +101,8 @@ const DraftStart = () => {
                     const lastUpdated = new Date(response.data.data.updatedAt).getTime(); // Updated time
                     const turnEndTime = lastUpdated + response.data.data.time_per_pick * 1000; // End time for the current turn
                     const remainingTime = Math.max(turnEndTime - now, 0); // Prevent negative time
+                    console.log("remainingTime");
+                    console.log(remainingTime);
                     setTimeRemaining(remainingTime);
                 }
             } else {
@@ -114,6 +118,14 @@ const DraftStart = () => {
     useEffect(() => {
         let interval;
         let pollingInterval;
+
+        const handleBeforeUnload = () => {
+            clearInterval(pollingInterval);
+            clearInterval(interval);
+            console.log("interval cleared");
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
         if (draftData?.state === 'In Process') {
             // Calculate the remaining time for the new turn
             const now = Date.now();
@@ -127,26 +139,41 @@ const DraftStart = () => {
                 setTimeRemaining((prevTime) => {
                     if (prevTime <= 1000) {
                         clearInterval(interval); // Stop the timer when it reaches 0
+                        console.log(draftData);
+                        console.log(draftData.turn);
+                        console.log(user.email);
+                        if (draftData && (draftData.turn === user.email)) {
+                            console.log(prevTime)
+                            console.log("Calling auto pick")
+                            autoPickCall();
+                        }
                         return 0;
                     }
                     return prevTime - 1000;
                 });
             }, 1000);
 
-            // pollingInterval = setInterval(() => {
-            //     fetchdraftData();
-            // }, 5000);
+            pollingInterval = setInterval(() => {
+                fetchdraftData();
+                console.log("refreshing data")
+            }, ((draftData.time_per_pick / 3) * 1000));
         }
 
-        return () => clearInterval(interval); // Cleanup the interval on unmount or turn change
+        return () => {
+            console.log("exiting page, time to clear all intervals")
+            clearInterval(pollingInterval);
+            clearInterval(interval);
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        }; // Cleanup the interval on unmount or turn change
+
     }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
 
-    useEffect(() => {
-        if (timeRemaining === 0) {
-            // Fetch updated draft data when the timer reaches 0
-            fetchdraftData();
-        }
-    }, [timeRemaining]);
+    // useEffect(() => {
+    //     if (timeRemaining === 0) {
+    //         // Fetch updated draft data when the timer reaches 0
+    //         fetchdraftData();
+    //     }
+    // }, [timeRemaining]);
 
     useEffect(() => {
         if (draftData) {
@@ -201,7 +228,7 @@ const DraftStart = () => {
             );
             if (response.data && !response.data.error) {
                 setPlayers(response.data.data || []);
-                console.log("Players:", response.data.data);
+                //console.log("Players:", response.data.data);
             } else {
                 console.error("Failed to fetch league data:", response.data.message);
             }
@@ -222,15 +249,15 @@ const DraftStart = () => {
             if (response.data && !response.data.error) {
 
                 // const selectedPlayerIds = draftData.players_selected;
-                // console.log("Selected Player Ids:", selectedPlayerIds);
-                // console.log("PickList:", response.data.data);
+                // //console.log("Selected Player Ids:", selectedPlayerIds);
+                // //console.log("PickList:", response.data.data);
                 // const updatedPickList = response.data.data.filter(
                 //     (player) => !selectedPlayerIds.includes(player._id)
                 // );
                 // setAutoPickList(updatedPickList);
                 setAutoPickList(response.data.data);
                 // setOriginalPickList(response.data.data);
-                // console.log("PickList:", response.data.data);
+                // //console.log("PickList:", response.data.data);
             } else {
                 console.error("Failed to fetch league data:", response.data.message);
             }
@@ -254,8 +281,12 @@ const DraftStart = () => {
     // };
 
     const handlePick = async (player) => {
+        if (loadingSelect) {
+            addAlert("Pick is in progress. Your time ran out", "info");
+            return;
+        }
         try {
-            console.log("Picking player:", player);
+            //console.log("Picking player:", player);
             const requestBody = {
                 user_email: user.email,
                 draftID: draftID,
@@ -263,7 +294,7 @@ const DraftStart = () => {
             };
             const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players`, requestBody);
             if (response.data && !response.data.error) {
-                console.log("Player successfully picked:", response.data);
+                //console.log("Player successfully picked:", response.data);
                 // Fetch updated draft data
                 await fetchdraftData();
                 addAlert("Player successfully picked!", "success");
@@ -273,6 +304,28 @@ const DraftStart = () => {
             }
         } catch (error) {
             console.error('Failed to add player:', error);
+        } finally {
+            setLoadingSelect(false);
+        }
+    };
+
+
+    function autoPickCall() {
+        try {
+            let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players/autopick?draftID=${draftID}&email=${user.email}`
+            axios.get(link).then((response) => {
+                console.log(response);
+                if (response.data && !response.data.error) {
+                    fetchdraftData();
+                    addAlert("Player successfully picked!", "success");
+                } else {
+                    console.error("Failed to pick player:", response.data.message);
+                }
+            });
+        } catch (error) {
+            console.error('Failed to add player:', error);
+        } finally {
+            setLoadingSelect(false);
         }
     };
 
@@ -281,7 +334,7 @@ const DraftStart = () => {
             const players = draftData.teams.find((team) => team.user_email === user.email).team?.players || [];
             if (players) {
                 setChosenPlayers(players);
-                console.log("Chosen Players:", players);
+                //console.log("Chosen Players:", players);
             }
         }
     };
@@ -295,7 +348,7 @@ const DraftStart = () => {
                 attacker: 2,
             };
             const segregatedPlayers = segregatePlayers(chosenPlayers, lineupConfigurations);
-            console.log("Segregated Players:", segregatedPlayers);
+            //console.log("Segregated Players:", segregatedPlayers);
             if (segregatedPlayers) {
                 setPitchViewList(segregatedPlayers);
             }
@@ -303,7 +356,7 @@ const DraftStart = () => {
     }, [chosenPlayers]);
 
     const segregatePlayers = (players, lineupConfigurations) => {
-        console.log("Players list:", players);
+        //console.log("Players list:", players);
         // Object to store the players grouped by positions
         const groupedPlayers = {
             Goalkeeper: [],
@@ -325,10 +378,10 @@ const DraftStart = () => {
 
         // Group players by positions
         players.forEach((player) => {
-            console.log("Player:", player);
+            //console.log("Player:", player);
             if (groupedPlayers[player.player.position_name]) {
                 groupedPlayers[player.player.position_name].push(player);
-                console.log("Grouped Players:", groupedPlayers);
+                //console.log("Grouped Players:", groupedPlayers);
             }
         });
 
@@ -387,7 +440,7 @@ const DraftStart = () => {
         const turn = draftData?.turn;
         const team = draftData?.teams.find((team) => team.user_email === turn);
         setCurrentTurnTeam(team);
-        console.log("Current Turn Team:", team);
+        //console.log("Current Turn Team:", team);
     };
 
     useEffect(() => {
@@ -588,8 +641,11 @@ const DraftStart = () => {
                                                         <td className="p-2 sticky right-0 bg-[#1C1C1C]">
                                                             <button
                                                                 className={`${draftData?.turn !== user.email ? 'bg-[#454545]' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
-                                                                onClick={() => handlePick(player)}
-                                                                disabled={draftData?.turn !== user.email}
+                                                                onClick={() => {
+                                                                    setLoadingSelect(true);
+                                                                    handlePick(player)
+                                                                }}
+                                                                disabled={(draftData?.turn !== user.email) || loadingSelect}
                                                             >
                                                                 Pick
                                                             </button>
@@ -648,9 +704,9 @@ const DraftStart = () => {
                                                                 </td>
                                                                 <td className="p-2 sticky right-0 bg-[#1C1C1C]">
                                                                     <button
-                                                                        disabled={draftData?.turn !== user.email || draftData.players_selected.includes(player._id)}
+                                                                        disabled={draftData?.turn !== user.email || loadingSelect}
                                                                         className={`${draftData?.turn !== user.email || draftData.players_selected.includes(player._id) ? 'bg-[#3c3c3c]' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-3 py-1 rounded-lg `}
-                                                                        onClick={() => handlePick(player)}
+                                                                        onClick={() => { setLoadingSelect(true); handlePick(player); }}
                                                                     >
                                                                         <FaChevronRight />
                                                                     </button>

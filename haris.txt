@@ -1,15 +1,17 @@
+--------------------------------------HARIS--------------------------------------
 DONE
-Change Order API 
-ratings from sportmonks
-check and assign captain and v.captain
-check and assign in team
-make match schedule after draft is done
+back : remove not-eligible players from all players and picklist 
+autopick API on time end (front and back)
 
 IN PROCESS
-on front : pick from pick list if time has run out(check flow of drafting)
 
 NEXT
-
-
-implement club and position filtering on picklist 
+front : add filter by club to all players
 selected player not getting removed from players list on draft
+
+
+--------------------------------------OMAIR--------------------------------------
+if drafting in progress, take directly to start draft page
+add club logo to player square on bottom right/left 
+add 20 stadium images and we would need to call league to check which stadium is already selected and not let new user select that again
+check for user in local and session both or copy local to session at start of application

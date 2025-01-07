@@ -1,3 +1,4 @@
+import { filterPlayers } from "@/lib/helpers";
 import { FantasyTeam } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import mongoose from "mongoose";
@@ -9,15 +10,9 @@ export const GET = async (req, { params }) => {
         // Extract the teamId from the request parameters
         const { teamId } = params;
         // Find the fantasy team by ID
-        const team = await FantasyTeam.findById(teamId).populate("pick_list");
-        if (!team) {
-            return NextResponse.json({
-                error: true,
-                message: `Team with ID ${teamId} not found.`,
-            });
-        }
-        return NextResponse.json({ error: false, data: team.pick_list });
-
+        const team = await FantasyTeam.findById(teamId).populate("pick_list").populate("leagueID");
+        const players = await filterPlayers(team.pick_list, team.leagueID.draftID, team._id);
+        return NextResponse.json({ error: false, data: players });
     } catch (err) {
         console.error("Error fetching team:", err);
         return NextResponse.json({

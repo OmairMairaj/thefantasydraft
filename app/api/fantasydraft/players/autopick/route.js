@@ -2,9 +2,6 @@ import { Player, FantasyDraft, FantasyLeague, FantasyTeam, GameWeek } from "@/li
 import { connectToDb } from "@/lib/utils";
 import { filterPlayers } from "@/lib/helpers";
 import { NextResponse } from "next/server";
-import { sendMultipleEmails } from "../../../../lib/mail";
-import { TfiControlShuffle } from "react-icons/tfi";
-import { ConnectionStates } from "mongoose";
 import mongoose from "mongoose";
 
 export const GET = async (req) => {
@@ -12,55 +9,46 @@ export const GET = async (req) => {
     // Get parameters from URL
     await connectToDb();
     const draftID = req.nextUrl.searchParams.get("draftID");
-    const teamID = req.nextUrl.searchParams.get("teamID");
-    const allPlayers = await Player.find({});
-    // Function Call for filtering players
-    const remainingPlayers = await filterPlayers(allPlayers, draftID, teamID);
-    // Return
-    return NextResponse.json({ error: false, data: remainingPlayers, });
+    const user_email = req.nextUrl.searchParams.get("email");
 
-  } catch (err) {
-    console.error("Error fetching drafts: ", err.message);
-    return NextResponse.json({
-      error: true,
-      message: "An unexpected error occurred, please try again later.",
-    });
-  }
-};
+    // Get data for DB
+    let draft = await FantasyDraft.findOne({ _id: draftID });
+    let league = await FantasyLeague.findOne({ draftID: draft._id });
 
-
-export const POST = async (req, res) => {
-  try {
-    await connectToDb();
-    //contains DraftID, PlayerID, TeamID, PlayerObj
-    let payload = await req.json();
-    let draft = await FantasyDraft.findOne({ _id: payload.draftID });
-    let league = await FantasyLeague.findOne({ draftID: payload.draftID });
+    // Basic Validations
     if (draft.state !== "In Process") {
       return NextResponse.json({
         error: true,
         message: "The draft is not in progress currently."
       });
     }
-    if (draft.turn !== payload.user_email) {
+    if (draft.turn !== user_email) {
       return NextResponse.json({
         error: true,
         message: "It is not your turn right now to pick a player."
       });
     }
-    if (draft.players_selected.indexOf(payload.playerObj._id) !== -1) {
-      return NextResponse.json({
-        error: true,
-        message: "This player is already selected by another user."
-      });
-    }
-    let teamID = draft.teams.find(item => item.user_email === payload.user_email).team
-    console.log(teamID);
-    let team = await FantasyTeam.findOne({ _id: teamID });
-    // console.log(team);
+
+    // Finding team and inserting player in it
+    let teamID = draft.teams.find(item => item.user_email === user_email).team
+    let team = await FantasyTeam.findOne({ _id: teamID }).populate("pick_list");
     let players_length = team.players.length;
+    const allPlayers = await Player.find({});
+    let canSelectPlayers = []
+    
+    if (team.pick_list && team.pick_list.length > 0) {
+      canSelectPlayers = await filterPlayers(team.pick_list, draftID, teamID);
+      if (canSelectPlayers.length < 1) {
+        canSelectPlayers = await filterPlayers(allPlayers, draftID, teamID);
+        canSelectPlayers = canSelectPlayers.sort((a, b) => b.rating - a.rating)
+      }
+    }else{
+      canSelectPlayers = await filterPlayers(allPlayers, draftID, teamID);
+      canSelectPlayers = canSelectPlayers.sort((a, b) => b.rating - a.rating);
+    }
+
     let playerObj = {
-      player: new mongoose.Types.ObjectId(payload.playerObj._id),
+      player: new mongoose.Types.ObjectId(canSelectPlayers[0]._id),
       in_team: players_length < 11 ? true : false,
       captain: players_length === 0 ? true : false,
       vice_captain: players_length === 1 ? true : false,
@@ -68,10 +56,9 @@ export const POST = async (req, res) => {
     // Updating Team
     team.players.push(playerObj);
     // Updating Draft
-    draft.players_selected.push(payload.playerObj._id)
+    draft.players_selected.push(canSelectPlayers[0]._id)
     let index = draft.order.indexOf(draft.turn)
-    if (index == -1) { throw err; }
-    else if (index == (draft.order.length - 1)) {
+    if (index == (draft.order.length - 1)) {
       draft.order = draft.order.reverse();
       draft.draft_round = draft.draft_round + 1;
       draft.turn = draft.order[0];
@@ -128,22 +115,17 @@ export const POST = async (req, res) => {
 
     team.save();
     draft.save();
-    // console.log(team);
-    // console.log(draft);
     return NextResponse.json({
       error: false,
-      // data: gameweeks
       league: league,
       draft: draft,
       team: team
     });
-
   } catch (err) {
+    console.error("Error fetching drafts: ", err.message);
     return NextResponse.json({
       error: true,
-      err: err.message,
-      message: "Error picking a player, please try again or contact support."
+      message: "An unexpected error occurred, please try again later.",
     });
   }
 };
-
