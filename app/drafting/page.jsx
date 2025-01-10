@@ -22,7 +22,7 @@ const exo2 = Exo_2({
 
 const Drafting = () => {
 
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState({});
     const [leagueID, setLeagueID] = useState(null);
     const [draftData, setDraftData] = useState(null);
     const [isCreator, setIsCreator] = useState(false);
@@ -43,23 +43,32 @@ const Drafting = () => {
     const [currentView, setCurrentView] = useState('drafting');
 
     useEffect(() => {
-        // Get user from session storage
-        const storedUser = sessionStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser).user);
-        } else {
-            console.error("User not found in session storage");
-        }
-
-        // Extract leagueID from the URL using window.location
+        // Check if window is defined to ensure we are on the client side
         if (typeof window !== 'undefined') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const leagueIDFromURL = urlParams.get('leagueID');
+            let userData = null;
 
-            if (leagueIDFromURL) {
-                setLeagueID(leagueIDFromURL);
+            // Get user from session storage or local storage
+            if (sessionStorage.getItem("user")) {
+                userData = JSON.parse(sessionStorage.getItem("user"));
+            } else if (localStorage.getItem("user")) {
+                userData = JSON.parse(localStorage.getItem("user"));
             } else {
-                console.error("League ID not found in URL");
+                router.push("/login?redirect=" + window.location.toString());
+            }
+
+            if (userData && userData.user) {
+                setUser(userData.user);
+                console.log(userData.user.email);
+
+                // Extract leagueID from the URL using window.location
+                const urlParams = new URLSearchParams(window.location.search);
+                const leagueIDFromURL = urlParams.get('leagueID');
+
+                if (leagueIDFromURL) {
+                    setLeagueID(leagueIDFromURL);
+                } else {
+                    console.error("League ID not found in URL");
+                }
             }
         }
     }, []);
@@ -78,9 +87,18 @@ const Drafting = () => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?leagueID=${leagueID}`
             );
             if (response.data && !response.data.error) {
-                setDraftData(response.data.data[0]);
                 console.log("draftData: ", response.data.data[0]);
 
+                // Check if the logged-in user is part of the league's teams
+                const isUserPartOfLeague = response.data.data[0].teams.some(
+                    (team) => team.user_email === user.email
+                );
+                if (!isUserPartOfLeague) {
+                    // Redirect the user to the dashboard if they are not part of the league
+                    addAlert("You are not a part of this league.", "error");
+                    router.push("/dashboard");
+                    return;
+                }
 
                 // Check if the current user is the creator of the league
                 if (response.data.data[0].creator === user.email) {
@@ -99,6 +117,8 @@ const Drafting = () => {
                 if (response.data.data[0]?.state === 'In Process') {
                     setCurrentView('draft-start');
                 }
+
+                setDraftData(response.data.data[0]);
             } else {
                 console.error("Failed to fetch league data:", response.data.message);
             }

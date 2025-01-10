@@ -16,14 +16,21 @@ const Table = () => {
     const router = useRouter();
 
     useEffect(() => {
-        // Check if user is authenticated
-        const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
-        if (!userData) {
-            // If no user is found, redirect to login
-            router.push("/login");
-        } else {
-            // Fetch table data of the league
-            fetchStandings();
+        // Check if window is defined to ensure we are on the client side
+        if (typeof window !== 'undefined') {
+            let userData = null;
+
+            if (sessionStorage.getItem("user")) {
+                userData = JSON.parse(sessionStorage.getItem("user"));
+            } else if (localStorage.getItem("user")) {
+                userData = JSON.parse(localStorage.getItem("user"));
+            } else {
+                router.push("/login?redirect=" + window.location.toString());
+            }
+
+            if (userData && userData.user) {
+                fetchStandings();
+            }
         }
     }, []);
 
@@ -76,7 +83,7 @@ const Table = () => {
                                         <td className="py-3 px-2 sm:px-4 text-center">{team.goals_conceded}</td>
                                         <td className="py-3 px-2 sm:px-4 text-center">{team.goals_scored - team.goals_conceded}</td>
                                         <td className="py-3 px-2 sm:px-4 text-center font-bold">{team.points}</td>
-                                        <td className="py-3 px-2 sm:px-4">{team.form.sort((a, b) => b.sort_order - a.sort_order).slice(0,5).map((item)=>item.form+" ")}</td>
+                                        <td className="py-3 px-2 sm:px-4">{team.form.sort((a, b) => b.sort_order - a.sort_order).slice(0, 5).map((item) => item.form + " ")}</td>
                                     </tr>
                                 ))}
                             </tbody>

@@ -15,16 +15,33 @@ const JoinLeagueProcess = () => {
   const [step, setStep] = useState(1);
   const totalSteps = 4;
   const { addAlert } = useAlert();
+  const [user, setUser] = useState({});
+
+  useEffect(() => {
+    // Check if window is defined to ensure we are on the client side
+    if (typeof window !== 'undefined') {
+      let userData = null;
+
+      if (sessionStorage.getItem("user")) {
+        userData = JSON.parse(sessionStorage.getItem("user"));
+      } else if (localStorage.getItem("user")) {
+        userData = JSON.parse(localStorage.getItem("user"));
+      } else {
+        router.push("/login?redirect=" + window.location.toString());
+      }
+
+      if (userData && userData.user) {
+        setUser(userData.user);
+        console.log(userData.user.email);
+      }
+    }
+  }, []);
 
   const handleNext = () => setStep(step + 1);
   const handleBack = () => setStep(step - 1);
   const handleComplete = () => {
     const league = JSON.parse(sessionStorage.getItem("joinLeagueData"));
     const team = JSON.parse(sessionStorage.getItem("joinLeagueTeamData"));
-    let user = {};
-    if (sessionStorage.getItem("user"))
-      user = JSON.parse(sessionStorage.getItem("user")).user;
-    else user = JSON.parse(localStorage.getItem("user")).user;
     const body = {
       teamData: team,
       userData: user,
@@ -34,7 +51,7 @@ const JoinLeagueProcess = () => {
     const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague/join";
     axios.post(URL, body).then((response) => {
       console.log(response);
-      addAlert(response.data.message, response.data.error ? "error": "success");
+      addAlert(response.data.message, response.data.error ? "error" : "success");
       if (response.data.error == false) {
         sessionStorage.removeItem("joinLeagueData");
         sessionStorage.removeItem("joinLeagueTeamData");

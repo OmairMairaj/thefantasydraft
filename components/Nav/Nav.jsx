@@ -19,7 +19,7 @@ const exo2 = Exo_2({
 
 const Nav = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const pathname = usePathname();
   const dropdownRef = useRef(null);
@@ -37,12 +37,35 @@ const Nav = () => {
     }
   }, [pathname]);
 
+  useEffect(() => {
+    // Check if window is defined to ensure we are on the client side
+    if (typeof window !== 'undefined') {
+      let userData = null;
+
+      // Get user from session storage or local storage
+      if (sessionStorage.getItem("user")) {
+        userData = JSON.parse(sessionStorage.getItem("user"));
+      } else if (localStorage.getItem("user")) {
+        userData = JSON.parse(localStorage.getItem("user"));
+      }
+
+      if (userData && userData.user) {
+        setUser(userData.user);
+        console.log(userData.user.email);
+      } else {
+        setUser("nothing");
+      }
+    }
+  }, [pathname]);
+
+
+
   React.useEffect(() => {
     if (
       (pathname != "/" && pathname != "/how-to-play" && pathname != "/contact" && pathname != "/signup") &&
       user === "nothing"
     ) {
-      router.push("/login");
+      router.push("/login?redirect=" + window.location.toString());
     }
   }, [user]);
 

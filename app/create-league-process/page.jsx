@@ -16,6 +16,27 @@ const CreateLeagueProcess = () => {
   const [step, setStep] = useState(1);
   const totalSteps = 5; // Number of steps in the process
   const { addAlert } = useAlert();
+  const [user, setUser] = useState({});
+
+  useEffect(() => {
+    // Check if window is defined to ensure we are on the client side
+    if (typeof window !== 'undefined') {
+      let userData = null;
+
+      if (sessionStorage.getItem("user")) {
+        userData = JSON.parse(sessionStorage.getItem("user"));
+      } else if (localStorage.getItem("user")) {
+        userData = JSON.parse(localStorage.getItem("user"));
+      } else {
+        router.push("/login?redirect=" + window.location.toString());
+      }
+
+      if (userData && userData.user) {
+        setUser(userData.user);
+        console.log(userData.user.email);
+      }
+    }
+  }, []);
 
   const handleNext = () => setStep(step + 1);
   const handleBack = () => setStep(step - 1);
@@ -24,10 +45,6 @@ const CreateLeagueProcess = () => {
     const league = JSON.parse(sessionStorage.getItem("leagueData"));
     const team = JSON.parse(sessionStorage.getItem("teamData"));
     const invite = JSON.parse(sessionStorage.getItem("inviteData"));
-    let user = {};
-    if (sessionStorage.getItem("user"))
-      user = JSON.parse(sessionStorage.getItem("user")).user;
-    else user = JSON.parse(localStorage.getItem("user")).user;
 
     //Setting Body
     const body = {
