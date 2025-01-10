@@ -11,8 +11,8 @@ import axios from 'axios';
 import { useAlert } from '@/components/AlertContext/AlertContext';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Modal from '@/components/Modal/Modal';
-import DraftSettings from './components/settings/page';
-import DraftStart from './components/draft-start/page';
+import DraftSettings from './components/Settings';
+import DraftStart from './components/DraftStart';
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],

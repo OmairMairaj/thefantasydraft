@@ -956,6 +956,6 @@ const DraftStart = ({ draftID, user, onSettings }) => {
             </div >
         </Suspense>
     );
-};
+}
 
 export default DraftStart;
