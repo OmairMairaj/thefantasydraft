@@ -19,11 +19,9 @@ const exo2 = Exo_2({
     subsets: ['latin'],
 });
 
-const DraftStart = () => {
-
-    const [user, setUser] = useState(null);
-    const [draftID, setDraftID] = useState(null);
+const DraftStart = ({ draftID, user, onSettings }) => {
     const [draftData, setDraftData] = useState(null);
+    const [isCreator, setIsCreator] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState(null);
     const [players, setPlayers] = useState([]);
     const [autoPickList, setAutoPickList] = useState([]);
@@ -52,28 +50,6 @@ const DraftStart = () => {
     const { addAlert } = useAlert();
 
     useEffect(() => {
-        // Get user from session storage
-        const storedUser = sessionStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser).user);
-        } else {
-            console.error("User not found in session storage");
-        }
-        // Extract draftID from the URL using window.location
-        if (typeof window !== 'undefined') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const draftIDFromURL = urlParams.get('draftID');
-            //console.log("DraftID from URL: ", draftIDFromURL);
-
-            if (draftIDFromURL) {
-                setDraftID(draftIDFromURL);
-            } else {
-                console.error("League ID not found in URL");
-            }
-        }
-    }, []);
-
-    useEffect(() => {
         // Fetch league data if user and draftID are available
         if (user && draftID) fetchdraftData();
     }, [user, draftID]);
@@ -90,11 +66,11 @@ const DraftStart = () => {
 
                 setTurnEmail(response.data.data.turn);
                 // Check if the current user is the creator of the league
-                // if (response.data.data.creator === user.email) {
-                //     setIsCreator(true);
-                // } else {
-                //     setIsCreator(false);
-                // }
+                if (response.data.data.creator === user.email) {
+                    setIsCreator(true);
+                } else {
+                    setIsCreator(false);
+                }
 
                 if (response.data.data.state === 'In Process') {
                     const now = Date.now();
@@ -334,7 +310,7 @@ const DraftStart = () => {
             const players = draftData.teams.find((team) => team.user_email === user.email).team?.players || [];
             if (players) {
                 setChosenPlayers(players);
-                //console.log("Chosen Players:", players);
+                console.log("Chosen Players:", players);
             }
         }
     };
@@ -482,12 +458,28 @@ const DraftStart = () => {
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <div className="min-h-[88vh] flex flex-col my-16 text-white px-6 md:px-10 lg:px-16 xl:px-20 pb-10">
-                <h1 className={`text-4xl font-bold ${exo2.className} mb-8`}>Drafting</h1>
+            <div className="flex flex-col text-white">
                 {loading && !draftData ? (
-                    <div>Loading...</div>
+                    <div className="w-full min-h-[70vh] flex items-center justify-center">
+                        <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
+                    </div>
                 ) : (
                     <>
+                        <div className="flex justify-between items-center mb-4">
+                            <h1 className={`text-4xl font-bold ${exo2.className}`}>Drafting</h1>
+                            <div className="flex items-center gap-4">
+                                {/* {isCreator && draftData?.state !== "In Process" && draftData?.state !== "Ended" && (
+                                    <button onClick={() => handleNavigation('draft-start')} className="bg-[#FF8A00] py-2 px-6  text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
+                                        <FaPlay />
+                                        <span>Start Draft</span>
+                                    </button>
+                                )} */}
+                                <button onClick={onSettings} className="bg-[#333333] py-2 px-6  text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
+                                    <FaCog />
+                                    <span>League Settings</span>
+                                </button>
+                            </div>
+                        </div>
                         {/* Drafting Info Section */}
                         <div className="flex justify-between mb-8">
                             <div className="flex flex-col space-y-4 w-1/3 pr-4 border-r border-[#404040]">
@@ -500,6 +492,9 @@ const DraftStart = () => {
                                         )}
                                     {draftData?.state === 'Ended' && (
                                         <p className="text-lg">The draft has ended.</p>
+                                    )}
+                                    {draftData?.state === 'Manual' || draftData?.state === "Scheduled" && (
+                                        <p className="text-lg">The draft is yet to be started by League admin.</p>
                                     )}
                                 </div>
 
@@ -515,6 +510,12 @@ const DraftStart = () => {
                                         <>
                                             <p className="text-2xl">Draft Status</p>
                                             <p className="text-5xl text-white mt-2">{draftData?.state}</p>
+                                        </>
+                                    )}
+                                    {draftData?.state === 'Manual' || draftData?.state === "Scheduled" && (
+                                        <>
+                                            <p className="text-2xl">Time Remainings</p>
+                                            <p className="text-5xl text-white mt-2"> {`- - : - -`}</p>
                                         </>
                                     )}
                                 </div>
@@ -804,8 +805,15 @@ const DraftStart = () => {
                                                             {pitchViewList.lineup.Goalkeeper.map((player) => (
                                                                 <div
                                                                     key={player.player.id}
-                                                                    className="flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                    className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
                                                                 >
+                                                                    <div className="absolute top-1 right-1 w-6 h-6">
+                                                                        <img
+                                                                            src={player.player.team_image_path}
+                                                                            alt={player.player.team_name || 'Team Logo'}
+                                                                            className="rounded-full"
+                                                                        />
+                                                                    </div>
                                                                     <img
                                                                         src={player.player.image_path}
                                                                         alt={player.player.team_name || 'Player'}
@@ -823,8 +831,15 @@ const DraftStart = () => {
                                                             {pitchViewList.lineup.Defender.map((player) => (
                                                                 <div
                                                                     key={player.player.id}
-                                                                    className="flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                    className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
                                                                 >
+                                                                    <div className="absolute top-1 right-1 w-6 h-6">
+                                                                        <img
+                                                                            src={player.player.team_image_path}
+                                                                            alt={player.player.team_name || 'Team Logo'}
+                                                                            className="rounded-full"
+                                                                        />
+                                                                    </div>
                                                                     <img
                                                                         src={player.player.image_path}
                                                                         alt={player.player.team_name || 'Player'}
@@ -842,8 +857,15 @@ const DraftStart = () => {
                                                             {pitchViewList.lineup.Midfielder.map((player) => (
                                                                 <div
                                                                     key={player.player.id}
-                                                                    className="flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                    className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
                                                                 >
+                                                                    <div className="absolute top-1 right-1 w-6 h-6">
+                                                                        <img
+                                                                            src={player.player.team_image_path}
+                                                                            alt={player.player.team_name || 'Team Logo'}
+                                                                            className="rounded-full"
+                                                                        />
+                                                                    </div>
                                                                     <img
                                                                         src={player.player.image_path}
                                                                         alt={player.player.team_name || 'Player'}
@@ -861,8 +883,15 @@ const DraftStart = () => {
                                                             {pitchViewList.lineup.Attacker.map((player) => (
                                                                 <div
                                                                     key={player.player.id}
-                                                                    className="flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                    className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
                                                                 >
+                                                                    <div className="absolute top-1 right-1 w-6 h-6">
+                                                                        <img
+                                                                            src={player.player.team_image_path}
+                                                                            alt={player.player.team_name || 'Team Logo'}
+                                                                            className="rounded-full"
+                                                                        />
+                                                                    </div>
                                                                     <img
                                                                         src={player.player.image_path}
                                                                         alt={player.player.team_name || 'Player'}
@@ -884,8 +913,15 @@ const DraftStart = () => {
                                                         {pitchViewList.bench.map((player) => (
                                                             <div
                                                                 key={player.player.id}
-                                                                className="flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
                                                             >
+                                                                <div className="absolute top-1 right-1 w-6 h-6">
+                                                                    <img
+                                                                        src={player.player.team_image_path}
+                                                                        alt={player.player.team_name || 'Team Logo'}
+                                                                        className="rounded-full"
+                                                                    />
+                                                                </div>
                                                                 <img
                                                                     src={player.player.image_path}
                                                                     alt={player.player.team_name || 'Player'}

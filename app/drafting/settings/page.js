@@ -10,36 +10,13 @@ const exo2 = Exo_2({
     subsets: ['latin'],
 });
 
-const DraftSettings = () => {
-    const [user, setUser] = useState(null);
-    const [draftID, setDraftID] = useState(null);
+const DraftSettings = ({ draftID, user, onBack }) => {
     const [draftData, setDraftData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
     const [originalStartDate, setOriginalStartDate] = useState(null);
-
-    useEffect(() => {
-        const storedUser = sessionStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser).user);
-        } else {
-            console.error("User not found in session storage");
-        }
-
-        if (typeof window !== 'undefined') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const draftIDFromURL = urlParams.get('draftID');
-
-            if (draftIDFromURL) {
-                setDraftID(draftIDFromURL);
-                console.log("Draft ID found in URL:", draftIDFromURL);
-            } else {
-                console.error("Draft ID not found in URL");
-            }
-        }
-    }, []);
 
     useEffect(() => {
         if (user && draftID) fetchDraftData();
@@ -164,25 +141,37 @@ const DraftSettings = () => {
     };
 
     if (loading || !draftData) {
-        return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
+        return (
+            <div className="w-full min-h-[70vh] flex items-center justify-center">
+                <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
+            </div>
+        )
     }
 
     return (
-        <div className="min-h-[88vh] flex flex-col my-16 text-white px-6 md:px-10 lg:px-16 xl:px-20 pb-10">
-            <div className='flex justify-between'>
-                <h1 className={`text-4xl font-bold ${exo2.className} mb-8`}>Draft Settings</h1>
+        <div className="min-h-[88vh] flex flex-col text-white">
+            <div className='flex justify-between mb-4'>
+                <div className='flex items-center gap-4'>
+                    <button
+                        className={`fade-gradient px-6 py-2 rounded-2xl transition duration-300 ${exo2.className}`}
+                        onClick={onBack}
+                    >
+                        Back
+                    </button>
+                    <h1 className={`text-4xl font-bold ${exo2.className}`}>Draft Settings</h1>
+                </div>
                 {isCreator && (
                     <div className="flex justify-end">
                         {isEditing ? (
                             <button
-                                className="fade-gradient px-12 py-2 rounded-3xl mb-8"
+                                className="fade-gradient px-12 py-2 rounded-3xl "
                                 onClick={handleSaveClick}
                             >
                                 Save
                             </button>
                         ) : (
                             <button
-                                className="fade-gradient px-12 py-2 rounded-3xl mb-8"
+                                className="fade-gradient px-12 py-2 rounded-3xl "
                                 onClick={handleEditClick}
                             >
                                 Edit

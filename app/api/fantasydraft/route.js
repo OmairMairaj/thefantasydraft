@@ -18,7 +18,7 @@ export const GET = async (req) => {
           select: "team_name team_image_path players", // Fields to retrieve
           populate: {
             path: "players.player", // Path to populate within the team object
-            select: "name image_path common_name team_name position_name", // Fields to retrieve from the player model
+            select: "name image_path common_name team_name position_name team_image_path", // Fields to retrieve from the player model
           },
         });
 
