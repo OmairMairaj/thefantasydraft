@@ -1,18 +1,10 @@
 --------------------------------------HARIS--------------------------------------
 DONE
-back : remove not-eligible players from all players and picklist 
-autopick API on time end (front and back)
-front : add filter by club to all players
-selected player not getting removed from players list on draft
 
 IN PROCESS
-
-NEXT
-Force Pick API and front end at admin
-
+Scoring
 
 --------------------------------------OMAIR--------------------------------------
-if drafting in progress, take directly to start draft page (DONE)
-add club logo to player square on bottom right/left  (DONE)
-add 20 stadium images and we would need to call league to check which stadium is already selected and not let new user select that again
-check for user in local and session both or copy local to session at start of application
+Add an arrow on draft order to show the way draft will work
+draft pages responsiveness
+Please turn off timers and the calls they make after a page is exited

@@ -151,8 +151,8 @@ const DraftStart = ({ draftID, user, onSettings }) => {
 
         return () => {
             console.log("exiting page, time to clear all intervals");
-            // clearInterval(pollingIntervalRef.current);
-            // clearInterval(intervalRef.current);
+            clearInterval(pollingIntervalRef.current);
+            clearInterval(intervalRef.current);
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
     }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
