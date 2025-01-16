@@ -3,6 +3,36 @@ import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
+
+export const GET = async (req) => {
+  try {
+    await connectToDb();
+    // Extract League ID from query parameters
+    const leagueID = req.nextUrl.searchParams.get("leagueID");
+    let leagues;
+    // Check if email parameter is provided
+    if (leagueID) {
+      // Find all leagues where the user's email is included in the users_onboard array
+      leagues = await FantasyLeague.find({ _id: leagueID });
+      let teams_to_find = leagues[0].teams.map(item => item.team)
+      let teams = await FantasyTeam.find({ _id: { $in: [teams_to_find] } });
+      let stadiums = teams.map(item => item.ground_image_path)
+      return NextResponse.json({ error: false, data: stadiums });
+    }
+    return NextResponse.json({
+      error: true,
+      message: "An unexpected error occurred, please try again later.",
+    });
+  } catch (err) {
+    console.error("Error fetching leagues: ", err);
+    return NextResponse.json({
+      error: true,
+      message: "An unexpected error occurred, please try again later.",
+    });
+  }
+};
+
+
 export const POST = async (req, res) => {
   try {
     await connectToDb();
