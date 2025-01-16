@@ -2,12 +2,13 @@
 DONE
 back : remove not-eligible players from all players and picklist 
 autopick API on time end (front and back)
+front : add filter by club to all players
+selected player not getting removed from players list on draft
 
 IN PROCESS
 
 NEXT
-front : add filter by club to all players
-selected player not getting removed from players list on draft
+Force Pick API and front end at admin
 
 
 --------------------------------------OMAIR--------------------------------------

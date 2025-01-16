@@ -31,12 +31,16 @@ const DraftStart = () => {
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('rating'); // Default sorting by name
     const [filter, setFilter] = useState('');
-    const [autoPick, setAutoPick] = useState(false);
-    const [draftOrder, setDraftOrder] = useState(draftData?.order || []);
+    const [teamFilter, setTeamFilter] = useState('');
+    const [teams, setTeams] = useState(null);
+    // const [draftOrder, setDraftOrder] = useState(draftData?.order || []);
+    const [isCreator, setIsCreator] = useState(false);
     const [loading, setLoading] = useState(false);
     const [loadingSelect, setLoadingSelect] = useState(false);
     const [turnEmail, setTurnEmail] = useState(null);
     const [currentTurnTeam, setCurrentTurnTeam] = useState(null);
+    const intervalRef = useRef(null);
+    const pollingIntervalRef = useRef(null);
     const [pitchViewList, setPitchViewList] = useState({
         lineup: {
             Goalkeeper: [],
@@ -73,6 +77,19 @@ const DraftStart = () => {
         }
     }, []);
 
+
+    useEffect(() => {
+        try {
+            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/team`)
+                .then((response) => {
+                    if (response && response.data && response.data.data) setTeams(response.data.data);
+                    else addAlert("Error fetching teams. Please try again", 'error');
+                });
+        } catch (error) {
+            console.log("Error fetching teams data:", error);
+        }
+    }, []);
+
     useEffect(() => {
         // Fetch league data if user and draftID are available
         if (user && draftID) fetchdraftData();
@@ -86,15 +103,17 @@ const DraftStart = () => {
             );
             if (response.data && !response.data.error) {
                 setDraftData(response.data.data);
-                //console.log("draftData: ", response.data.data);
-
                 setTurnEmail(response.data.data.turn);
                 // Check if the current user is the creator of the league
-                // if (response.data.data.creator === user.email) {
-                //     setIsCreator(true);
-                // } else {
-                //     setIsCreator(false);
-                // }
+                console.log("Checking for creator")
+                console.log(response.data.data)
+                console.log(response.data.data.creator)
+                console.log(user.email)
+                if (response.data.data.creator === user.email) {
+                    setIsCreator(true);
+                } else {
+                    setIsCreator(false);
+                }
 
                 if (response.data.data.state === 'In Process') {
                     const now = Date.now();
@@ -116,57 +135,104 @@ const DraftStart = () => {
     };
 
     useEffect(() => {
-        let interval;
-        let pollingInterval;
-
         const handleBeforeUnload = () => {
-            clearInterval(pollingInterval);
-            clearInterval(interval);
+            clearInterval(pollingIntervalRef.current);
+            clearInterval(intervalRef.current);
             console.log("interval cleared");
         };
         window.addEventListener("beforeunload", handleBeforeUnload);
 
         if (draftData?.state === 'In Process') {
-            // Calculate the remaining time for the new turn
             const now = Date.now();
-            const lastUpdated = new Date(draftData.updatedAt).getTime(); // When the last turn was updated
-            const turnEndTime = lastUpdated + draftData.time_per_pick * 1000; // End time for the current turn
-            const remainingTime = Math.max(turnEndTime - now, 0); // Prevent negative time
+            const lastUpdated = new Date(draftData.updatedAt).getTime();
+            const turnEndTime = lastUpdated + draftData.time_per_pick * 1000;
+            const remainingTime = Math.max(turnEndTime - now, 0);
             setTimeRemaining(remainingTime);
 
-            // Start a new interval to update the countdown
-            interval = setInterval(() => {
-                setTimeRemaining((prevTime) => {
-                    if (prevTime <= 1000) {
-                        clearInterval(interval); // Stop the timer when it reaches 0
-                        console.log(draftData);
-                        console.log(draftData.turn);
-                        console.log(user.email);
-                        if (draftData && (draftData.turn === user.email)) {
-                            console.log(prevTime)
-                            console.log("Calling auto pick")
-                            autoPickCall();
+            if (!intervalRef.current) {
+                intervalRef.current = setInterval(() => {
+                    setTimeRemaining((prevTime) => {
+                        if (prevTime <= 1000) {
+                            clearInterval(intervalRef.current);
+                            intervalRef.current = null;
+                            if (draftData && (draftData.turn === user.email)) {
+                                console.log(prevTime);
+                                console.log("Calling auto pick");
+                                autoPickCall();
+                            }
+                            return 0;
                         }
-                        return 0;
-                    }
-                    return prevTime - 1000;
-                });
-            }, 1000);
+                        return prevTime - 1000;
+                    });
+                }, 1000);
+            }
 
-            pollingInterval = setInterval(() => {
-                fetchdraftData();
-                console.log("refreshing data")
-            }, ((draftData.time_per_pick / 3) * 1000));
+            if (!pollingIntervalRef.current) {
+                pollingIntervalRef.current = setInterval(() => {
+                    fetchdraftData();
+                    console.log("refreshing data");
+                // }, ((draftData.time_per_pick / 3) * 1000));
+                }, 10000);
+            }
         }
 
         return () => {
-            console.log("exiting page, time to clear all intervals")
-            clearInterval(pollingInterval);
-            clearInterval(interval);
+            console.log("exiting page, time to clear all intervals");
+            // clearInterval(pollingIntervalRef.current);
+            // clearInterval(intervalRef.current);
             window.removeEventListener("beforeunload", handleBeforeUnload);
-        }; // Cleanup the interval on unmount or turn change
-
+        };
     }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
+
+    // useEffect(() => {
+    //     let interval;
+    //     let pollingInterval;
+
+    //     const handleBeforeUnload = () => {
+    //         clearInterval(pollingInterval);
+    //         clearInterval(interval);
+    //         console.log("interval cleared");
+    //     };
+    //     window.addEventListener("beforeunload", handleBeforeUnload);
+
+    //     if (draftData?.state === 'In Process') {
+    //         // Calculate the remaining time for the new turn
+    //         const now = Date.now();
+    //         const lastUpdated = new Date(draftData.updatedAt).getTime(); // When the last turn was updated
+    //         const turnEndTime = lastUpdated + draftData.time_per_pick * 1000; // End time for the current turn
+    //         const remainingTime = Math.max(turnEndTime - now, 0); // Prevent negative time
+    //         setTimeRemaining(remainingTime);
+
+    //         // Start a new interval to update the countdown
+    //         interval = setInterval(() => {
+    //             setTimeRemaining((prevTime) => {
+    //                 if (prevTime <= 1000) {
+    //                     clearInterval(interval);
+    //                     if (draftData && (draftData.turn === user.email)) {
+    //                         console.log(prevTime)
+    //                         console.log("Calling auto pick")
+    //                         autoPickCall();
+    //                     }
+    //                     return 0;
+    //                 }
+    //                 return prevTime - 1000;
+    //             });
+    //         }, 1000);
+
+    //         pollingInterval = setInterval(() => {
+    //             fetchdraftData();
+    //             console.log("refreshing data")
+    //         }, ((draftData.time_per_pick / 3) * 1000));
+    //     }
+
+    //     return () => {
+    //         console.log("exiting page, time to clear all intervals")
+    //         clearInterval(pollingInterval);
+    //         clearInterval(interval);
+    //         window.removeEventListener("beforeunload", handleBeforeUnload);
+    //     }; // Cleanup the interval on unmount or turn change
+
+    // }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
 
     // useEffect(() => {
     //     if (timeRemaining === 0) {
@@ -190,11 +256,11 @@ const DraftStart = () => {
         return `${minutes}:${seconds} s`;
     };
 
-    useEffect(() => {
-        if (draftData?.order) {
-            setDraftOrder([...draftData.order]); // Ensure it's a new array
-        }
-    }, [draftData]);
+    // useEffect(() => {
+    //     if (draftData?.order) {
+    //         setDraftOrder([...draftData.order]); // Ensure it's a new array
+    //     }
+    // }, [draftData]);
 
     useEffect(() => {
         const savedView = sessionStorage.getItem('draftView');
@@ -310,9 +376,9 @@ const DraftStart = () => {
     };
 
 
-    function autoPickCall() {
+    function autoPickCall(email) {
         try {
-            let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players/autopick?draftID=${draftID}&email=${user.email}`
+            let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
             axios.get(link).then((response) => {
                 console.log(response);
                 if (response.data && !response.data.error) {
@@ -423,8 +489,13 @@ const DraftStart = () => {
         .filter((player) =>
             // Filter players by name or common_name
             player.name.toLowerCase().includes(search.toLowerCase()) ||
-            player.common_name?.toLowerCase().includes(search.toLowerCase()) ||
-            player.team_name?.toLowerCase().includes(search.toLowerCase())
+            player.common_name?.toLowerCase().includes(search.toLowerCase())
+            // ||
+            // player.team_name?.toLowerCase().includes(search.toLowerCase())
+        )
+        .filter((player) =>
+            // Filter by team name if filter is set
+            !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase()
         )
         .filter((player) =>
             // Filter by position if filter is set
@@ -530,8 +601,7 @@ const DraftStart = () => {
                                             // Find the team corresponding to the current email in the order
                                             const teamData = draftData?.teams.find((team) => team.user_email === email);
                                             return (
-                                                <div key={index} data-turn={email} className={`bg-[#1C1C1C] flex flex-col items-center justify-center text-center h-[140px] w-[200px] rounded-lg ${email === draftData?.turn ? 'border-2 border-[#FF8A00] shadow-lg' : 'hover:bg-[#444444]'
-                                                    }`}>
+                                                <div key={index} data-turn={email} className={`bg-[#1C1C1C] flex flex-col items-center justify-center text-center h-[150px] w-[200px] rounded-lg ${email === draftData?.turn ? 'border-2 border-[#FF8A00] shadow-lg' : ''}`}>
                                                     {teamData ? (
                                                         <>
                                                             <p className="text-sm text-[#FF8A00] mb-2">{`Turn ${index + 1}`}</p>
@@ -545,6 +615,10 @@ const DraftStart = () => {
                                                             )}
                                                             {/* Show the team name */}
                                                             <p className="text-sm">{teamData.team?.team_name || "Unnamed Team"}</p>
+                                                            {draftData && isCreator && email === draftData.turn ?
+                                                                <button onClick={() => { autoPickCall(email) }} className={`bg-[#1C1C1C] w-[150px] rounded-lg border-2 border-[#FF8A00] shadow-lg hover:bg-[#444] `}>Force Pick</button>
+                                                                : null
+                                                            }
                                                         </>
                                                     ) : (
                                                         <p>No Team Found</p>
@@ -591,6 +665,19 @@ const DraftStart = () => {
                                                 <option value="midfielder">Midfielder</option>
                                                 <option value="defender">Defender</option>
                                                 <option value="goalkeeper">Goalkeeper</option>
+                                            </select>
+                                        </div>
+                                        <div className='flex items-center gap-2 w-4/12'>
+                                            {/* <p className="text-gray-400 text-sm">Filter:</p> */}
+                                            <select
+                                                value={teamFilter}
+                                                onChange={(e) => setTeamFilter(e.target.value)}
+                                                className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                            >
+                                                <option value="">Team</option>
+                                                {teams ? teams.map((item) => <>
+                                                    <option value={item.name}>{item.name}</option>
+                                                </>) : null}
                                             </select>
                                         </div>
                                         <div className='flex items-center gap-2 w-5/12 '>
@@ -835,7 +922,7 @@ const DraftStart = () => {
                                                                     </p>
                                                                 </div>
                                                             ))}
-                                                            {renderSkeletons(3, pitchViewList.lineup.Defender.length)}
+                                                            {renderSkeletons(4, pitchViewList.lineup.Defender.length)}
                                                         </div>
                                                         {/* Midfielders */}
                                                         <div className="flex justify-center items-center gap-4">
@@ -854,7 +941,7 @@ const DraftStart = () => {
                                                                     </p>
                                                                 </div>
                                                             ))}
-                                                            {renderSkeletons(3, pitchViewList.lineup.Midfielder.length)}
+                                                            {renderSkeletons(4, pitchViewList.lineup.Midfielder.length)}
                                                         </div>
                                                         {/* Attackers */}
                                                         <div className="flex justify-center items-center gap-4">
