@@ -84,10 +84,10 @@ const DraftSettings = ({ draftID, user, onBack }) => {
             console.log("Lineup sum:", lineupSum);
             console.log("Lineup players:", editData?.lineup_players);
 
-            // Validate if the lineup sum matches lineup_players
-            if (lineupSum !== parseInt(editData?.lineup_players, 10)) {
+            // Validate if the lineup sum is greater than lineup_players
+            if (lineupSum > parseInt(editData?.lineup_players, 10)) {
                 alert(
-                    `The total lineup players in lineup configuration must equal the specified lineup players (${editData?.lineup_players}).`
+                    `The total lineup players in lineup configuration must be less than the specified lineup players (${editData?.lineup_players}).`
                 );
                 return;
             }

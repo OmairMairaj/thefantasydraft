@@ -64,7 +64,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
             console.log("Error fetching teams data:", error);
         }
     }, []);
-    
+
     useEffect(() => {
         // Fetch league data if user and draftID are available
         if (user && draftID) fetchdraftData();
@@ -144,7 +144,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                 pollingIntervalRef.current = setInterval(() => {
                     fetchdraftData();
                     console.log("refreshing data");
-                // }, ((draftData.time_per_pick / 3) * 1000));
+                    // }, ((draftData.time_per_pick / 3) * 1000));
                 }, 10000);
             }
         }
@@ -409,26 +409,26 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     }
 
     const filteredPlayers = players
-    .filter((player) =>
-        // Filter players by name or common_name
-        player.name.toLowerCase().includes(search.toLowerCase()) ||
-        player.common_name?.toLowerCase().includes(search.toLowerCase())
-        // ||
-        // player.team_name?.toLowerCase().includes(search.toLowerCase())
-    )
-    .filter((player) =>
-        // Filter by team name if filter is set
-        !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase()
-    )
-    .filter((player) =>
-        // Filter by position if filter is set
-        !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
-    )
-    .sort((a, b) => {
-        if (sort === 'name') return a.name.localeCompare(b.name);
-        if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
-        return 0;
-    });
+        .filter((player) =>
+            // Filter players by name or common_name
+            player.name.toLowerCase().includes(search.toLowerCase()) ||
+            player.common_name?.toLowerCase().includes(search.toLowerCase())
+            // ||
+            // player.team_name?.toLowerCase().includes(search.toLowerCase())
+        )
+        .filter((player) =>
+            // Filter by team name if filter is set
+            !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase()
+        )
+        .filter((player) =>
+            // Filter by position if filter is set
+            !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
+        )
+        .sort((a, b) => {
+            if (sort === 'name') return a.name.localeCompare(b.name);
+            if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
+            return 0;
+        });
 
     const fetchTurnTeam = () => {
         const turn = draftData?.turn;

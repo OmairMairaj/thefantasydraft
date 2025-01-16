@@ -4,6 +4,9 @@ DONE
 IN PROCESS
 Scoring
 
+TO-DO
+shift email given in all models of the owner/creator to the user ID
+
 --------------------------------------OMAIR--------------------------------------
 Add an arrow on draft order to show the way draft will work
 draft pages responsiveness
