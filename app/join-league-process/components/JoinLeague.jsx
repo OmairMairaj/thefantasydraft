@@ -22,13 +22,27 @@ const JoinLeague = ({ onNext }) => {
   const [loading, setLoading] = useState(false);
   const [validated, setValidated] = useState(false);
   const { addAlert } = useAlert();
+  const [user, setUser] = useState({});
 
-  let user = null;
-  if (sessionStorage.getItem("user"))
-    user = JSON.parse(sessionStorage.getItem("user")).user;
-  else if (localStorage.getItem("user"))
-    user = JSON.parse(localStorage.getItem("user")).user;
-  else router.push("/login?redirect=" + window.location.toString());
+  useEffect(() => {
+    // Check if window is defined to ensure we are on the client side
+    if (typeof window !== 'undefined') {
+      let userData = null;
+      if (sessionStorage.getItem("user")) {
+        userData = JSON.parse(sessionStorage.getItem("user"));
+      } else if (localStorage.getItem("user")) {
+        userData = JSON.parse(localStorage.getItem("user"));
+      } else {
+        router.push("/login?redirect=" + window.location.toString());
+        console.log(window.location.toString());
+      }
+
+      if (userData && userData.user) {
+        setUser(userData.user);
+        console.log(userData.user.email);
+      }
+    }
+  }, []);
 
   const handleInviteCodeChange = (e) => {
     const code = e.target.value;

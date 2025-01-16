@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Exo_2 } from "next/font/google";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
@@ -21,11 +21,23 @@ const Profile = () => {
   // console.log("we here");
   // console.log();
 
-  React.useEffect(() => {
-    if (sessionStorage.getItem("user")) {
-      setUser(JSON.parse(sessionStorage.getItem("user")).user);
-    } else {
-      setUser(JSON.parse(localStorage.getItem("user")).user);
+  useEffect(() => {
+    // Check if window is defined to ensure we are on the client side
+    if (typeof window !== 'undefined') {
+      let userData = null;
+
+      if (sessionStorage.getItem("user")) {
+        userData = JSON.parse(sessionStorage.getItem("user"));
+      } else if (localStorage.getItem("user")) {
+        userData = JSON.parse(localStorage.getItem("user"));
+      } else {
+        router.push("/login?redirect=" + window.location.toString());
+      }
+
+      if (userData && userData.user) {
+        setUser(userData.user);
+        console.log(userData.user.email);
+      }
     }
   }, []);
 

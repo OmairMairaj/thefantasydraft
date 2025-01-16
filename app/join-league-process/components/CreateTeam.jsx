@@ -35,6 +35,14 @@ const CreateTeam = ({ onNext, onBack }) => {
         '/images/stadium10.png',
         '/images/stadium11.png',
         '/images/stadium12.png',
+        '/images/stadium13.png',
+        '/images/stadium14.png',
+        '/images/stadium15.png',
+        '/images/stadium16.png',
+        '/images/stadium17.png',
+        '/images/stadium18.png',
+        '/images/stadium19.png',
+        '/images/stadium20.png',
     ];
 
     const capitalizeWords = (str) => {

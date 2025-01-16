@@ -12,7 +12,7 @@ Force Pick API and front end at admin
 
 
 --------------------------------------OMAIR--------------------------------------
-if drafting in progress, take directly to start draft page
-add club logo to player square on bottom right/left 
+if drafting in progress, take directly to start draft page (DONE)
+add club logo to player square on bottom right/left  (DONE)
 add 20 stadium images and we would need to call league to check which stadium is already selected and not let new user select that again
 check for user in local and session both or copy local to session at start of application

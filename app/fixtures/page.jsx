@@ -21,13 +21,22 @@ const Fixtures = () => {
   const { addAlert } = useAlert();
 
   useEffect(() => {
-    // Check if user is authenticated
-    const userData =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
-    if (!userData) {
-      router.push("/login");
-    } else {
-      fetchCurrentGameweek();
+    // Check if window is defined to ensure we are on the client side
+    if (typeof window !== 'undefined') {
+      let userData = null;
+
+      if (sessionStorage.getItem("user")) {
+        userData = JSON.parse(sessionStorage.getItem("user"));
+      } else if (localStorage.getItem("user")) {
+        userData = JSON.parse(localStorage.getItem("user"));
+      } else {
+        router.push("/login?redirect=" + window.location.toString());
+      }
+
+      if (userData && userData.user) {
+        fetchCurrentGameweek();
+        console.log(userData.user.email);
+      }
     }
   }, []);
 
@@ -41,7 +50,7 @@ const Fixtures = () => {
 
   const fetchCurrentGameweek = () => {
     axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`,{ cache: 'no-store' })
+      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`, { cache: 'no-store' })
       .then((response) => {
         console.log("current")
         console.log(response)
@@ -102,7 +111,7 @@ const Fixtures = () => {
 
   return (
     <div className="min-h-[88vh] flex flex-col items-center space-y-8">
-      <div className="w-full max-w-5xl px-6 sm:px-20 my-20">
+      <div className="w-full max-w-5xl px-6 sm:px-20 my-8">
         <h2
           className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-2 ${exo2.className}`}
         >
