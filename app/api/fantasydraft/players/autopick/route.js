@@ -35,14 +35,14 @@ export const GET = async (req) => {
     let players_length = team.players.length;
     const allPlayers = await Player.find({});
     let canSelectPlayers = []
-    
+
     if (team.pick_list && team.pick_list.length > 0) {
       canSelectPlayers = await filterPlayers(team.pick_list, draftID, teamID);
       if (canSelectPlayers.length < 1) {
         canSelectPlayers = await filterPlayers(allPlayers, draftID, teamID);
         canSelectPlayers = canSelectPlayers.sort((a, b) => b.rating - a.rating)
       }
-    }else{
+    } else {
       canSelectPlayers = await filterPlayers(allPlayers, draftID, teamID);
       canSelectPlayers = canSelectPlayers.sort((a, b) => b.rating - a.rating);
     }

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Suspense } from "react";
 import { Exo_2 } from 'next/font/google';
-import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink, FaChevronRight } from 'react-icons/fa';
+import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink, FaChevronRight, FaChevronCircleRight } from 'react-icons/fa';
 import { LuGrip } from "react-icons/lu";
 import Link from 'next/link';
 // import { useRouter } from 'next/navigation';
@@ -12,6 +12,7 @@ import { useAlert } from '@/components/AlertContext/AlertContext';
 import { useRef } from "react";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Modal from '@/components/Modal/Modal';
+import { FaArrowRightLong } from 'react-icons/fa6';
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],
@@ -82,11 +83,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
 
                 setTurnEmail(response.data.data.turn);
                 // Check if the current user is the creator of the league
-                if (response.data.data.creator === user.email) {
-                    setIsCreator(true);
-                } else {
-                    setIsCreator(false);
-                }
+                setIsCreator(response.data.data.creator === user.email);
 
                 if (response.data.data.state === 'In Process') {
                     const now = Date.now();
@@ -99,46 +96,91 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                 }
             } else {
                 console.error("Failed to fetch league data:", response.data.message);
+                addAlert("Failed to fetch draft data. Please try again.", "error");
             }
         } catch (error) {
-            console.error("Error fetching league data:", error);
+            console.error("An error occurred while fetching draft data:", error);
+            addAlert("An error occurred while fetching draft data.", "error");
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        const handleBeforeUnload = () => {
-            clearInterval(pollingIntervalRef.current);
-            clearInterval(intervalRef.current);
-            console.log("interval cleared");
-        };
-        window.addEventListener("beforeunload", handleBeforeUnload);
+    // useEffect(() => {
+    //     const handleBeforeUnload = () => {
+    //         clearInterval(pollingIntervalRef.current);
+    //         clearInterval(intervalRef.current);
+    //         console.log("interval cleared");
+    //     };
+    //     window.addEventListener("beforeunload", handleBeforeUnload);
 
-        if (draftData?.state === 'In Process') {
+    //     if (draftData?.state === 'In Process') {
+    //         const now = Date.now();
+    //         const lastUpdated = new Date(draftData.updatedAt).getTime();
+    //         const turnEndTime = lastUpdated + draftData.time_per_pick * 1000;
+    //         const remainingTime = Math.max(turnEndTime - now, 0);
+    //         setTimeRemaining(remainingTime);
+
+    //         if (!intervalRef.current) {
+    //             intervalRef.current = setInterval(() => {
+    //                 setTimeRemaining((prevTime) => {
+    //                     if (prevTime <= 1000) {
+    //                         clearInterval(intervalRef.current);
+    //                         intervalRef.current = null;
+    //                         if (draftData && (draftData.turn === user.email)) {
+    //                             console.log(prevTime);
+    //                             console.log("Calling auto pick");
+    //                             autoPickCall();
+    //                         }
+    //                         return 0;
+    //                     }
+    //                     return prevTime - 1000;
+    //                 });
+    //             }, 1000);
+    //         }
+
+    //         if (!pollingIntervalRef.current) {
+    //             pollingIntervalRef.current = setInterval(() => {
+    //                 fetchdraftData();
+    //                 console.log("refreshing data");
+    //                 // }, ((draftData.time_per_pick / 3) * 1000));
+    //             }, 10000);
+    //         }
+    //     }
+
+    //     return () => {
+    //         console.log("exiting page, time to clear all intervals");
+    //         clearInterval(pollingIntervalRef.current);
+    //         clearInterval(intervalRef.current);
+    //         window.removeEventListener("beforeunload", handleBeforeUnload);
+    //     };
+    // }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
+
+    useEffect(() => {
+        const setupIntervals = () => {
             const now = Date.now();
             const lastUpdated = new Date(draftData.updatedAt).getTime();
             const turnEndTime = lastUpdated + draftData.time_per_pick * 1000;
             const remainingTime = Math.max(turnEndTime - now, 0);
             setTimeRemaining(remainingTime);
 
-            if (!intervalRef.current) {
-                intervalRef.current = setInterval(() => {
-                    setTimeRemaining((prevTime) => {
-                        if (prevTime <= 1000) {
-                            clearInterval(intervalRef.current);
-                            intervalRef.current = null;
-                            if (draftData && (draftData.turn === user.email)) {
-                                console.log(prevTime);
-                                console.log("Calling auto pick");
-                                autoPickCall();
-                            }
-                            return 0;
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            intervalRef.current = setInterval(() => {
+                setTimeRemaining((prevTime) => {
+                    if (prevTime <= 1000) {
+                        clearInterval(intervalRef.current);
+                        intervalRef.current = null;
+                        if (draftData?.turn === user.email) {
+                            console.log(prevTime);
+                            console.log("Calling auto pick");
+                            autoPickCall();
                         }
-                        return prevTime - 1000;
-                    });
-                }, 1000);
-            }
+                        return 0;
+                    }
+                    return prevTime - 1000;
+                });
+            }, 1000);
+
 
             if (!pollingIntervalRef.current) {
                 pollingIntervalRef.current = setInterval(() => {
@@ -147,13 +189,18 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                     // }, ((draftData.time_per_pick / 3) * 1000));
                 }, 10000);
             }
+        };
+
+        if (draftData?.state === "In Process" && draftData?.turn) {
+            setupIntervals();
         }
 
         return () => {
-            console.log("exiting page, time to clear all intervals");
-            clearInterval(pollingIntervalRef.current);
-            clearInterval(intervalRef.current);
-            window.removeEventListener("beforeunload", handleBeforeUnload);
+            console.log("Clearing intervals on cleanup");
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            intervalRef.current = null;
+            if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
         };
     }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
 
@@ -462,15 +509,8 @@ const DraftStart = ({ draftID, user, onSettings }) => {
 
     useEffect(() => {
         if (draftData?.turn && turnContainerRef.current) {
-            const currentTurnBox = turnContainerRef.current.querySelector(
-                `[data-turn="${draftData.turn}"]`
-            );
-            if (currentTurnBox) {
-                currentTurnBox.scrollIntoView({
-                    behavior: "smooth",
-                    inline: "center",
-                });
-            }
+            const currentTurnBox = turnContainerRef.current.querySelector(`[data-turn="${draftData.turn}"]`);
+            currentTurnBox?.scrollIntoView({ behavior: "smooth", inline: "center" });
         }
     }, [draftData?.turn]);
 
@@ -499,7 +539,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                             </div>
                         </div>
                         {/* Drafting Info Section */}
-                        <div className="flex justify-between mb-8">
+                        <div className="flex justify-between mb-4">
                             <div className="flex flex-col space-y-4 w-1/3 pr-4 border-r border-[#404040]">
                                 <div className="bg-[#333333] px-4 py-4 rounded-lg text-center">
                                     {draftData?.turn &&
@@ -540,38 +580,42 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                             </div>
 
                             <div className="flex flex-col space-y-2 w-2/3 pl-4">
-                                <div className='flex justify-between'>
+                                <div className='flex'>
                                     <div className={`flex text-xl items-center ${exo2.className}`}>Draft Order:<span className='text-base ml-2 text-gray-400'>{`(Round ${draftData?.draft_round} order)`}</span></div>
+
                                 </div>
                                 <div ref={turnContainerRef} className="overflow-x-auto pb-2 scrollbar">
-                                    <div className="flex gap-4 min-w-max">
+                                    <div className="flex min-w-max">
                                         {draftData?.order.map((email, index) => {
                                             // Find the team corresponding to the current email in the order
                                             const teamData = draftData?.teams.find((team) => team.user_email === email);
                                             return (
-                                                <div key={index} data-turn={email} className={`bg-[#1C1C1C] flex flex-col items-center justify-center text-center h-[140px] w-[200px] rounded-lg ${email === draftData?.turn ? 'border-2 border-[#FF8A00] shadow-lg' : 'hover:bg-[#444444]'
-                                                    }`}>
-                                                    {teamData ? (
-                                                        <>
-                                                            <p className="text-sm text-[#FF8A00] mb-2">{`Turn ${index + 1}`}</p>
-                                                            {/* Show the team logo */}
-                                                            {teamData.team?.team_image_path && (
-                                                                <img
-                                                                    src={teamData.team.team_image_path}
-                                                                    alt={teamData.team.team_name}
-                                                                    className="w-14 h-14 rounded-lg mb-2"
-                                                                />
-                                                            )}
-                                                            {/* Show the team name */}
-                                                            <p className="text-sm">{teamData.team?.team_name || "Unnamed Team"}</p>
-                                                            {draftData && isCreator && email === draftData.turn ?
-                                                                <button onClick={() => { autoPickCall(email) }} className={`bg-[#1C1C1C] w-[150px] rounded-lg border-2 border-[#FF8A00] shadow-lg hover:bg-[#444] `}>Force Pick</button>
-                                                                : null
-                                                            }
-                                                        </>
-                                                    ) : (
-                                                        <p>No Team Found</p>
-                                                    )}
+                                                <div className='flex items-center'>
+                                                    <div key={index} data-turn={email} className={`bg-[#1C1C1C] flex flex-col items-center justify-center text-center h-[160px] w-[200px] rounded-lg ${email === draftData?.turn ? 'border-2 border-[#FF8A00] shadow-lg' : ''
+                                                        }`}>
+                                                        {teamData ? (
+                                                            <>
+                                                                <p className="text-sm text-[#FF8A00] mb-2">{`Turn ${index + 1}`}</p>
+                                                                {/* Show the team logo */}
+                                                                {teamData.team?.team_image_path && (
+                                                                    <img
+                                                                        src={teamData.team.team_image_path}
+                                                                        alt={teamData.team.team_name}
+                                                                        className="w-14 h-14 rounded-lg mb-2"
+                                                                    />
+                                                                )}
+                                                                {/* Show the team name */}
+                                                                <p className="text-sm">{teamData.team?.team_name || "Unnamed Team"}</p>
+                                                                {draftData && isCreator && email === draftData.turn ?
+                                                                    <button onClick={() => { autoPickCall(email) }} className={`bg-[#ff8800d6] px-4 my-1 rounded-lg shadow-lg hover:bg-[#ff8800] `}>Force Pick</button>
+                                                                    : null
+                                                                }
+                                                            </>
+                                                        ) : (
+                                                            <p>No Team Found</p>
+                                                        )}
+                                                    </div>
+                                                    <div className='flex text-lg mx-1 text-gray-400'><FaChevronRight /></div>
                                                 </div>
                                             );
                                         })}
@@ -676,7 +720,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                         <td className="p-2">{player.rating}</td>
                                                         <td className="p-2 sticky right-0 bg-[#1C1C1C]">
                                                             <button
-                                                                className={`${draftData?.turn !== user.email ? 'bg-[#454545]' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
+                                                                className={`${draftData?.turn !== user.email || loadingSelect ? 'bg-[#454545] cursor-not-allowed' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
                                                                 onClick={() => {
                                                                     setLoadingSelect(true);
                                                                     handlePick(player)

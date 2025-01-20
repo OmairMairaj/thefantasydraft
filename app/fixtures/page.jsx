@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Exo_2 } from "next/font/google";
 import { useAlert } from "@/components/AlertContext/AlertContext";
+import { Exo_2 } from "next/font/google";
 
 const exo2 = Exo_2({
   weight: ["700", "800"],

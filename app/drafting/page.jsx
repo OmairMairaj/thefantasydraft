@@ -35,7 +35,7 @@ const Drafting = () => {
     const [sort, setSort] = useState('rating'); // Default sorting by name
     const [filter, setFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [draftOrder, setDraftOrder] = useState(draftData?.order || []);
+    const [draftOrder, setDraftOrder] = useState([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const { addAlert } = useAlert();
@@ -88,9 +88,10 @@ const Drafting = () => {
             );
             if (response.data && !response.data.error) {
                 console.log("draftData: ", response.data.data[0]);
+                const draft = response.data.data[0];
 
                 // Check if the logged-in user is part of the league's teams
-                const isUserPartOfLeague = response.data.data[0].teams.some(
+                const isUserPartOfLeague = draft.teams.some(
                     (team) => team.user_email === user.email
                 );
                 if (!isUserPartOfLeague) {
@@ -101,29 +102,33 @@ const Drafting = () => {
                 }
 
                 // Check if the current user is the creator of the league
-                if (response.data.data[0].creator === user.email) {
+                if (draft.creator === user.email) {
                     setIsCreator(true);
                 } else {
                     setIsCreator(false);
                 }
 
-                if (response.data.data[0]?.state === 'Scheduled') {
-                    const startTime = new Date(response.data.data[0].start_date).getTime();
+                if (draft?.state === 'Scheduled') {
+                    const startTime = new Date(draft.start_date).getTime();
                     const now = Date.now();
                     setTimeRemaining(startTime - now > 0 ? startTime - now : 0);
                 }
 
                 // Redirect to draft-start if status is "In Process"
-                if (response.data.data[0]?.state === 'In Process') {
+                if (draft?.state === 'In Process') {
+                    setCurrentView('draft-start');
+                }
+                if (draft?.state === 'Ended') {
                     setCurrentView('draft-start');
                 }
 
-                setDraftData(response.data.data[0]);
+                setDraftData(draft);
             } else {
-                console.error("Failed to fetch league data:", response.data.message);
+                console.error("Failed to fetch draft data:", response.data.message);
             }
         } catch (error) {
-            console.error("Error fetching league data:", error);
+            console.error("Error fetching draft data:", error);
+            addAlert("An error occurred while fetching draft data.", "error");
         } finally {
             setLoading(false);
         }
@@ -146,7 +151,10 @@ const Drafting = () => {
     }, [draftData, timeRemaining]);
 
     useEffect(() => {
-        if (draftData) fetchPickList();
+        if (draftData) {
+            setDraftOrder([...draftData.order]);
+            fetchPickList();
+        }
     }, [draftData]);
 
     const formatTime = (ms) => {
@@ -418,35 +426,37 @@ const Drafting = () => {
                                             <h2 className={`text-4xl font-bold ${exo2.className}`}>Admin</h2>
                                             <p className="text-gray-400">Actions only available to Admin.</p>
                                             {/* Invite Section */}
-                                            <div className="flex space-x-4 mb-8 items-center">
-                                                <div className='text-white mr-1'>Invite Code:</div>
-                                                <div
-                                                    className="bg-[#303030] w-1/2 px-4 py-2 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
-                                                >{draftData?.leagueID?.invite_code}</div>
-                                                <button
-                                                    className="fade-gradient py-2 px-6 rounded-full flex items-center space-x-2"
-                                                    onClick={() => {
-                                                        let inviteCode
-                                                        if (draftData && draftData.leagueID && draftData.leagueID.invite_code) {
-                                                            inviteCode = process.env.NEXT_PUBLIC_FRONTEND_URL + "join-league-process?code=" + draftData.leagueID.invite_code;
-                                                            navigator.clipboard
-                                                                .writeText(inviteCode)
-                                                                .then(() => {
-                                                                    addAlert("Invite code copied to clipboard!", "success");
-                                                                })
-                                                                .catch((error) => {
-                                                                    console.error("Failed to copy invite code:", error);
-                                                                    addAlert("Failed to copy invite code. Please try again.", "error");
-                                                                });
-                                                        } else {
-                                                            addAlert("No invite code available to copy.", 'error');
-                                                        }
-                                                    }}
-                                                >
-                                                    <FaLink />
-                                                    <span>Copy Invite Link</span>
-                                                </button>
-                                            </div>
+                                            {(draftData?.state !== 'Ended' && draftData?.state !== 'In Process') && (
+                                                <div className="flex space-x-4 mb-8 items-center">
+                                                    <div className='text-white mr-1'>Invite Code:</div>
+                                                    <div
+                                                        className="bg-[#303030] w-1/2 px-4 py-2 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
+                                                    >{draftData?.leagueID?.invite_code}</div>
+                                                    <button
+                                                        className="fade-gradient py-2 px-6 rounded-full flex items-center space-x-2"
+                                                        onClick={() => {
+                                                            let inviteCode
+                                                            if (draftData && draftData.leagueID && draftData.leagueID.invite_code) {
+                                                                inviteCode = process.env.NEXT_PUBLIC_FRONTEND_URL + "join-league-process?code=" + draftData.leagueID.invite_code;
+                                                                navigator.clipboard
+                                                                    .writeText(inviteCode)
+                                                                    .then(() => {
+                                                                        addAlert("Invite code copied to clipboard!", "success");
+                                                                    })
+                                                                    .catch((error) => {
+                                                                        console.error("Failed to copy invite code:", error);
+                                                                        addAlert("Failed to copy invite code. Please try again.", "error");
+                                                                    });
+                                                            } else {
+                                                                addAlert("No invite code available to copy.", 'error');
+                                                            }
+                                                        }}
+                                                    >
+                                                        <FaLink />
+                                                        <span>Copy Invite Link</span>
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="flex space-x-4 absolute bottom-0 right-0 mb-6 px-6">
@@ -557,7 +567,7 @@ const Drafting = () => {
                                     <div className="flex flex-col space-y-2 w-2/3 pl-4">
                                         <div className='flex justify-between'>
                                             <div className={`flex text-xl items-center ${exo2.className}`}>Draft Order:<span className='text-base ml-2 text-gray-400'>{`(Round 1 order)`}</span></div>
-                                            {isCreator && (
+                                            {isCreator && (draftData?.state !== 'Ended' && draftData?.state !== 'In Process') && (
                                                 <button className="fade-gradient text-white px-6 py-1 rounded-full" onClick={() => setIsModalOpen(true)}>Change Order</button>
                                             )}
                                         </div>
