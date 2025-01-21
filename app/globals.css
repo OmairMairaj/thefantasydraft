@@ -295,9 +295,9 @@ input:-ms-autofill {
 .ribbon-2 {
   --f: 15px;
   /* control the folded part*/
-  --r: 15px;
+  --r: 50px;
   /* control the ribbon shape */
-  --t: 30px;
+  --t: 60px;
   /* the top offset */
   display: flex;
   align-items: center;
@@ -309,6 +309,6 @@ input:-ms-autofill {
     polygon(0 0, 100% 0, 100% calc(100% - var(--f)), calc(100% - var(--f)) 100%,
       calc(100% - var(--f)) calc(100% - var(--f)), 0 calc(100% - var(--f)),
       var(--r) calc(50% - var(--f)/2));
-  background: #494949;
+  background: #424242;
   /* box-shadow: 0 calc(-1*var(--f)) 0 #0005; */
 }

@@ -412,7 +412,7 @@ const Dashboard = () => {
                       <div className="w-full ">
                         <div className="flex flex-col lg:flex-row justify-between flex-wrap gap-4 sm:gap-6 md:gap-6 lg:gap-3 xl:gap-4">
                           {/* Team Name Card */}
-                          <Link href={'/team'} className="w-full lg:w-[49.2%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col justify-between bg-cover bg-center"
+                          <Link href={'/team'} className="w-full lg:w-[49.2%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col justify-between bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out"
                             style={{
                               backgroundImage: "url('/images/myteamimage.png')",
                             }}>
@@ -512,7 +512,7 @@ const Dashboard = () => {
                           </div>
 
                           {/* Match Center Card */}
-                          <div className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col justify-between bg-cover bg-center`}
+                          <Link href={'/match-center'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col justify-between bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
                             style={{
                               backgroundImage: "url('/images/gameweekimage.png')",
                             }}>
@@ -532,7 +532,7 @@ const Dashboard = () => {
                                 </li>
                               ))}
                             </ul>
-                          </div>
+                          </Link>
 
                           {/* Achievements Card */}
                           <div className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center`}

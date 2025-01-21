@@ -190,7 +190,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                             <img
                                 src={draftData?.leagueID?.league_image_path}
                                 alt="League Logo"
-                                className="w-16 h-16 object-cover rounded-lg sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28"
+                                className="w-16 h-16 object-cover rounded-lg sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32"
                             />
                         </div>
                         <div className='col-span-4 space-y-1'>
