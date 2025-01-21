@@ -8,6 +8,16 @@ TO-DO
 shift email given in all models of the owner/creator to the user ID
 
 --------------------------------------OMAIR--------------------------------------
+DONE
 Add an arrow on draft order to show the way draft will work
-draft pages responsiveness
 Please turn off timers and the calls they make after a page is exited
+
+IN PROCESS
+LeagueTable page
+
+TO-DO
+Draft pages responsiveness
+Draft page ended view: remove players and autopick box and show list view and pitch view side by side
+MyTeam page lineup configuration check and skeleton render accordingly
+MyTeam page list view switch and view options
+MyTeam page make captain/vice-captain option
