@@ -463,7 +463,7 @@ const Dashboard = () => {
                           </Link>
 
                           {/* League Table Card */}
-                          <div className={`w-full lg:w-[49.2%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center`}
+                          <Link href={'/league-table'} className={`w-full lg:w-[49.2%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
                             style={{
                               backgroundImage: "url('/images/matchcenterImage.png')",
                             }}>
@@ -491,7 +491,7 @@ const Dashboard = () => {
                                 </tbody>
                               </table>
                             </div>
-                          </div>
+                          </Link>
 
                           {/* Transfers Card */}
                           <div className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center`}

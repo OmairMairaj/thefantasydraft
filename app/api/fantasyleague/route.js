@@ -9,17 +9,32 @@ export const GET = async (req) => {
   try {
     await connectToDb();
 
-    // Extract email from query parameters
+    // Extract email and leagueId from query parameters
     const email = req.nextUrl.searchParams.get("email");
+    const leagueId = req.nextUrl.searchParams.get("leagueId");
 
     let leagues;
 
-    // Check if email parameter is provided
-    if (email) {
-      // Find all leagues where the user's email is included in the users_onboard array
-      leagues = await FantasyLeague.find({ users_onboard: { $in: [email] } });
+    if (leagueId) {
+      // Find a specific league by ID and populate teams
+      leagues = await FantasyLeague.findById(leagueId)
+        .populate({
+          path: "teams.team", // Path to the nested field
+          populate: {
+            path: "players.player", // Path to populate within the team object
+          },
+        });
+      if (!leagues) {
+        return NextResponse.json({
+          error: true,
+          message: "League not found",
+        });
+      }
+    } else if (email) {
+      // Find all leagues where the user's email is in users_onboard array
+      leagues = await FantasyLeague.find({ users_onboard: email });
     } else {
-      // Return all fantasy leagues if no email is provided
+      // Return all fantasy leagues if no filters are provided
       leagues = await FantasyLeague.find();
     }
 
