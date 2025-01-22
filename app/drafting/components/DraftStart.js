@@ -353,7 +353,8 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                 console.log(response);
                 if (response.data && !response.data.error) {
                     fetchdraftData();
-                    addAlert("Player successfully Force Picked!", "success");
+                    if (email) addAlert("Player successfully FORCE Picked!", "success");
+                    else addAlert("Player successfully AUTO Picked!", "success");
                 } else {
                     console.error("Failed to pick player:", response.data.message);
                 }

@@ -1,11 +1,12 @@
 import { Player, FantasyDraft, FantasyLeague, FantasyTeam, GameWeek } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
-import { filterPlayers } from "@/lib/helpers";
+import { filterPlayers, setInTeam } from "@/lib/helpers";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
 export const GET = async (req) => {
   try {
+    let draftEnd = false;
     // Get parameters from URL
     await connectToDb();
     const draftID = req.nextUrl.searchParams.get("draftID");
@@ -115,6 +116,10 @@ export const GET = async (req) => {
 
     team.save();
     draft.save();
+    if (draftEnd) {
+      // Setting bench, in-team players, captain and v.captain for all teams
+     let response = await setInTeam(draft);
+    }
     return NextResponse.json({
       error: false,
       league: league,

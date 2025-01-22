@@ -1,6 +1,6 @@
 import { Player, FantasyDraft, FantasyLeague, FantasyTeam, GameWeek } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
-import { filterPlayers } from "@/lib/helpers";
+import { filterPlayers, setInTeam } from "@/lib/helpers";
 import { NextResponse } from "next/server";
 import { sendMultipleEmails } from "../../../../lib/mail";
 import { TfiControlShuffle } from "react-icons/tfi";
@@ -31,6 +31,7 @@ export const GET = async (req) => {
 
 export const POST = async (req, res) => {
   try {
+    let draftEnd = false;
     await connectToDb();
     //contains DraftID, PlayerID, TeamID, PlayerObj
     let payload = await req.json();
@@ -55,9 +56,15 @@ export const POST = async (req, res) => {
       });
     }
     let teamID = draft.teams.find(item => item.user_email === payload.user_email).team
-    console.log(teamID);
+    // console.log(teamID);
     let team = await FantasyTeam.findOne({ _id: teamID });
-    // console.log(team);
+
+    // let playerObj = getPlayerObjForPick(draft, payload.playerObj._id, team.players)
+    // return NextResponse.json({
+    //   error: false,
+    //   message: "we testing."
+    // });
+
     let players_length = team.players.length;
     let playerObj = {
       player: new mongoose.Types.ObjectId(payload.playerObj._id),
@@ -65,6 +72,7 @@ export const POST = async (req, res) => {
       captain: players_length === 0 ? true : false,
       vice_captain: players_length === 1 ? true : false,
     }
+
     // Updating Team
     team.players.push(playerObj);
     // Updating Draft
@@ -81,6 +89,7 @@ export const POST = async (req, res) => {
 
     // Checking for draft end
     if ((draft.draft_round - 1) === draft.squad_players) {
+      draftEnd = true;
       draft.state = "Ended";
       draft.start_date = null;
       draft.turn = null;
@@ -128,11 +137,12 @@ export const POST = async (req, res) => {
 
     team.save();
     draft.save();
-    // console.log(team);
-    // console.log(draft);
+    if (draftEnd) {
+      // Setting bench, in-team players, captain and v.captain for all teams
+     let response = await setInTeam(draft);
+    }
     return NextResponse.json({
       error: false,
-      // data: gameweeks
       league: league,
       draft: draft,
       team: team
@@ -146,4 +156,24 @@ export const POST = async (req, res) => {
     });
   }
 };
+
+// export const POST = async (req, res) => {
+//   try {
+//     await connectToDb();
+//     let payload = await req.json();
+//     let draft = await FantasyDraft.findOne({ _id: payload.draftID });
+//     await setInTeam(draft);
+//     return NextResponse.json({
+//       error: false,
+//       draft: draft,
+//     });
+
+//   } catch (err) {
+//     return NextResponse.json({
+//       error: true,
+//       err: err.message,
+//       message: "Error picking a player, please try again or contact support."
+//     });
+//   }
+// };
 
