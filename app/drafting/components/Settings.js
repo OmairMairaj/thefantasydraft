@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Exo_2 } from 'next/font/google';
+import { useAlert } from '@/components/AlertContext/AlertContext';
+import { useRouter } from 'next/navigation';
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],
@@ -17,6 +19,11 @@ const DraftSettings = ({ draftID, user, onBack }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
     const [originalStartDate, setOriginalStartDate] = useState(null);
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [inputLeagueName, setInputLeagueName] = useState("");
+    const [inputError, setInputError] = useState(false);
+    const { addAlert } = useAlert();
+    const router = useRouter();
 
     useEffect(() => {
         if (user && draftID) fetchDraftData();
@@ -140,6 +147,53 @@ const DraftSettings = ({ draftID, user, onBack }) => {
         });
     };
 
+    const handleDeleteLeague = async () => {
+        if (!inputLeagueName) {
+            setInputError(true);
+            return;
+        }
+
+        if (inputLeagueName !== draftData?.leagueID?.league_name) {
+            setInputError(true);
+            return;
+        }
+        try {
+            const response = await axios.delete(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${draftData?.leagueID?._id}`
+            );
+
+            if (response.data && !response.data.error) {
+                addAlert("League deleted successfully.", "success");
+                console.log("League deleted successfully");
+                setShowDeletePopup(false);
+                router.push('/dashboard');
+            } else {
+                addAlert(response.data.message || "Failed to delete league.", "error");
+                console.error("Error deleting league:", response.data.message);
+            }
+        } catch (error) {
+            console.error("Error deleting league:", error);
+            addAlert("An unexpected error occurred while deleting the league.", "error");
+        }
+    };
+
+    const handleDeleteInputChange = (e) => {
+        setInputLeagueName(e.target.value);
+        setInputError(false);
+    };
+
+    useEffect(() => {
+        if (showDeletePopup) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [showDeletePopup]);
+
     if (loading || !draftData) {
         return (
             <div className="w-full min-h-[70vh] flex items-center justify-center">
@@ -147,9 +201,50 @@ const DraftSettings = ({ draftID, user, onBack }) => {
             </div>
         )
     }
-
     return (
-        <div className="min-h-[88vh] flex flex-col text-white">
+        <div className="min-h-[88vh] flex flex-col text-white relative">
+            {showDeletePopup && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+                    <div className={`bg-[#1c1c1c] p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center min-w-96 w-1/3 ${exo2.className}`}>
+                        <h2 className="text-2xl font-bold text-[#FF8A00] mb-4">Delete League</h2>
+                        <p className="mb-4 text-gray-300 mx-12">
+                            Are you sure you want to delete this league? This will remove all <strong className='text-white'>teams</strong>, <strong className='text-white'>draft data</strong>, and related information.
+                        </p>
+                        <p className="mb-4 text-gray-400">
+                            Type <span className="font-bold text-white">{draftData?.leagueID?.league_name}</span> to confirm:
+                        </p>
+                        <input
+                            type="text"
+                            value={inputLeagueName}
+                            onChange={handleDeleteInputChange}
+                            className={`w-full p-2 bg-[#2F2F2F] text-white rounded-lg mb-1 text-center 
+                                ${inputError ? "border border-red-500" : "border-none"}
+                            `}
+                            placeholder="Enter league name"
+                        />
+                        {inputError && <p className="text-red-500 mb-1">League name does not match.</p>}
+                        <div className="flex justify-between mt-4">
+                            <button
+                                className={` px-6 py-2 rounded-xl shadow-md ${!inputLeagueName ? "fade-gradient-no-hover opacity-50 cursor-not-allowed" : "fade-gradient"}`}
+                                onClick={handleDeleteLeague}
+                                disabled={!inputLeagueName}
+                            >
+                                Yes, I'm sure
+                            </button>
+                            <button
+                                className="fade-gradient px-6 py-2 rounded-xl shadow-md"
+                                onClick={() => {
+                                    setShowDeletePopup(false);
+                                    setInputLeagueName("");
+                                    setInputError(false);
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className='flex justify-between mb-4'>
                 <div className='flex items-center gap-4'>
                     <button
@@ -583,6 +678,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                             onClick={() => {
                                 // Handle Delete League logic here
                                 console.log("Delete League clicked");
+                                setShowDeletePopup(true);
                             }}
                         >
                             DELETE LEAGUE

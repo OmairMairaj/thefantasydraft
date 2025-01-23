@@ -111,3 +111,46 @@ export const POST = async (req, res) => {
     });
   }
 };
+
+export async function DELETE(req) {
+  try {
+    await connectToDb();
+
+    const { searchParams } = new URL(req.url);
+    const leagueId = searchParams.get("leagueId");
+
+    if (!leagueId) {
+      return NextResponse.json({
+        error: true,
+        message: "League ID is required.",
+      });
+    }
+
+    // Check if the league exists
+    const league = await FantasyLeague.findById(leagueId);
+    if (!league) {
+      return NextResponse.json({
+        error: true,
+        message: "League not found.",
+      });
+    }
+
+    // Remove associated teams and draft data
+    await FantasyTeam.deleteMany({ leagueID: leagueId });
+    await FantasyDraft.deleteMany({ leagueID: leagueId });
+
+    // Delete the league itself
+    await FantasyLeague.findByIdAndDelete(leagueId);
+
+    return NextResponse.json({
+      error: false,
+      message: "League deleted successfully.",
+    });
+  } catch (err) {
+    console.error("Error deleting league: ", err);
+    return NextResponse.json({
+      error: true,
+      message: "An unexpected error occurred while deleting the league.",
+    });
+  }
+}
