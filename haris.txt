@@ -1,13 +1,13 @@
 --------------------------------------HARIS--------------------------------------
 DONE
+in team setting (2 GKs first picked both in team)
+order of players for auto-sub
 
 IN PROCESS
 Scoring
 
 TO-DO
 shift email given in all models of the owner/creator to the user ID
-in team setting (2 GKs first picked both in team)
-order of players for auto-sub
 
 --------------------------------------OMAIR--------------------------------------
 DONE

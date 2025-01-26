@@ -55,8 +55,8 @@ export async function GET(req) {
             // let rating_count = 0;
             // console.log("player_data.statistics")
             // console.log(player_data.statistics)
-            // console.log("player_data.statistics.filter(i => i.type_id === 118)")
-            // console.log(player_data.statistics.filter(i => i.type_id === 118))
+            // console.log("player_data.statistics.filter(i => i.type_id == 118)")
+            // console.log(player_data.statistics.filter(i => i.type_id == 118))
             // if (rating_count !== 0) rating = rating_sum / rating_count;
             // console.log("player_data")
             // console.log(player_data)
@@ -73,13 +73,13 @@ export async function GET(req) {
                 "teamID": player?.teamID,
                 "team_name": player?.team_name,
                 "team_image_path": player?.team_image_path,
-                "rating": player_data?.statistics?.filter(i => i.season_id === seasonID)[0]?.details?.filter(i => i.type_id === 118)[0]?.value?.average || 0,
+                "rating": player_data?.statistics?.filter(i => i.season_id == seasonID)[0]?.details?.filter(i => i.type_id == 118)[0]?.value?.average || 0,
                 "fpl": null,
                 "points": null,
             };
-            data_to_insert.push(query);
             console.log(query.name);
             console.log(query.rating);
+            data_to_insert.push(query);
         }
         console.log(data_to_insert.length);
         await connectToDb();
