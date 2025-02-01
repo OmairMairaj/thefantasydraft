@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(req) {
     try {
         const seasonID = process.env.NEXT_PUBLIC_SEASON_ID
-        const api_url = "https://api.sportmonks.com/v3/football/fixtures/?include=round;stage;league;venue;state;lineups;events;timeline;statistics;periods;participants;scores;&per_page=50&filters=fixtureSeasons:"
+        const api_url = "https://api.sportmonks.com/v3/football/fixtures/?include=round;stage;league;venue;state;lineups.details.type;events;timeline;statistics;periods;participants;scores;&per_page=50&filters=fixtureSeasons:"
         const agent = new https.Agent({
             rejectUnauthorized: false,
         });
@@ -779,6 +779,13 @@ export async function GET(req) {
                     position_name: event_type_ids[lineup.position_id] || "Unknown",
                     formation_position: lineup.formation_position,
                     jersey_number: lineup.jersey_number,
+                    statistics: lineup.details.map((stat) => {
+                        return {
+                            value: Number(stat?.data?.value) || null,
+                            name: stat?.type?.name || null,
+                            code: stat?.type?.code || null
+                        }
+                    })
                 }));
 
                 // EVENTS
@@ -841,8 +848,16 @@ export async function GET(req) {
                     scores: scores,
                 };
                 // console.log(query)
+                // return NextResponse.json({
+                //     error: false,
+                //     message: query,
+                // });
                 await connectToDb();
                 const res = await Match.updateOne({ id: match.id }, { $set: query }, { upsert: true });
+                // return NextResponse.json({
+                //     error: false,
+                //     message: "done",
+                // });
                 // console.log(res);
             }
             // paginate = false;
