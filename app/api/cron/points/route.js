@@ -747,29 +747,42 @@ export async function GET(req) {
     //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     //Updating Scores
     let db = await connectToDb();
-    let minutes_since_last_update = new Date(Date.now() - 1000 * 60 * 30);
+    let minutes_since_last_update = new Date(Date.now() - 1000 * 60 * 60 * 30);
     console.log(minutes_since_last_update)
     let matchesUpdated = await Match.find({ updatedAt: { $gte: minutes_since_last_update } })
     if (matchesUpdated && matchesUpdated.length > 0) {
         let players_updated = matchesUpdated.map((match) => { return match.lineups.map((lineup) => { return lineup }) }).flat()
-        let points_config = ["goals", "assists", "clean_sheet", "penalty_save", "saves", "penalty_miss", "yellow_card", "red_card", "mins_played", "tackles", "interceptions",]
+        let points_config = [
+            "goals",
+            "assists",
+            "clean-sheet",
+            "goals-conceded",
+            "penalty_save",
+            "saves",
+            "penalty_miss",
+            "yellowcards",
+            "redcards",
+            "minutes-played",
+            "tackles",
+            "interceptions"
+        ]
         let players_fpl = []
         players_updated.forEach((player) => {
             let player_stats = player.statistics;
             let fpl_stats = {
-                goals: 0,
-                assists: 0,
+                "goals": 0,
+                "assists": 0,
                 "clean-sheet": 0,
                 "goals-conceded": 0,
-                penalty_save: 0,
-                saves: 0,
-                penalty_miss: 0,
-                yellowcards: 0,
-                redcards: 0,
+                "penalty_save": 0,
+                "saves": 0,
+                "penalty_miss": 0,
+                "yellowcards": 0,
+                "redcards": 0,
                 "minutes-played": 0,
-                tackles: 0,
-                interceptions: 0,
-                bonus: 0
+                "tackles": 0,
+                "interceptions": 0,
+                "bonus": 0
             };
             if (player_stats && player_stats.length > 0) {
                 player_stats.forEach((stat) => {
@@ -778,13 +791,14 @@ export async function GET(req) {
                     }
                 })
             }
-            if (fpl_stats["goals-conceded"] === 0) fpl_stats["clean-sheet"] = 1;
+            if ((fpl_stats["goals-conceded"] === 0)&&(fpl_stats["minutes-played"] > 60)) fpl_stats["clean-sheet"] = 1;
             // console.log(player.player_name);
             // console.log(fpl_stats);
             // console.log("XXXXXXXXXXXX");
             player.fpl_stats = fpl_stats;
             players_fpl.push({
                 _id: player._id,
+                name: player.player_name,
                 fpl_stats: fpl_stats
             })
         })
