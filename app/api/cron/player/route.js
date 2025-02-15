@@ -18,6 +18,7 @@ export async function GET(req) {
         let data_to_insert = [];
         await connectToDb();
         const teams = await Team.find({})
+        const gameweek = await GameWeek.find({ seasonID: seasonID })
         // console.log(teams)
         const playerIDs = []
         teams.map((team) => {
@@ -60,6 +61,18 @@ export async function GET(req) {
             // if (rating_count !== 0) rating = rating_sum / rating_count;
             // console.log("player_data")
             // console.log(player_data)
+            let player_points = [];
+            gameweek.forEach((gw) => {
+                let points_obj = {
+                    status: "Not Started",
+                    seasonID: seasonID,
+                    gameweek: gw._id,
+                    points: null,
+                    fpl_stats: null
+                }
+                player_points.push(points_obj);
+            })
+
             const query = {
                 "id": player_data?.id,
                 "name": player_data?.name,
@@ -74,18 +87,26 @@ export async function GET(req) {
                 "team_name": player?.team_name,
                 "team_image_path": player?.team_image_path,
                 "rating": player_data?.statistics?.filter(i => i.season_id == seasonID)[0]?.details?.filter(i => i.type_id == 118)[0]?.value?.average || 0,
-                "fpl": null,
-                "points": null,
+                "points": player_points,
             };
             console.log(query.name);
             console.log(query.rating);
-            data_to_insert.push(query);
+            await connectToDb();
+            const res = await Player.updateOne({ id: query.id }, { $set: query }, { upsert: true });
+            data_to_insert.push(res);
         }
-        console.log(data_to_insert.length);
-        await connectToDb();
-        const res = await Player.insertMany(data_to_insert, { ordered: false });
+        // console.log(data_to_insert.length);
+        // await connectToDb();
+        // const existing_players = await Player.find({});
+        // const delta_data_to_insert = data_to_insert.filter((player) => {
+        //     return !existing_players.some((existing_player) => existing_player.id === player.id);
+        // });
+        // return NextResponse.json({
+        //     data: delta_data_to_insert,
+        // });
+        // const res = await Player.insertMany(delta_data_to_insert, { ordered: false });
         return NextResponse.json({
-            res: res,
+            res: data_to_insert,
             error: false,
             message: "done",
         });

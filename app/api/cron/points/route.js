@@ -1,6 +1,7 @@
-import { GameWeek, Match, Standing } from "@/lib/models";
+import { Match, Player, Standing } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
+import { GameWeek } from "../../../../lib/models";
 
 import https from "https";
 import axios from "axios";
@@ -743,7 +744,7 @@ export async function GET(req) {
         1694: "Header",
         1695: "Shot",
     }
-
+    const seasonID = process.env.NEXT_PUBLIC_SEASON_ID
     //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     //Updating Scores
     let db = await connectToDb();
@@ -791,16 +792,50 @@ export async function GET(req) {
                     }
                 })
             }
-            if ((fpl_stats["goals-conceded"] === 0)&&(fpl_stats["minutes-played"] > 60)) fpl_stats["clean-sheet"] = 1;
+            if ((fpl_stats["goals-conceded"] === 0) && (fpl_stats["minutes-played"] > 60)) fpl_stats["clean-sheet"] = 1;
             // console.log(player.player_name);
             // console.log(fpl_stats);
             // console.log("XXXXXXXXXXXX");
             player.fpl_stats = fpl_stats;
             players_fpl.push({
                 _id: player._id,
+                player_id: player.player_id,
                 name: player.player_name,
                 fpl_stats: fpl_stats
             })
+        })
+
+        let currentGameWeek = await GameWeek.findOne({ is_current: true })
+
+        let allPlayers = await Player.find({}).populate("points.gameweek")
+
+
+        allPlayers.forEach(async (player) => {
+            // console.log(player.name);
+            let player_fpl = players_fpl.find((player_fpl) => player_fpl.player_id == player.id)
+            if (player_fpl) {
+                let playerGameWeek = player.points.find((item) => ((item.gameweek._id.equals(currentGameWeek._id)) && (item.seasonID == seasonID)))
+                if (playerGameWeek) {
+                    playerGameWeek.fpl_stats = player_fpl.fpl_stats;
+                    let temp_points = 0;
+                    temp_points = temp_points + (player_fpl.fpl_stats.goals * 5);
+                    temp_points = temp_points + (player_fpl.fpl_stats.assists * 3);
+                    temp_points = temp_points + (player_fpl.fpl_stats["clean-sheet"] * 4);
+                    temp_points = temp_points + (player_fpl.fpl_stats["goals-conceded"] * -1);
+                    temp_points = temp_points + (player_fpl.fpl_stats.penalty_save * 5);
+                    temp_points = temp_points + Math.floor(player_fpl.fpl_stats.saves * 0.333);
+                    temp_points = temp_points + (player_fpl.fpl_stats.penalty_miss * -3);
+                    temp_points = temp_points + (player_fpl.fpl_stats.yellowcards * -1);
+                    temp_points = temp_points + (player_fpl.fpl_stats.redcards * -3);
+                    temp_points = temp_points + Math.floor(player_fpl.fpl_stats.tackles * 0.2);
+                    temp_points = temp_points + (player_fpl.fpl_stats.interceptions * 0.2);
+                    temp_points = temp_points + (player_fpl.fpl_stats.bonus);
+                    if (temp_points > 0) temp_points = Math.floor(temp_points)
+                    else temp_points = Math.ceil(temp_points);
+                    playerGameWeek.points = temp_points;
+                }
+                let res = await player.save();
+            }
         })
         return NextResponse.json({
             data: players_fpl
