@@ -155,6 +155,12 @@ const Nav = () => {
           >
             TABLE
           </Link>
+          <Link
+            href="/players"
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+          >
+            PLAYERS
+          </Link>
         </div>
       )}
 
@@ -349,6 +355,12 @@ const Nav = () => {
                     className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                   >
                     Table
+                  </a>
+                  <a
+                    href="/players"
+                    className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Players
                   </a>
                   <div
                     onClick={() => {

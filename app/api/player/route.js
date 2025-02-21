@@ -6,7 +6,21 @@ import { NextResponse } from "next/server";
 export const GET = async (req, res) => {
   try {
     await connectToDb();
-    const Players = await Player.find().sort({ rating: -1 });
+    const Players = await Player.find().sort({ rating: -1 }).populate({ path: "points.gameweek" });
+    Players.forEach(player => {
+      if (player.points) {
+        // Sort points array based on numerical value of gameweek.name
+        player.points.sort((a, b) => {
+          if (!a.gameweek || !b.gameweek) return 0; // Handle missing gameweek data
+
+          // Convert gameweek.name to a number before comparison
+          const gwA = parseInt(a.gameweek.name, 10) || 0;
+          const gwB = parseInt(b.gameweek.name, 10) || 0;
+
+          return gwA - gwB; // Sort in ascending order (GW1, GW2, ...)
+        });
+      }
+    });
     return NextResponse.json({ error: false, data: Players });
   } catch (err) {
     console.log(err);
