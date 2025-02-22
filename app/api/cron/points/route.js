@@ -805,8 +805,9 @@ export async function GET(req) {
             })
         })
 
-        let currentGameWeek = await GameWeek.findOne({ is_current: true })
 
+        db = await connectToDb();
+        let currentGameWeek = await GameWeek.findOne({ is_current: true })
         let allPlayers = await Player.find({}).populate("points.gameweek")
 
 
@@ -834,12 +835,10 @@ export async function GET(req) {
                     else temp_points = Math.ceil(temp_points);
                     playerGameWeek.points = temp_points;
                 }
+                db = await connectToDb();
                 let res = await player.save();
             }
         })
-        return NextResponse.json({
-            data: players_fpl
-        });
     }
     //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     //End of Call
