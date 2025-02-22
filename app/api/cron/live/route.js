@@ -747,6 +747,7 @@ export async function GET(req) {
     //Updating Scores
     console.log("Updating Scores");
     try {
+        let db = await connectToDb();
         const api_url = "https://api.sportmonks.com/v3/football/livescores?include=round;stage;league;venue;state;lineups.details.type;events;timeline;statistics;periods;participants;scores;"
         const agent = new https.Agent({
             rejectUnauthorized: false,
@@ -846,7 +847,7 @@ export async function GET(req) {
                         teams: teams,
                         scores: scores,
                     };
-                    await connectToDb();
+                    db = await connectToDb();
                     const res = await Match.updateOne({ id: match.id }, { $set: query }, { upsert: true });
                 }
                 console.log("done")
