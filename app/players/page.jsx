@@ -26,7 +26,7 @@ const PlayersListing = () => {
     const fetchPlayers = async () => {
         setLoading(true); // Start loading before fetching
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/player`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/player/with-points `);
             if (response.data && !response.data.error) {
                 console.log('Players:', response.data.data);
                 setPlayers(response.data.data || []);
@@ -111,6 +111,7 @@ const PlayersListing = () => {
                         <tr className="text-center">
                             <th className='p-3 max-w-4'>{sort === 'rating' ? 'Rank' : "#"}</th>
                             <th className="p-3">Name</th>
+                            <th className="p-3">Total Points</th>
                             <th className="p-3">Position</th>
                             <th className="p-3">Rating</th>
                         </tr>
@@ -137,6 +138,7 @@ const PlayersListing = () => {
                                             <p className="text-gray-400">{player.team_name}</p>
                                         </div>
                                     </td>
+                                    <td className="p-3">{player.total_points}</td>
                                     <td className="p-3">{player.position_name}</td>
                                     <td className="p-3">{player.rating}</td>
                                 </tr>

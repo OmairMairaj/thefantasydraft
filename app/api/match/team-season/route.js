@@ -10,7 +10,7 @@ export const GET = async (req) => {
         const seasonID = parseInt(req.nextUrl.searchParams.get("seasonID"));
         const teamID = parseInt(req.nextUrl.searchParams.get("teamID"));
 
-        if (!seasonID || !teamID) {
+        if (!seasonID || !teamID) { 
             return NextResponse.json({ error: true, message: "Missing seasonID or teamID" });
         }
 

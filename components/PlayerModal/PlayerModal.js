@@ -70,8 +70,8 @@ const PlayerModal = ({ player, onClose }) => {
         const location = opponentTeam.location === "home" ? "(A)" : "(H)";
 
         // Determine match result
-        const playerScore = match.scores.find(s => s.team_id === playerTeam.team_id)?.goals ?? 0;
-        const opponentScore = match.scores.find(s => s.team_id === opponentTeam.team_id)?.goals ?? 0;
+        const playerScore = match.scores.find(s => ((s.team_id === playerTeam.team_id) && (s.score_type_name === "Current")))?.goals ?? 0;
+        const opponentScore = match.scores.find(s => ((s.team_id === opponentTeam.team_id) && (s.score_type_name === "Current")))?.goals ?? 0;
         const won = playerScore > opponentScore;
         const lost = playerScore < opponentScore;
         const resultLabel = won ? "W" : lost ? "L" : "D";
@@ -150,7 +150,7 @@ const PlayerModal = ({ player, onClose }) => {
                                                 </div>
                                             ) : '-'}
                                         </td>
-                                        <td className="p-2">{game.points ?? '0'}</td>
+                                        <td className="p-2">{player.points.find((item) => item.gameweek._id === game.gameweek._id).points ?? '0'}</td>
                                         <td className="p-2">{stats["minutes-played"] ?? '0'}</td>
                                         <td className="p-2">{stats.goals ?? '0'}</td>
                                         <td className="p-2">{stats.assists ?? '0'}</td>
