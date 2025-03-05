@@ -11,6 +11,7 @@ import { useAlert } from "@/components/AlertContext/AlertContext";
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 import Image from 'next/image';
 import { motion } from "framer-motion";
+import PlayerModal from '@/components/PlayerModal/PlayerModal';
 
 
 const exo2 = Exo_2({
@@ -51,6 +52,7 @@ const MatchCenter = () => {
     const [showOptions, setShowOptions] = useState(null); // Track clicked player for showing options
     const optionsRef = useRef(null);
     const [selectedTeam, setSelectedTeam] = useState(null);
+    const [openPlayerModal, setOpenPlayerModal] = useState(false);
 
     useEffect(() => {
         // Check if window is defined to ensure we are on the client side
@@ -310,6 +312,11 @@ const MatchCenter = () => {
         ));
     };
 
+    const closeModal = () => {
+        setSelectedPlayer(null);
+        setOpenPlayerModal(false);
+    };
+
     const positionIcon = (position) => {
         const positionStyles = {
             Attacker: { bg: 'bg-[#D3E4FE]', text: 'F' },
@@ -330,9 +337,27 @@ const MatchCenter = () => {
     };
 
     // Handle player click to show options menu
-    const handlePlayerClick = (player) => {
+    const handlePlayerClick = async (player) => {
         console.log("Clicked player:", player.player.common_name);
-        alert(`Clicked player: ${player.player.common_name}`);
+        console.log("Selected Player:", player.player);
+        // alert(`Clicked player: ${player.player.common_name}`);
+        const id = player.player._id;
+        console.log(id);
+        try {
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/player/with-points/${id}`);
+            if (response.data && !response.data.error) {
+                console.log("Player Data", response.data.data);
+
+                setSelectedPlayer(response.data.data);
+            } else {
+                console.error("Error fetching player details: ", response.data.message);
+                addAlert(response.data.message, "error");
+            }
+        } catch (error) {
+            console.error('Error fetching player details:', error);
+            addAlert("An error occurred while fetching team details.", "error");
+        }
+        setOpenPlayerModal(true);
     };
 
     const handlePageChange = (newPage) => {
@@ -358,6 +383,39 @@ const MatchCenter = () => {
                 bench: [],
             });
         }
+    };
+
+
+    // Function to find the gameweek points of the team (for the selected gameweek)
+    const getGameweekPoints = (players, gameweekID) => {
+        console.log("Calculating gameweek points for team...");
+        console.log(players, gameweekID);
+        if (!players || players.length === 0 || !gameweekID) return 0;
+
+        return players.reduce((total, player) => {
+            const gameweekData = player.player.points.find(gw => gw.gameweek === gameweekID);
+            return total + (gameweekData ? gameweekData.points : 0);
+        }, 0);
+    };
+
+    // Function to find the gameweek points of the captain (for the selected gameweek)
+    const getCaptainGameweekPoints = (players, gameweekID) => {
+        if (!players || players.length === 0 || !gameweekID) return 0;
+
+        const captain = players.find(player => player.captain);
+        if (!captain) return 0;
+
+        const gameweekData = captain.player.points.find(gw => gw.gameweek === gameweekID);
+        return gameweekData ? gameweekData.points : 0;
+    };
+
+    // Function to find the total points of the team (all-time points)
+    const getTotalPoints = (players) => {
+        if (!players || players.length === 0) return 0;
+
+        return players.reduce((total, player) => {
+            return total + player.player.points.reduce((sum, gw) => sum + gw.points, 0);
+        }, 0);
     };
 
     return (
@@ -440,7 +498,7 @@ const MatchCenter = () => {
                                                 <h3 className="text-3xl font-bold">{userTeam.team_name}</h3>
                                                 <p>{userTeam.user_email}</p>
                                             </div>
-                                            <p>Points: {userTeam.points || 0}</p>
+                                            <p>{`Points: ${getGameweekPoints(userTeam.players, gameweekDetails._id)}`}</p>
                                             {/* <p>Form: {userTeam.form}</p> */}
                                         </div>
                                     </div>
@@ -448,87 +506,48 @@ const MatchCenter = () => {
                             )}
 
                             {/* League Teams Section */}
-                            <motion.div className="flex flex-wrap gap-4 w-full mt-6">
-                                {leagueTeams?.map((team) => {
+                            <motion.div className="flex flex-wrap gap-6 w-full mt-6">
+                                {leagueTeams?.filter((t) => t.team._id !== userTeam._id).map((team) => {
                                     console.log(selectedTeam);
                                     console.log(selectedTeam?._id, team.team._id);
                                     return (
-                                        <>
-                                            <motion.div
-                                                key={team.team._id}
-                                                whileHover={{ scale: 1.02 }}
-                                                className={`relative ${selectedTeam ? 'w-[47%]' : 'w-[32%]'} rounded-xl shadow-md shadow-gray-800 cursor-pointer transition-transform ease-in-out overflow-hidden 
-                                    ${selectedTeam?._id === team.team._id ? "border border-orange-400" : ""}`}
-                                                onClick={() => handleTeamSelect(team.team)}
-                                            >
-                                                {/* Dark overlay */}
-                                                <div className="absolute inset-0 bg-gradient-to-r from-[#0C192250] to-[#0C1922]"></div>
+                                        <motion.div
+                                            key={team.team._id}
+                                            whileHover={{ scale: 1.02 }}
+                                            className={`relative ${selectedTeam ? 'w-[48%]' : 'w-[32%]'} rounded-xl shadow-md shadow-gray-800 cursor-pointer transition-transform ease-in-out overflow-hidden  ${selectedTeam?._id === team.team._id ? "border border-orange-400" : ""}`}
+                                            onClick={() => handleTeamSelect(team.team)}
+                                        >
+                                            {/* Dark overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-r from-[#0C192250] to-[#0C1922]"></div>
 
-                                                {/* Background Image */}
-                                                {/* <div className="absolute inset-0 bg-cover bg-center"
-                                style={{ backgroundImage: `url(${userTeam?.ground_image_path})` }}>
-                            </div> */}
+                                            {/* Background Image */}
+                                            {/* <div className="absolute inset-0 bg-cover bg-center"
+                                                    style={{ backgroundImage: `url(${userTeam?.ground_image_path})` }}>
+                                                </div> */}
 
-                                                {/* Content */}
-                                                <div className="relative z-10 flex items-center p-3 text-white">
-                                                    <Image
-                                                        src={team.team.team_image_path}
-                                                        alt={team.team.team_name}
-                                                        width={100}
-                                                        height={60}
-                                                        className="object-contain"
-                                                    />
+                                            {/* Content */}
+                                            <div className="relative z-10 flex items-center p-3 text-white">
+                                                <Image
+                                                    src={team.team.team_image_path}
+                                                    alt={team.team.team_name}
+                                                    width={80}
+                                                    height={60}
+                                                    className="object-contain"
+                                                />
 
-                                                    <div className="ml-4 space-y-2">
-                                                        <div className='flex flex-col'>
-                                                            <h3 className="text-2xl font-bold">{team.team.team_name}</h3>
-                                                            <p>{team.team.user_email}</p>
-                                                        </div>
-                                                        <p>Points: {team.team.points || 0}</p>
-                                                        {/* <p>Form: {team.team.form}</p> */}
+                                                <div className="ml-2 space-y-2">
+                                                    <div className='flex flex-col'>
+                                                        <h3 className="text-2xl font-bold">{team.team.team_name}</h3>
+                                                        <p>{team.team.user_email}</p>
                                                     </div>
+                                                    <p>{`Points: ${getGameweekPoints(team.team.players, gameweekDetails._id)}`}</p>
+                                                    {/* <p>Form: {team.team.form}</p> */}
                                                 </div>
-                                            </motion.div>
-                                            <motion.div
-                                                key={team.team._id}
-                                                whileHover={{ scale: 1.02 }}
-                                                className={`relative ${selectedTeam ? 'w-[47%]' : 'w-[32%]'} rounded-xl shadow-md shadow-gray-800 cursor-pointer transition-transform ease-in-out overflow-hidden 
-                                    ${selectedTeam?._id === team.team._id ? "border border-orange-400" : ""}`}
-                                                onClick={() => handleTeamSelect(team.team)}
-                                            >
-                                                {/* Dark overlay */}
-                                                <div className="absolute inset-0 bg-gradient-to-r from-[#0C192250] to-[#0C1922]"></div>
-
-                                                {/* Background Image */}
-                                                {/* <div className="absolute inset-0 bg-cover bg-center"
-                                style={{ backgroundImage: `url(${userTeam?.ground_image_path})` }}>
-                            </div> */}
-
-                                                {/* Content */}
-                                                <div className="relative z-10 flex items-center p-3 text-white">
-                                                    <Image
-                                                        src={team.team.team_image_path}
-                                                        alt={team.team.team_name}
-                                                        width={100}
-                                                        height={60}
-                                                        className="object-contain"
-                                                    />
-
-                                                    <div className="ml-4 space-y-2">
-                                                        <div className='flex flex-col'>
-                                                            <h3 className="text-2xl font-bold">{team.team.team_name}</h3>
-                                                            <p>{team.team.user_email}</p>
-                                                        </div>
-                                                        <p>Points: {team.team.points || 0}</p>
-                                                        {/* <p>Form: {team.team.form}</p> */}
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        </>
-
+                                            </div>
+                                        </motion.div>
                                     )
                                 })}
-                            </motion.div>
+                            </motion.div >
                         </motion.div>
 
                         {/* Right Section (PitchView/ListView) */}
@@ -560,15 +579,15 @@ const MatchCenter = () => {
                                             <div className='flex items-center justify-between'>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>GameWeek Points</p>
-                                                    <p className='text-lg font-semibold'>{selectedTeam?.points || 0}</p>
+                                                    <p className='text-lg font-semibold'>{getGameweekPoints(players, gameweekDetails._id) || 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Captain Points</p>
-                                                    <p className='text-lg font-semibold'>{selectedTeam?.points || 0}</p>
+                                                    <p className='text-lg font-semibold'>{getCaptainGameweekPoints(players, gameweekDetails._id) || 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Total Points</p>
-                                                    <p className='text-lg font-semibold'>{selectedTeam?.points || 0}</p>
+                                                    <p className='text-lg font-semibold'>{getTotalPoints(players) || 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Transfers</p>
@@ -615,7 +634,7 @@ const MatchCenter = () => {
                                                                     (p) => p.gameweek === gameweekDetails._id
                                                                 );
                                                                 return (
-                                                                    <div key={player.player._id} className={`${selectedPlayer?.player._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]`} onClick={() => handlePlayerClick(player)}>
+                                                                    <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
                                                                         <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                                         <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
@@ -653,7 +672,7 @@ const MatchCenter = () => {
                                                                     (p) => p.gameweek === gameweekDetails._id
                                                                 );
                                                                 return (
-                                                                    <div key={player.player._id} className={`${selectedPlayer?.player._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]`} onClick={() => handlePlayerClick(player)}>
+                                                                    <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
                                                                         <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                                         <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
@@ -690,7 +709,7 @@ const MatchCenter = () => {
                                                                     (p) => p.gameweek === gameweekDetails._id
                                                                 );
                                                                 return (
-                                                                    <div key={player.player._id} className={`${selectedPlayer?.player._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]`} onClick={() => handlePlayerClick(player)}>
+                                                                    <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
                                                                         <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                                         <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
@@ -727,7 +746,7 @@ const MatchCenter = () => {
                                                                     (p) => p.gameweek === gameweekDetails._id
                                                                 );
                                                                 return (
-                                                                    <div key={player.player._id} className={`${selectedPlayer?.player._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]`} onClick={() => handlePlayerClick(player)}>
+                                                                    <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
                                                                         <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                                         <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
@@ -767,7 +786,7 @@ const MatchCenter = () => {
                                                                 (p) => p.gameweek === gameweekDetails._id
                                                             );
                                                             return (
-                                                                <div key={player.player._id} className={`${selectedPlayer?.player._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]`} onClick={() => handlePlayerClick(player)}>
+                                                                <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
                                                                     <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                                     <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
@@ -814,42 +833,52 @@ const MatchCenter = () => {
                                                             {/* <th className="p-2">Role</th> */}
                                                             <th className="p-2">Team</th>
                                                             <th className="p-2">Position</th>
+                                                            <th className="p-2">Points</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {players.map((player) => (
-                                                            <tr key={player.player.id} className="border-b border-[#333333] text-center items-center justify-center">
-                                                                <td className="px-2 text-left truncate">
-                                                                    <div className="flex items-center space-x-2">
-                                                                        {player.player.image_path && (
-                                                                            <img
-                                                                                src={player.player.image_path}
-                                                                                alt={player.player.team_name || 'Team Logo'}
-                                                                                className="w-10 h-10 my-2 rounded-lg"
-                                                                            />
-                                                                        )}
-                                                                        <div className="overflow-hidden">
-                                                                            <p className="font-bold truncate">{player.player.common_name}
-                                                                                <span className='p-2'>
-                                                                                    {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
-                                                                                    {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                                </span>
-                                                                            </p>
+                                                        {players.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek === gameweekDetails._id
+                                                            );
+                                                            return (
+
+                                                                <tr key={player.player.id} onClick={() => handlePlayerClick(player)} className="border-b border-[#333333] text-center items-center justify-center cursor-pointer hover:scale-[1.01]">
+                                                                    <td className="px-2 text-left truncate">
+                                                                        <div className="flex items-center space-x-2">
+                                                                            {player.player.image_path && (
+                                                                                <img
+                                                                                    src={player.player.image_path}
+                                                                                    alt={player.player.team_name || 'Team Logo'}
+                                                                                    className="w-10 h-10 my-2 rounded-lg"
+                                                                                />
+                                                                            )}
+                                                                            <div className="overflow-hidden">
+                                                                                <p className="font-bold truncate">{player.player.common_name}
+                                                                                    <span className='p-2'>
+                                                                                        {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
+                                                                                        {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
+                                                                                    </span>
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                </td>
-                                                                {/* <td className="p-2 text-center truncate">
+                                                                    </td>
+                                                                    {/* <td className="p-2 text-center truncate">
                                                         {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">Captain</span>}
                                                         {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">Vice Captain</span>}
                                                     </td> */}
-                                                                <td className="p-2 text-center truncate">
-                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
-                                                                </td>
-                                                                <td className="p-2 text-center truncate">
-                                                                    {player.player.position_name}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                                    <td className="p-2 text-center truncate">
+                                                                        <img src={player.player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
+                                                                    </td>
+                                                                    <td className="p-2 text-center truncate">
+                                                                        {player.player.position_name}
+                                                                    </td>
+                                                                    <td className="p-2 text-center truncate">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </td>
+                                                                </tr>
+                                                            )
+                                                        })}
                                                         {players.length === 0 && (
                                                             <tr>
                                                                 <td colSpan="4" className="text-center py-4 text-gray-400">
@@ -872,6 +901,7 @@ const MatchCenter = () => {
 
                 </>
             )}
+            {openPlayerModal && selectedPlayer && <PlayerModal player={selectedPlayer} onClose={closeModal} />}
         </div >
     );
 };
