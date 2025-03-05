@@ -227,6 +227,8 @@ const TeamPage = () => {
     }, [players]);
 
     const segregatePlayers = (players) => {
+        console.group("%cPlayer Segregation Process", "color: cyan; font-weight: bold; font-size: 14px;");
+
         // Define position categories with a max limit of 5
         const positionCategories = ["Goalkeeper", "Defender", "Midfielder", "Attacker"];
         const maxLimit = 5;
@@ -242,29 +244,49 @@ const TeamPage = () => {
             bench: [],
         };
 
-        // Group players based on in_team flag and position
-        players.forEach((player) => {
-            const position = player.player.position_name;
+        console.log(`%cTotal Players to Segregate: ${players.length}`, "color: lightgreen; font-weight: bold;");
 
-            if (positionCategories.includes(position)) {
-                if (player.in_team) {
-                    // Ensure lineup does not exceed 5 players per position
-                    if (result.lineup[position].length < maxLimit) {
-                        result.lineup[position].push(player);
-                    } else {
-                        result.bench.push(player);
-                    }
+        // Group players based on in_team flag and position
+        players.forEach((player, index) => {
+            const position = player.player.position_name;
+            const playerName = player.player.common_name;
+            const isInTeam = player.in_team;
+            const teamStatus = isInTeam ? "Starting XI" : "Bench";
+
+            console.groupCollapsed(
+                `%c[${index + 1}] ${playerName} - ${position} (${teamStatus})`,
+                `color: ${isInTeam ? "yellow" : "gray"}; font-weight: bold;`
+            );
+
+            if (!positionCategories.includes(position)) {
+                console.warn(`%cUnknown position detected for ${playerName}: ${position}`, "color: red;");
+                console.groupEnd();
+                return;
+            }
+
+            if (isInTeam) {
+                if (result.lineup[position].length < maxLimit) {
+                    result.lineup[position].push(player);
+                    console.log(`✅ %cAdded to lineup (${position}).`, "color: green;");
                 } else {
                     result.bench.push(player);
+                    console.log(`⚠️ %cMax limit reached for ${position}. Sent to bench.`, "color: orange;");
                 }
             } else {
-                console.warn(`Unknown position: ${position}`);
+                result.bench.push(player);
+                console.log(`⬆️ %cPlayer starts on the bench.`, "color: lightblue;");
             }
+
+            console.groupEnd();
         });
 
-        // Sort bench players to ensure correct order for autosub functionality
-        // result.bench.sort((a, b) => a._id.localeCompare(b._id));
+        // Final summary
+        console.group("%cFinal Team Composition", "color: cyan; font-weight: bold;");
+        console.log("%cLineup:", "color: green; font-weight: bold;", result.lineup);
+        console.log("%cBench:", "color: orange; font-weight: bold;", result.bench);
+        console.groupEnd();
 
+        console.groupEnd(); // End of main group
         return result;
     };
 

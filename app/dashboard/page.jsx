@@ -110,60 +110,65 @@ const Dashboard = () => {
         fetchLeaguesByUser(userData.user.email)
         console.log(userData.user.email);
 
-        // Check if selectedLeagueID is in sessionStorage
-        const storedLeagueID = sessionStorage.getItem("selectedLeagueID");
-        if (storedLeagueID) {
-          setSelectedLeague({ _id: storedLeagueID }); // Temporarily set league with just ID
-        }
+        // // Check if selectedLeagueID is in sessionStorage
+        // const storedLeagueID = sessionStorage.getItem("selectedLeagueID");
+        // console.log("storedLeagueID", storedLeagueID);
+        // if (storedLeagueID) {
+        //   setSelectedLeague({ _id: storedLeagueID }); // Temporarily set league with just ID
+        // }
       }
     }
   }, []);
 
-  useEffect(() => {
-    const fetchTeamsData = async () => {
-      if (selectedLeague) {
-        try {
-          // Use Promise.all to fetch all team data in parallel
-          const teamResponses = await Promise.all(
-            selectedLeague.teams.map(async (team) => {
-              try {
-                if (team.team) {
-                  const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyteam/${team.team}`);
-                  if (!response.data.error) {
-                    return response.data.data;
-                  } else {
-                    console.error("Error fetching team: ", response.data.message);
-                    return null; // Return null if there's an error to maintain index consistency
-                  }
+
+  const fetchTeamsData = async () => {
+    if (selectedLeague) {
+      try {
+        // Use Promise.all to fetch all team data in parallel
+        const teamResponses = await Promise.all(
+          selectedLeague.teams.map(async (team) => {
+            try {
+              if (team.team) {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyteam/${team.team}`);
+                if (!response.data.error) {
+                  return response.data.data;
                 } else {
-                  console.error("teamId is undefined for team: ", team);
-                  return null; // Handle undefined teamId gracefully
+                  console.error("Error fetching team: ", response.data.message);
+                  return null; // Return null if there's an error to maintain index consistency
                 }
-              } catch (error) {
-                console.error("Error fetching team: ", error);
-                return null; // Handle request errors gracefully
+              } else {
+                console.error("teamId is undefined for team: ", team);
+                return null; // Handle undefined teamId gracefully
               }
-            })
-          );
+            } catch (error) {
+              console.error("Error fetching team: ", error);
+              return null; // Handle request errors gracefully
+            }
+          })
+        );
 
-          // Filter out any null values in case some requests failed
-          const validTeams = teamResponses.filter((team) => team !== null);
-          setTeams(validTeams);
-          console.log(validTeams)
+        // Filter out any null values in case some requests failed
+        const validTeams = teamResponses.filter((team) => team !== null);
+        setTeams(validTeams);
+        console.log(validTeams)
 
-          if (!selectedLeague.paid) {
-            setShowUnpaid(true);
-          }
-
-        } catch (error) {
-          console.error("Error fetching teams data: ", error);
+        if (!selectedLeague.paid) {
+          setShowUnpaid(true);
         }
+
+      } catch (error) {
+        console.error("Error fetching teams data: ", error);
       }
-    };
+    }
+  };
 
-    fetchTeamsData();
+
+  useEffect(() => {
+    if (selectedLeague) {
+      sessionStorage.setItem("selectedLeagueID", selectedLeague._id);
+      fetchTeamsData();
+    }
   }, [selectedLeague]);
-
 
   useEffect(() => {
     console.log("teams useEffect triggered")
@@ -183,11 +188,29 @@ const Dashboard = () => {
       if (!response.data.error) {
         setLeagues(response.data.data);
         console.log(response.data.data);
-      } else {
-        console.error("Error fetching leagues: ", response.data.message);
+
+        if (response.data.data.length === 0) {
+          setShowEmptyView(true);
+          setLoading(false); // Stop loading if no leagues found
+          return;
+        }
+
+        // Validate stored league ID
+        const storedLeagueID = sessionStorage.getItem("selectedLeagueID");
+        const validStoredLeague = response.data.data.find(league => league._id === storedLeagueID);
+
+        if (validStoredLeague) {
+          setSelectedLeague(validStoredLeague);
+        } else {
+          setSelectedLeague(response.data.data[0]); // Default to first league
+        }
+
+        setShowEmptyView(false);
       }
     } catch (error) {
       console.error("Error fetching leagues: ", error);
+    } finally {
+      setLoading(false); // Ensures loading is stopped in all cases
     }
   };
 

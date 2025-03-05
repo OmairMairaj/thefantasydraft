@@ -18,12 +18,17 @@ export const GET = async (req) => {
     if (leagueId) {
       // Find a specific league by ID and populate teams
       leagues = await FantasyLeague.findById(leagueId)
-        .populate({
-          path: "teams.team", // Path to the nested field
-          populate: {
-            path: "players.player", // Path to populate within the team object
+        .populate([
+          {
+            path: "teams.team", // Populate teams inside the league
+            populate: {
+              path: "players.player", // Populate players inside each team
+            },
           },
-        });
+          {
+            path: "draftID", // Populate draftID separately
+          }
+        ]);
       if (!leagues) {
         return NextResponse.json({
           error: true,
@@ -32,7 +37,7 @@ export const GET = async (req) => {
       }
     } else if (email) {
       // Find all leagues where the user's email is in users_onboard array
-      leagues = await FantasyLeague.find({ users_onboard: email });
+      leagues = await FantasyLeague.find({ users_onboard: email }).populate("draftID");
     } else {
       // Return all fantasy leagues if no filters are provided
       leagues = await FantasyLeague.find();

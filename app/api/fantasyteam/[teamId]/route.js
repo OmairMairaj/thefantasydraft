@@ -12,7 +12,7 @@ export const GET = async (req, { params }) => {
         // Find the fantasy team by ID
         const team = await FantasyTeam.findById(teamId).populate({
             path: "players.player", // Path to the nested field
-            select: "name image_path common_name team_name position_name team_image_path", // Fields to retrieve
+            select: "name image_path common_name team_name position_name team_image_path points", // Fields to retrieve
         });
 
         if (!team) {
