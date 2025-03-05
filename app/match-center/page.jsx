@@ -390,20 +390,23 @@ const MatchCenter = () => {
     const getGameweekPoints = (players, gameweekID) => {
         console.log("Calculating gameweek points for team...");
         console.log(players, gameweekID);
-        if (!players || players.length === 0 || !gameweekID) return 0;
+        if (!players || !players?.player || players.length === 0 || !gameweekID) return 0;
 
         return players.reduce((total, player) => {
-            const gameweekData = player.player.points.find(gw => gw.gameweek === gameweekID);
-            return total + (gameweekData ? gameweekData.points : 0);
+            if (player?.player) {
+                const gameweekData = player.player.points.find(gw => gw.gameweek === gameweekID);
+                return total + (gameweekData ? gameweekData.points : 0);
+            }
         }, 0);
     };
 
     // Function to find the gameweek points of the captain (for the selected gameweek)
     const getCaptainGameweekPoints = (players, gameweekID) => {
-        if (!players || players.length === 0 || !gameweekID) return 0;
+        if (!players || !players?.player || players.length === 0 || !gameweekID) return 0;
 
         const captain = players.find(player => player.captain);
         if (!captain) return 0;
+
 
         const gameweekData = captain.player.points.find(gw => gw.gameweek === gameweekID);
         return gameweekData ? gameweekData.points : 0;
@@ -411,10 +414,12 @@ const MatchCenter = () => {
 
     // Function to find the total points of the team (all-time points)
     const getTotalPoints = (players) => {
-        if (!players || players.length === 0) return 0;
+        if (!players || !players?.player || players.length === 0) return 0;
 
         return players.reduce((total, player) => {
-            return total + player.player.points.reduce((sum, gw) => sum + gw.points, 0);
+            if (player.player) {
+                return total + player.player.points.reduce((sum, gw) => sum + gw.points, 0);
+            }
         }, 0);
     };
 
@@ -579,15 +584,15 @@ const MatchCenter = () => {
                                             <div className='flex items-center justify-between'>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>GameWeek Points</p>
-                                                    <p className='text-lg font-semibold'>{getGameweekPoints(players, gameweekDetails._id) || 0}</p>
+                                                    <p className='text-lg font-semibold'>{players && getGameweekPoints(players, gameweekDetails._id) || 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Captain Points</p>
-                                                    <p className='text-lg font-semibold'>{getCaptainGameweekPoints(players, gameweekDetails._id) || 0}</p>
+                                                    <p className='text-lg font-semibold'>{players && getCaptainGameweekPoints(players, gameweekDetails._id) || 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Total Points</p>
-                                                    <p className='text-lg font-semibold'>{getTotalPoints(players) || 0}</p>
+                                                    <p className='text-lg font-semibold'>{players && getTotalPoints(players) || 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Transfers</p>
