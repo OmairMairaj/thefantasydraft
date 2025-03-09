@@ -35,8 +35,8 @@ export const POST = async (req, res) => {
     await connectToDb();
     //contains DraftID, PlayerID, TeamID, PlayerObj
     let payload = await req.json();
-    let draft = await FantasyDraft.findOne({ _id: payload.draftID });
-    let league = await FantasyLeague.findOne({ draftID: payload.draftID });
+    let draft = await FantasyDraft.findOne({ _id: payload.draftID, is_deleted: false });
+    let league = await FantasyLeague.findOne({ draftID: payload.draftID, is_deleted: false });
     if (draft.state !== "In Process") {
       return NextResponse.json({
         error: true,
@@ -57,7 +57,7 @@ export const POST = async (req, res) => {
     }
     let teamID = draft.teams.find(item => item.user_email === payload.user_email).team
     // console.log(teamID);
-    let team = await FantasyTeam.findOne({ _id: teamID });
+    let team = await FantasyTeam.findOne({ _id: teamID , is_deleted: false});
 
     // let playerObj = getPlayerObjForPick(draft, payload.playerObj._id, team.players)
     // return NextResponse.json({
@@ -161,7 +161,7 @@ export const POST = async (req, res) => {
 //   try {
 //     await connectToDb();
 //     let payload = await req.json();
-//     let draft = await FantasyDraft.findOne({ _id: payload.draftID });
+//     let draft = await FantasyDraft.findOne({ _id: payload.draftID , is_deleted: false});
 //     await setInTeam(draft);
 //     return NextResponse.json({
 //       error: false,

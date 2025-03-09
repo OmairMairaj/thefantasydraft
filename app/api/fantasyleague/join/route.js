@@ -13,9 +13,9 @@ export const GET = async (req) => {
     // Check if email parameter is provided
     if (leagueID) {
       // Find all leagues where the user's email is included in the users_onboard array
-      leagues = await FantasyLeague.find({ _id: leagueID });
+      leagues = await FantasyLeague.find({ _id: leagueID, is_deleted: false });
       let teams_to_find = leagues[0].teams.map(item => item.team)
-      let teams = await FantasyTeam.find({ _id: { $in: [teams_to_find] } });
+      let teams = await FantasyTeam.find({ _id: { $in: [teams_to_find] }, is_deleted: false });
       let stadiums = teams.map(item => item.ground_image_path)
       return NextResponse.json({ error: false, data: stadiums });
     }
@@ -50,8 +50,8 @@ export const POST = async (req, res) => {
         message: "The limit set for maximum teams has been reached. Please ask admin to increase maximum teams limit."
       });
     }
-    let leagueData = await FantasyLeague.findOne({ invite_code: payload.leagueData.inviteCode });
-    let draftData = await FantasyDraft.findOne({ _id: leagueData.draftID });
+    let leagueData = await FantasyLeague.findOne({ invite_code: payload.leagueData.inviteCode, is_deleted: false });
+    let draftData = await FantasyDraft.findOne({ _id: leagueData.draftID, is_deleted: false });
     if (payload.teamData) {
       // const PickList = (await Player.find().sort({ rating: -1 })).map(i => i._id);
       const teamObj = {

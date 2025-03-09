@@ -472,7 +472,7 @@ const Drafting = () => {
                                                 )}
                                             <button onClick={() => handleNavigation('settings')} className="bg-[#333333] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
                                                 <FaCog />
-                                                <span>League Settings</span>
+                                                <span>Draft Settings</span>
                                             </button>
                                         </div>
                                     </div>
@@ -494,7 +494,7 @@ const Drafting = () => {
                                                     )} */}
                                                 <button onClick={() => handleNavigation('settings')} className="bg-[#333333] py-2 px-6  text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
                                                     <FaCog />
-                                                    <span>League Settings</span>
+                                                    <span>Draft Settings</span>
                                                 </button>
                                             </div>
                                         </div>

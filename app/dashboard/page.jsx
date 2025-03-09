@@ -353,7 +353,7 @@ const Dashboard = () => {
                           <div className="flex space-x-2 md:space-x-4">
                             <Link href={"/league-settings?leagueID=" + selectedLeague._id} className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 md:py-2 lg:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
                               <FaCog className="text-sm md:text-base lg:text-lg xl:text-xl" />
-                              <span>Configurations</span>
+                              <span>League Settings</span>
                             </Link>
                             <Link href={"/drafting?leagueID=" + selectedLeague._id} className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 lg:py-2 md:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
                               <FaDraft2Digital className="text-sm md:text-base lg:text-lg xl:text-xl" />

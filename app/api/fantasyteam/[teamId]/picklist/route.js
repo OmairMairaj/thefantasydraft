@@ -10,7 +10,7 @@ export const GET = async (req, { params }) => {
         // Extract the teamId from the request parameters
         const { teamId } = params;
         // Find the fantasy team by ID
-        const team = await FantasyTeam.findById(teamId).populate("pick_list").populate("leagueID");
+        const team = await FantasyTeam.find({ _id: teamId, is_deleted: false }).populate("pick_list").populate("leagueID");
         const players = await filterPlayers(team.pick_list, team.leagueID.draftID, team._id);
         return NextResponse.json({ error: false, data: players });
     } catch (err) {
@@ -29,7 +29,7 @@ export const POST = async (req, { params }) => {
         let payload = await req.json();
         let id_array = payload.id_array;
         const { teamId } = params;
-        const team = await FantasyTeam.findById(teamId);
+        const team = await FantasyTeam.find({ _id: teamId, is_deleted: false });
         if (!team) {
             return NextResponse.json({
                 error: true,

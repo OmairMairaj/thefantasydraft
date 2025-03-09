@@ -11,7 +11,7 @@ export const GET = async (req) => {
     const draftID = req.nextUrl.searchParams.get("draftID");
     let drafts;
     if (draftID) {
-      drafts = await FantasyDraft.findById(draftID)
+      drafts = await FantasyDraft.find({ _id: draftID, is_deleted: false })
         .populate("leagueID", "invite_code league_image_path league_name min_teams max_teams")
         .populate({
           path: "teams.team", // Path to the nested field
@@ -29,7 +29,7 @@ export const GET = async (req) => {
     // Fetch by leagueID if provided
     else if (leagueID) {
       // Find all drafts where the user's leagueID is included in the users_onboard array
-      drafts = await FantasyDraft.find({ leagueID: leagueID })
+      drafts = await FantasyDraft.find({ leagueID: leagueID, is_deleted: false })
         .populate("leagueID", "invite_code")
         .populate({
           path: "teams.team", // Path to the nested field
@@ -38,7 +38,6 @@ export const GET = async (req) => {
     }
     // else {
     //   // Return all fantasy drafts if no leagueID is provided
-    //   drafts = await FantasyDraft.find({ leagueID });
     // }
     return NextResponse.json({ error: false, data: drafts });
   } catch (err) {
@@ -46,26 +45,6 @@ export const GET = async (req) => {
     return NextResponse.json({
       error: true,
       message: "An unexpected error occurred, please try again later.",
-    });
-  }
-};
-
-
-export const POST = async (req, res) => {
-  try {
-    await connectToDb();
-    let payload = await req.json();
-    if (payload.draftData && payload.draftData._id) {
-      const res = await FantasyDraft.findByIdAndUpdate(payload.draftData._id, payload.draftData, { new: true });
-      return NextResponse.json({ error: false, data: res });
-    } else {
-      return NextResponse.json({ error: true, message: "Please send a complete draft Object" });
-    }
-  } catch (err) {
-    return NextResponse.json({
-      error: true,
-      err: err.message,
-      message: "Error creating league, please try again."
     });
   }
 };

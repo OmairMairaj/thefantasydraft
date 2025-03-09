@@ -13,8 +13,8 @@ export const GET = async (req) => {
     const user_email = req.nextUrl.searchParams.get("email");
 
     // Get data for DB
-    let draft = await FantasyDraft.findOne({ _id: draftID });
-    let league = await FantasyLeague.findOne({ draftID: draft._id });
+    let draft = await FantasyDraft.findOne({ _id: draftID, is_deleted: false });
+    let league = await FantasyLeague.findOne({ draftID: draft._id, is_deleted: false });
 
     // Basic Validations
     if (draft.state !== "In Process") {
@@ -32,7 +32,7 @@ export const GET = async (req) => {
 
     // Finding team and inserting player in it
     let teamID = draft.teams.find(item => item.user_email === user_email).team
-    let team = await FantasyTeam.findOne({ _id: teamID }).populate("pick_list");
+    let team = await FantasyTeam.findOne({ _id: teamID, is_deleted: false }).populate("pick_list");
     let players_length = team.players.length;
     const allPlayers = await Player.find({});
     let canSelectPlayers = []
@@ -118,7 +118,7 @@ export const GET = async (req) => {
     draft.save();
     if (draftEnd) {
       // Setting bench, in-team players, captain and v.captain for all teams
-     let response = await setInTeam(draft);
+      let response = await setInTeam(draft);
     }
     return NextResponse.json({
       error: false,

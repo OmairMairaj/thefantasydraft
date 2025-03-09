@@ -10,7 +10,7 @@ export const GET = async (req, res) => {
   const reqEmail = url.searchParams.get("email");
   try {
     await connectToDb();
-    const data = await FantasyLeague.find({ invite_code: reqCode });
+    const data = await FantasyLeague.find({ invite_code: reqCode, is_deleted: false });
     if (data.length > 0) {
       if (data[0].users_onboard.indexOf(reqEmail) !== -1) return NextResponse.json({ error: true, message: "You are already a member of this league" });
       else return NextResponse.json({ error: false, data: data[0] });

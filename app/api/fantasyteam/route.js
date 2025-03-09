@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 export const GET = async (req, res) => {
   try {
     await connectToDb();
-    const data = await FantasyTeam.find();
+    const data = await FantasyTeam.find({ is_deleted: false });
     // .populate("userID").populate("leagueID").populate("pick_list");
     return NextResponse.json({ error: false, data: data });
   } catch (err) {

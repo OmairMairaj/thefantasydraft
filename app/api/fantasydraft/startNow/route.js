@@ -8,13 +8,13 @@ export const POST = async (req) => {
     await connectToDb();
     const payload = await req.json();
     console.log(payload)
-    let draft = await FantasyDraft.findOne({ _id: payload.draftID })
+    let draft = await FantasyDraft.findOne({ _id: payload.draftID, is_deleted: false })
       .populate("leagueID", "invite_code")
       .populate({
         path: "teams.team", // Path to the nested field
         select: "team_name team_image_path", // Fields to retrieve
       });
-    let league = await FantasyLeague.findOne({ draftID: draft._id });
+    let league = await FantasyLeague.findOne({ draftID: draft._id, is_deleted: false });
     if (payload.user_email !== draft.creator) return NextResponse.json({ error: true, message: "You are not the admin for this League. Please ask admin to start the draft" });
     if ((league.league_configuration.format === "Head to Head") && (league.teams.length % 2 !== 0)) return NextResponse.json({ error: true, message: "For a Head to Head format you need an even number of teams to start this league. Please add or remove a user" });
     draft.state = "In Process";

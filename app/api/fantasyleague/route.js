@@ -17,7 +17,7 @@ export const GET = async (req) => {
 
     if (leagueId) {
       // Find a specific league by ID and populate teams
-      leagues = await FantasyLeague.findById(leagueId)
+      leagues = await FantasyLeague.find({ _id: leagueId, is_deleted: false })
         .populate([
           {
             path: "teams.team", // Populate teams inside the league
@@ -37,10 +37,10 @@ export const GET = async (req) => {
       }
     } else if (email) {
       // Find all leagues where the user's email is in users_onboard array
-      leagues = await FantasyLeague.find({ users_onboard: email }).populate("draftID");
+      leagues = await FantasyLeague.find({ users_onboard: email, is_deleted: false }).populate("draftID");
     } else {
       // Return all fantasy leagues if no filters are provided
-      leagues = await FantasyLeague.find();
+      leagues = await FantasyLeague.find({ is_deleted: false });
     }
 
     return NextResponse.json({ error: false, data: leagues });
@@ -132,7 +132,7 @@ export async function DELETE(req) {
     }
 
     // Check if the league exists
-    const league = await FantasyLeague.findById(leagueId);
+    const league = await FantasyLeague.find({ _id: leagueId, is_deleted: false });
     if (!league) {
       return NextResponse.json({
         error: true,
@@ -141,11 +141,11 @@ export async function DELETE(req) {
     }
 
     // Remove associated teams and draft data
-    await FantasyTeam.deleteMany({ leagueID: leagueId });
-    await FantasyDraft.deleteMany({ leagueID: leagueId });
+    await FantasyTeam.findOneAndUpdate({ leagueID: leagueId }, { is_deleted: true });
+    await FantasyDraft.findOneAndUpdate({ leagueID: leagueId }, { is_deleted: true });
 
     // Delete the league itself
-    await FantasyLeague.findByIdAndDelete(leagueId);
+    await FantasyLeague.findOneAndUpdate({ _id: leagueId }, { is_deleted: true });
 
     return NextResponse.json({
       error: false,

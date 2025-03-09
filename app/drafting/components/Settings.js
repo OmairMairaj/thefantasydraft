@@ -67,6 +67,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
     };
 
     const handleSaveClick = async () => {
+        setLoading(true);
         try {
             // Log lineup configurations for debugging
             console.log("Lineup configurations:", editData?.lineup_configurations);
@@ -96,6 +97,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 alert(
                     `The total lineup players in lineup configuration must be less than the specified lineup players (${editData?.lineup_players}).`
                 );
+                setLoading(false);
                 return;
             }
 
@@ -103,13 +105,28 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 alert(
                     `The total squad players in squad configuration must equal the specified squad players (${editData?.squad_players}).`
                 );
+                setLoading(false);
                 return;
             }
 
-            // Proceed with saving
-            setIsEditing(false); // Exit edit mode
+            // console.log("editData");    
+            // console.log(editData);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/edit`, {
+                draftData: editData
+            });
+            if (response.data && !response.data.error) {
+                setDraftData(response.data.data);
+                console.log("Draft settings saved successfully:", response.data.data);
+                addAlert("Draft settings saved successfully.", "success");
+                setIsEditing(false);
+            } else {
+                console.error("Failed to save draft data:", response.data.message);
+                addAlert("Unable to edit Draft settings. Please try again later", "error");
+            }
+            setLoading(false);
         } catch (error) {
             console.error("Error saving draft data:", error);
+            setLoading(false);
         }
     };
 

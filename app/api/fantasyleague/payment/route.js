@@ -7,7 +7,7 @@ export const POST = async (req, res) => {
   try {
     await connectToDb();
     let payload = await req.json();
-    let data = await FantasyLeague.findOneAndUpdate({ _id: payload.league._id }, { paid: true }, { new: true });
+    let data = await FantasyLeague.findOneAndUpdate({ _id: payload.league._id, is_deleted: false }, { paid: true }, { new: true });
     return NextResponse.json({
       error: false,
       data:data,

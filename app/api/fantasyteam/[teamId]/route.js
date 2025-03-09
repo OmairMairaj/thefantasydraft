@@ -10,7 +10,7 @@ export const GET = async (req, { params }) => {
         const { teamId } = params;
 
         // Find the fantasy team by ID
-        const team = await FantasyTeam.findById(teamId).populate({
+        const team = await FantasyTeam.find({ _id: teamId, is_deleted: false }).populate({
             path: "players.player", // Path to the nested field
             select: "name image_path common_name team_name position_name team_image_path points", // Fields to retrieve
         });
@@ -51,8 +51,8 @@ export const POST = async (req, { params }) => {
         }
 
         // Find the fantasy team and update with the provided fields
-        const updatedTeam = await FantasyTeam.findByIdAndUpdate(
-            teamId,
+        const updatedTeam = await FantasyTeam.findOneAndUpdate(
+            { _id: teamId, is_deleted: false },  // Find team by ID
             { $set: body },  // Update only provided fields
             { new: true, runValidators: true }  // Return updated document & validate
         );
