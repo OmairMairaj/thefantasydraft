@@ -36,15 +36,15 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?draftID=${draftID}`
             );
             if (response.data && !response.data.error) {
-                setDraftData(response.data.data);
+                setDraftData(response.data.data[0]);
 
                 // Check if the current user is the creator of the league
-                if (response.data.data.creator === user.email) {
+                if (response.data.data[0].creator === user.email) {
                     setIsCreator(true);
                 } else {
                     setIsCreator(false);
                 }
-                console.log("Draft data fetched successfully:", response.data.data);
+                console.log("Draft data fetched successfully:", response.data.data[0]);
             } else {
                 console.error("Failed to fetch draft data:", response.data.message);
             }
