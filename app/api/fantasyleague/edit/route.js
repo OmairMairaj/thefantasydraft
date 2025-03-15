@@ -1,7 +1,6 @@
 import { FantasyDraft, FantasyLeague, FantasyTeam } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
 import { NextResponse } from "next/server";
-import { generateInviteCode } from "../../../lib/helpers";
 
 export const POST = async (req, res) => {
   try {
