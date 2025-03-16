@@ -10,16 +10,18 @@ export const GET = async (req, { params }) => {
         const { teamId } = params;
 
         // Find the fantasy team by ID
-        const team = await FantasyTeam.find({ _id: teamId, is_deleted: false }).populate({
+        let team = await FantasyTeam.find({ _id: teamId, is_deleted: false }).populate({
             path: "players.player", // Path to the nested field
             select: "name image_path common_name team_name position_name team_image_path points", // Fields to retrieve
         });
 
-        if (!team) {
+        if (!team || team.length === 0) {
             return NextResponse.json({
                 error: true,
                 message: `Team with ID ${teamId} not found.`,
             });
+        } else {
+            team = team[0];
         }
 
         return NextResponse.json({ error: false, data: team });

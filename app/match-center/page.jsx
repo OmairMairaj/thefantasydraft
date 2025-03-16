@@ -490,13 +490,13 @@ const MatchCenter = () => {
 
                                     {/* Content */}
                                     <div className="relative z-10 flex items-center p-6  text-white">
-                                        <Image
+                                        {(userTeam.team_image_path) ? <Image
                                             src={userTeam?.team_image_path}
                                             alt={userTeam?.team_name}
                                             width={150}
                                             height={60}
                                             className="object-contain"
-                                        />
+                                        />:null}
 
                                         <div className="ml-4 space-y-2">
                                             <div className='flex flex-col'>
@@ -532,13 +532,13 @@ const MatchCenter = () => {
 
                                             {/* Content */}
                                             <div className="relative z-10 flex items-center p-3 text-white">
-                                                <Image
+                                                {(team.team.team_image_path)?<Image
                                                     src={team.team.team_image_path}
                                                     alt={team.team.team_name}
                                                     width={80}
                                                     height={60}
                                                     className="object-contain"
-                                                />
+                                                />:null}
 
                                                 <div className="ml-2 space-y-2">
                                                     <div className='flex flex-col'>

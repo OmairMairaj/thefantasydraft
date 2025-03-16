@@ -47,7 +47,12 @@ export const GET = async (req) => {
       canSelectPlayers = await filterPlayers(allPlayers, draftID, teamID);
       canSelectPlayers = canSelectPlayers.sort((a, b) => b.rating - a.rating);
     }
-
+    if (team.players.find(playerObj => playerObj.player.toString() == canSelectPlayers[0]._id)) {
+      return NextResponse.json({
+        error: true,
+        message: "Player already picked."
+      });
+    }
     let playerObj = {
       player: new mongoose.Types.ObjectId(canSelectPlayers[0]._id),
       in_team: players_length < 11 ? true : false,

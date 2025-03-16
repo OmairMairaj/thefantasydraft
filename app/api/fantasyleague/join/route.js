@@ -80,6 +80,22 @@ export const POST = async (req, res) => {
       "userID": payload.userData._id,
       "user_email": payload.userData.email
     });
+    if (leagueData.league_configuration.format && (leagueData.league_configuration.format === "Classic")) {
+      leagueData.classic_points.push({
+        team: userTeam._id,
+        points_total: 0,
+        points_current: 0
+      })
+    } else {
+      leagueData.head_to_head_points.push({
+        team: userTeam._id,
+        points: 0,
+        wins: 0,
+        loses: 0,
+        draws: 0,
+        form: "- - - - -",
+      })
+    }
 
     const savedDataLeague = await leagueData.save()
     const savedDataDraft = await draftData.save()

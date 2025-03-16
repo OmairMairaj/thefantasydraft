@@ -21,7 +21,7 @@ export const GET = async (req) => {
             select: "name image_path common_name team_name position_name team_image_path", // Fields to retrieve from the player model
           },
         });
-
+      drafts = drafts[0];
       if (!drafts) {
         return NextResponse.json({ error: true, message: "Draft not found." });
       }

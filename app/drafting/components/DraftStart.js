@@ -62,7 +62,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                     else addAlert("Error fetching teams. Please try again", 'error');
                 });
         } catch (error) {
-            console.log("Error fetching teams data:", error);
+            console.error("Error fetching teams data:", error);
         }
     }, []);
 
@@ -90,12 +90,12 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                     const lastUpdated = new Date(response.data.data.updatedAt).getTime(); // Updated time
                     const turnEndTime = lastUpdated + response.data.data.time_per_pick * 1000; // End time for the current turn
                     const remainingTime = Math.max(turnEndTime - now, 0); // Prevent negative time
-                    console.log("remainingTime");
-                    console.log(remainingTime);
+                    // console.log("remainingTime");
+                    // console.log(remainingTime);
                     setTimeRemaining(remainingTime);
                 }
             } else {
-                console.error("Failed to fetch league data:", response.data.message);
+                console.error("1 Failed to fetch league data:", response.data.message);
                 addAlert("Failed to fetch draft data. Please try again.", "error");
             }
         } catch (error) {
@@ -171,7 +171,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                         clearInterval(intervalRef.current);
                         intervalRef.current = null;
                         if (draftData?.turn === user.email) {
-                            console.log(prevTime);
+                            // console.log(prevTime);
                             console.log("Calling auto pick");
                             autoPickCall();
                         }
@@ -266,7 +266,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                 setPlayers(response.data.data || []);
                 //console.log("Players:", response.data.data);
             } else {
-                console.error("Failed to fetch league data:", response.data.message);
+                console.error("2 Failed to fetch league data:", response.data.message);
             }
 
 
@@ -295,7 +295,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                 // setOriginalPickList(response.data.data);
                 // //console.log("PickList:", response.data.data);
             } else {
-                console.error("Failed to fetch league data:", response.data.message);
+                console.error("3 Failed to fetch league data:", response.data.message);
             }
 
         } catch (error) {
@@ -350,7 +350,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
         try {
             let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
             axios.get(link).then((response) => {
-                console.log(response);
+                // console.log(response);
                 if (response.data && !response.data.error) {
                     fetchdraftData();
                     if (email) addAlert("Player successfully FORCE Picked!", "success");
@@ -371,7 +371,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
             const players = draftData.teams.find((team) => team.user_email === user.email).team?.players || [];
             if (players) {
                 setChosenPlayers(players);
-                console.log("Chosen Players:", players);
+                // console.log("Chosen Players:", players);
             }
         }
     };
