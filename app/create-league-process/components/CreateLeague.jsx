@@ -83,7 +83,7 @@ const CreateLeague = ({ onNext }) => {
                                 value={leagueName}
                                 onChange={(e) => setLeagueName(capitalizeWords(e.target.value))}
                                 placeholder="Enter your league name"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                             />
                         </div>
 
@@ -96,7 +96,7 @@ const CreateLeague = ({ onNext }) => {
                                 value={maxTeams}
                                 onChange={(e) => setMaxTeams(e.target.value)}
                                 placeholder="Enter the Maximum Number of Teams"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                             />
                         </div>
 
@@ -109,7 +109,7 @@ const CreateLeague = ({ onNext }) => {
                                 value={secPerPick}
                                 onChange={(e) => setSecPerPick(e.target.value)}
                                 placeholder="Enter seconds per pick for the draft"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                             />
                         </div>
 

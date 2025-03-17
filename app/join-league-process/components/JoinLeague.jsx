@@ -109,7 +109,7 @@ const JoinLeague = ({ onNext }) => {
             value={inviteCode}
             onChange={handleInviteCodeChange}
             placeholder="Enter Invite Code"
-            className="w-full md:w-1/2 px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+            className="w-full md:w-1/2 px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
           />
           {loading && (
             <div className="flex items-center mt-4 text-sm md:text-base">

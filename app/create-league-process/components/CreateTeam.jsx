@@ -142,7 +142,7 @@ const CreateTeam = ({ onNext, onBack }) => {
                                 value={teamName}
                                 onChange={(e) => setTeamName(capitalizeWords(e.target.value))}
                                 placeholder="Enter your team name"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                             />
                         </div>
 
@@ -156,7 +156,7 @@ const CreateTeam = ({ onNext, onBack }) => {
                                 value={groundName}
                                 onChange={(e) => setGroundName(capitalizeWords(e.target.value))}
                                 placeholder="Enter the ground name"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                             />
                         </div>
                     </div>

@@ -6,10 +6,12 @@ import axios from 'axios';
 import { useAlert } from '@/components/AlertContext/AlertContext';
 
 import { Exo_2 } from 'next/font/google';
+import Image from 'next/image';
+import { FaEdit } from 'react-icons/fa';
 
 
 const exo2 = Exo_2({
-    weight: ['700', '800'],
+    weight: ['400', '500', '600', '700', '800'],
     style: ['italic'],
     subsets: ['latin'],
 });
@@ -24,7 +26,9 @@ const LeagueSettings = () => {
     const [isCreator, setIsCreator] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
-    
+    const [saving, setSaving] = useState(false);
+    const [gameweek, setGameweek] = useState(0);
+
 
 
     useEffect(() => {
@@ -44,6 +48,7 @@ const LeagueSettings = () => {
             // Extract leagueID from the URL using window.location
             if (userData && userData.user) {
                 setUser(userData.user);
+                console.log("User: ", userData);
                 const urlParams = new URLSearchParams(window.location.search);
                 const leagueIDFromURL = urlParams.get('leagueID');
                 if (leagueIDFromURL) {
@@ -62,13 +67,40 @@ const LeagueSettings = () => {
         }
     }, [user, leagueID]);
 
+
+
+    const handleEditClick = async () => {
+        setIsEditing(true);
+    }
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+        if (file.type !== "image/png") {
+            addAlert("Only PNG images are allowed.", "error");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setLeagueData({
+                ...leagueData,
+                league_image_path: reader.result, // This is the Base64-encoded image
+            });
+        };
+
+        reader.readAsDataURL(file);
+    };
+
     const handleSaveClick = async () => {
-        setLoading(true);
+        // setLoading(true);
         try {
             // console.log("editData");    
             // console.log(editData);
             const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague/edit`, {
-                leagueData: editData
+                leagueData: leagueData
             });
             if (response.data && !response.data.error) {
                 setLeagueData(response.data.data);
@@ -78,22 +110,24 @@ const LeagueSettings = () => {
             } else {
                 console.error("Failed to save League data:", response.data.message);
                 addAlert("Unable to edit League settings. Please try again later", "error");
+                setIsEditing(false);
             }
-            setLoading(false);
+            // setLoading(false);
         } catch (error) {
             console.error("Error saving League data:", error);
-            setLoading(false);
+            // setLoading(false);
+            setIsEditing(false);
         }
     };
 
     const fetchLeagueData = async () => {
         try {
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueID=${leagueID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${leagueID}`
             );
             if (response.data && !response.data.error) {
-                console.log("leagueData: ", response.data.data[0]);
-                const league = response.data.data[0];
+                console.log("leagueData: ", response.data.data);
+                const league = response.data.data;
 
                 // Check if the logged-in user is part of the league's teams
                 const isUserPartOfLeague = league.teams.some(
@@ -102,7 +136,7 @@ const LeagueSettings = () => {
                 if (!isUserPartOfLeague) {
                     // Redirect the user to the dashboard if they are not part of the league
                     addAlert("You are not a part of this league.", "error");
-                    router.push("/dashboard");
+                    // router.push("/dashboard");
                     return;
                 }
 
@@ -134,55 +168,291 @@ const LeagueSettings = () => {
         )
     } else return (
         <div className="min-h-[88vh] flex flex-col my-8 text-white px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-10">
-            <h1 className={`text-4xl font-bold ${exo2.className}`}>League Settings</h1>
-            <div className='grid grid-cols-3 gap-8 mt-10'>
-                <div className='bg-[#32323226] rounded-xl shadow-lg p-6 flex flex-col space-y-4'>
-                    <h2 className={`text-2xl font-bold ${exo2.className}`}>LEAGUE</h2>
-                    <p className='text-gray-400'>Edit your league's name and description.</p>
-                    <div className='flex flex-col space-y-4'>
-                        <input
-                            type='text'
-                            placeholder='League Name'
-                            className='bg-[#333333] px-4 py-3 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]'
-                        />
-                        <textarea
-                            placeholder='League Description'
-                            className='bg-[#333333] px-4 py-3 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]'
-                        />
+            <div className='flex justify-between items-center'>
+                <h1 className={`text-4xl font-bold ${exo2.className}`}>League Settings</h1>
+                {isCreator && (
+                    <div className="flex justify-end">
+                        {isEditing ? (
+                            <button
+                                className="fade-gradient px-12 py-2 rounded-3xl "
+                                onClick={handleSaveClick}
+                            >
+                                Save
+                            </button>
+                        ) : (
+                            <button
+                                className="fade-gradient px-12 py-2 rounded-3xl "
+                                onClick={handleEditClick}
+                            >
+                                Edit
+                            </button>
+                        )}
                     </div>
-                </div>
-                <div className='bg-[#1C1C1C] rounded-xl shadow-lg p-6 flex flex-col space-y-4'>
-                    <h2 className={`text-2xl font-bold ${exo2.className}`}>League Info</h2>
-                    <p className='text-gray-400'>Edit your league's name and description.</p>
-                    <div className='flex flex-col space-y-4'>
-                        <input
-                            type='text'
-                            placeholder='League Name'
-                            className='bg-[#333333] px-4 py-3 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]'
-                        />
-                        <textarea
-                            placeholder='League Description'
-                            className='bg-[#333333] px-4 py-3 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]'
-                        />
-                    </div>
-                </div>
-                <div className='bg-[#1C1C1C] rounded-xl shadow-lg p-6 flex flex-col space-y-4'>
-                    <h2 className={`text-2xl font-bold ${exo2.className}`}>TEAM</h2>
-                    <p className='text-gray-400'>Edit your league's name and description.</p>
-                    <div className='flex flex-col space-y-4'>
-                        <input
-                            type='text'
-                            placeholder='League Name'
-                            className='bg-[#333333] px-4 py-3 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]'
-                        />
-                        <textarea
-                            placeholder='League Description'
-                            className='bg-[#333333] px-4 py-3 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]'
-                        />
-                    </div>
-                </div>
+                )}
             </div>
+            <div className={`flex flex-col mt-6 ${exo2.className}`}>
+                {/* League Info Section */}
+                <div className='bg-[#0C1922] rounded-xl shadow-lg p-6'>
+                    <h2 className={`text-2xl font-bold ${exo2.className}`}>LEAGUE DETAILS</h2>
+                    <p className='text-gray-400'>Manage your league settings.</p>
+                    <div className='flex gap-12 w-full items-center justify-between p-6 '>
+                        <div className={`w-44 h-40 relative rounded-lg ${isEditing && 'border border-[#333333]'}`}>
+                            {leagueData.league_image_path ? (
+                                <Image
+                                    src={leagueData.league_image_path}
+                                    alt='League Logo'
+                                    layout='fill'
+                                    className='rounded-md object-contain '
+                                />
+                            ) : (
+                                <div className='w-full h-full flex items-center justify-center bg-gray-700 text-gray-400 rounded-full'>No Image</div>
+                            )}
+                            {/* Edit Icon - Shown Only in Editing Mode */}
+                            {isEditing && (
+                                <>
+                                    <label htmlFor="imageUpload" className="absolute top-2 right-2 bg-[#FF8A00] p-2 rounded-full cursor-pointer shadow-md hover:bg-[#ff7A00] transition">
+                                        <FaEdit className="text-white text-lg" />
+                                    </label>
+                                    <input
+                                        type="file"
+                                        id="imageUpload"
+                                        accept="image/png"
+                                        className="hidden"
+                                        onChange={(e) => handleImageUpload(e)}
+                                    />
+                                </>
+                            )}
+                        </div>
+                        <div className='grid grid-cols-2 gap-12 w-[85%]'>
+                            <div className='flex flex-col gap-2'>
+                                <div className='flex items-center gap-4'>
+                                    <label className='block w-1/4 text-gray-300'>League Name: </label>
+                                    <input
+                                        type='text'
+                                        value={leagueData.league_name || ''}
+                                        onChange={(e) => setLeagueData({ ...leagueData, league_name: e.target.value })}
+                                        disabled={!isEditing}
+                                        className={`w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
+                                    />
+                                </div>
+                                <div className='flex items-center gap-4'>
+                                    <label className='block w-1/4 text-gray-300'>Minimum Teams:</label>
+                                    <input
+                                        type='Number'
+                                        value={leagueData.min_teams || ''}
+                                        onChange={(e) => setLeagueData({ ...leagueData, min_teams: e.target.value })}
+                                        disabled={!isEditing}
+                                        className={`w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
+                                    />
+                                </div>
+                                <div className='flex items-center gap-4'>
+                                    <label className='block w-1/4 text-gray-300'>Maximum Teams:</label>
+                                    <input
+                                        type='Number'
+                                        value={leagueData.max_teams || ''}
+                                        onChange={(e) => setLeagueData({ ...leagueData, max_teams: e.target.value })}
+                                        disabled={!isEditing}
+                                        className={`w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
+                                    />
+                                </div>
+                            </div>
+                            <div className='flex flex-col gap-2'>
+                                <div className='flex items-center gap-4'>
+                                    <label className='block w-1/4 text-gray-300'>Format: </label>
+                                    <input
+                                        type='text'
+                                        value={leagueData.league_configuration?.format || ''}
+                                        disabled
+                                        className={`w-3/4 px-4 py-2 rounded-lg text-white ${isEditing ? 'bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]' : 'bg-transparent'}`}
+                                    />
+                                </div>
+                                <div className='flex items-center gap-4'>
+                                    <label className='block w-1/4 text-gray-300'>Starting Waiver:</label>
+                                    <input
+                                        type='Number'
+                                        value={leagueData.league_configuration.starting_waiver || ''}
+                                        onChange={(e) =>
+                                            setLeagueData({
+                                                ...leagueData,
+                                                league_configuration: {
+                                                    ...leagueData.league_configuration,
+                                                    starting_waiver: e.target.value
+                                                }
+                                            })
+                                        }
+                                        disabled={!isEditing}
+                                        className={`w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
+                                    />
+                                </div>
+                                <div className='flex items-center gap-4'>
+                                    <label className='block w-1/4 text-gray-300'>Auto Subs:</label>
+                                    {isEditing &&
+                                        <div
+                                            className={`relative w-16 h-7 flex items-center rounded-full p-2 my-2 cursor-pointer transition-all duration-300 border border-[#333333] ${leagueData.league_configuration?.auto_subs ? 'bg-[#FF8A00]' : 'bg-transparent'}`}
+                                            onClick={() =>
+                                                setLeagueData({
+                                                    ...leagueData,
+                                                    league_configuration: {
+                                                        ...leagueData.league_configuration,
+                                                        auto_subs: !leagueData.league_configuration?.auto_subs
+                                                    }
+                                                })
+                                            }
+                                        >
+                                            <div
+                                                className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300 ${leagueData.league_configuration?.auto_subs ? 'translate-x-7' : 'translate-x-[-6px]'}`}
+                                            >
 
+                                            </div>
+                                        </div>
+                                    }
+                                    <div className={`${!isEditing && 'w-3/4 px-4 py-2'} rounded-lg font-semibold`}>{leagueData.league_configuration?.auto_subs ? 'On' : 'Off'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Points Configuration Section */}
+                <div className='bg-[#0C1922] rounded-xl shadow-lg p-6 mt-6'>
+                    <h2 className={`text-2xl font-bold ${exo2.className}`}>POINTS CONFIGURATION</h2>
+                    <p className='text-gray-400'>Manage points settings for various actions.</p>
+
+                    <div className='grid grid-cols-4 gap-12 w-full p-6'>
+
+                        {/* Column 1 */}
+                        <div className='flex flex-col gap-4'>
+                            {[
+                                { label: "Goals", key: "goals" },
+                                { label: "Assists", key: "assists" },
+                                { label: "Minutes Played", key: "minutes-played" },
+                                { label: "Bonus", key: "bonus" }
+                            ].map(({ label, key }) => (
+                                <div className='flex items-center gap-4' key={key}>
+                                    <label className='block w-2/3 text-gray-300'>{label}:</label>
+                                    <input
+                                        type='number'
+                                        step="0.1"
+                                        value={leagueData.points_configuration?.[gameweek]?.[key] || ''}
+                                        onChange={(e) => {
+                                            const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
+                                            updatedPointsConfig[gameweek] = { // Modify the first object in the array
+                                                ...updatedPointsConfig[gameweek],
+                                                [key]: parseFloat(e.target.value) // Update the specific key
+                                            };
+
+                                            setLeagueData({
+                                                ...leagueData,
+                                                points_configuration: updatedPointsConfig // Update the state with the new array
+                                            });
+                                        }}
+                                        disabled={!isEditing}
+                                        className={`w-1/3 bg-transparent pl-2 py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Column 2 */}
+                        <div className='flex flex-col gap-4'>
+                            {[
+                                { label: "Goals Conceded", key: "goals-conceded" },
+                                { label: "Clean Sheet", key: "clean-sheet" },
+                                { label: "Saves", key: "saves" }
+                            ].map(({ label, key }) => (
+                                <div className='flex items-center gap-4' key={key}>
+                                    <label className='block w-2/3 text-gray-300'>{label}:</label>
+                                    <input
+                                        type='number'
+                                        step="0.1"
+                                        value={leagueData.points_configuration?.[gameweek]?.[key] || ''}
+                                        onChange={(e) => {
+                                            const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
+                                            updatedPointsConfig[gameweek] = { // Modify the first object in the array
+                                                ...updatedPointsConfig[gameweek],
+                                                [key]: parseFloat(e.target.value) // Update the specific key
+                                            };
+
+                                            setLeagueData({
+                                                ...leagueData,
+                                                points_configuration: updatedPointsConfig // Update the state with the new array
+                                            });
+                                        }}
+                                        disabled={!isEditing}
+                                        className={`w-1/3 bg-transparent pl-2 py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Column 3 */}
+                        <div className='flex flex-col gap-4'>
+                            {[
+                                { label: "Penalty Save", key: "penalty_save" },
+                                { label: "Penalty Miss", key: "penalty_miss" },
+                                { label: "Interceptions", key: "interceptions" }
+                            ].map(({ label, key }) => (
+                                <div className='flex items-center gap-4' key={key}>
+                                    <label className='block w-2/3 text-gray-300'>{label}:</label>
+                                    <input
+                                        type='number'
+                                        step="0.1"
+                                        value={leagueData.points_configuration?.[gameweek]?.[key] || ''}
+                                        onChange={(e) => {
+                                            const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
+                                            updatedPointsConfig[gameweek] = { // Modify the first object in the array
+                                                ...updatedPointsConfig[gameweek],
+                                                [key]: parseFloat(e.target.value) // Update the specific key
+                                            };
+
+                                            setLeagueData({
+                                                ...leagueData,
+                                                points_configuration: updatedPointsConfig // Update the state with the new array
+                                            });
+                                        }}
+                                        disabled={!isEditing}
+                                        className={`w-1/3 bg-transparent pl-2 py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Column 4 */}
+                        <div className='flex flex-col gap-4'>
+                            {[
+                                { label: "Yellow Cards", key: "yellowcards" },
+                                { label: "Red Cards", key: "redcards" },
+                                { label: "Tackles", key: "tackles" },
+                            ].map(({ label, key }) => (
+                                <div className='flex items-center gap-4' key={key}>
+                                    <label className='block w-2/3 text-gray-300'>{label}:</label>
+                                    <input
+                                        type='number'
+                                        step="0.1"
+                                        value={leagueData.points_configuration?.[gameweek]?.[key] || ''}
+                                        onChange={(e) => {
+                                            const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
+                                            updatedPointsConfig[gameweek] = { // Modify the first object in the array
+                                                ...updatedPointsConfig[gameweek],
+                                                [key]: parseFloat(e.target.value) // Update the specific key
+                                            };
+
+                                            setLeagueData({
+                                                ...leagueData,
+                                                points_configuration: updatedPointsConfig // Update the state with the new array
+                                            });
+                                        }}
+                                        disabled={!isEditing}
+                                        className={`w-1/3 bg-transparent pl-2 py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
         </div>
     )
 }

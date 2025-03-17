@@ -166,7 +166,7 @@ td {
 input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px #0C1922 inset !important;
   /* Replace with your custom background color */
-  /* -webkit-text-fill-color: white !important; */
+  -webkit-text-fill-color: white !important;
   /* Set text color to white */
 }
 

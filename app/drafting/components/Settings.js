@@ -36,10 +36,10 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?draftID=${draftID}`
             );
             if (response.data && !response.data.error) {
-                setDraftData(response.data.data[0]);
-
+                setDraftData(response.data.data);
+                console.log(response.data.data);
                 // Check if the current user is the creator of the league
-                if (response.data.data[0].creator === user.email) {
+                if (response.data.data.creator === user.email) {
                     setIsCreator(true);
                 } else {
                     setIsCreator(false);

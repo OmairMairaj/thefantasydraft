@@ -192,7 +192,7 @@ const CreateTeam = ({ onNext, onBack }) => {
                 value={teamName}
                 onChange={(e) => setTeamName(capitalizeWords(e.target.value))}
                 placeholder="Enter your team name"
-                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
               />
             </div>
             {/* Ground Name Input */}
@@ -209,7 +209,7 @@ const CreateTeam = ({ onNext, onBack }) => {
                 value={groundName}
                 onChange={(e) => setGroundName(capitalizeWords(e.target.value))}
                 placeholder="Enter the ground name"
-                className="w-full px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
               />
             </div>
           </div>
@@ -256,9 +256,8 @@ const CreateTeam = ({ onNext, onBack }) => {
             {groundImages.map((ground, index) => (
               <div
                 key={index}
-                className={`p-2 rounded-lg cursor-pointer ${
-                  selectedGround === ground ? "border-4 border-[#FF8A00]" : ""
-                }`}
+                className={`p-2 rounded-lg cursor-pointer ${selectedGround === ground ? "border-4 border-[#FF8A00]" : ""
+                  }`}
                 onClick={() => setSelectedGround(ground)}
               >
                 <div className="relative w-full h-36 sm:h-40 md:h-44 lg:h-40 xl:h-48">

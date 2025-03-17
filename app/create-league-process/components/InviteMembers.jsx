@@ -60,7 +60,7 @@ const InviteMembers = ({ onNext, onBack }) => {
                             value={emailInput}
                             onChange={(e) => setEmailInput(e.target.value)}
                             placeholder="Enter email address"
-                            className="w-full max-w-sm md:w-2/3 px-4 py-2 rounded-lg bg-[#0e0e0e] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
+                            className="w-full max-w-sm md:w-2/3 px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
                         />
                         <button
                             onClick={handleAddEmail}
