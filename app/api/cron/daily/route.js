@@ -742,11 +742,22 @@ export async function GET(req) {
         1694: "Header",
         1695: "Shot",
     }
+    let error = false;
 
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    //Updating League Team Points
+    try {
+        
+    }
+    catch (err) {
+        console.log(err);
+        error = true;
+        console.log("Error updating league team points");
+    }
 
     //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     //Updating Gameweek
-    console.log("Updating Gameweek");
+    console.log("Updating Game Week");
     try {
         const seasonID = process.env.NEXT_PUBLIC_SEASON_ID
         const api_url = "https://api.sportmonks.com/v3/football/rounds/seasons/"
@@ -784,13 +795,14 @@ export async function GET(req) {
         }
     } catch (err) {
         console.log(err);
-        console.log("Error updating gameweek");
+        error = true;
+        console.log("Error updating game week");
     }
 
     //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     //End of Call
     return NextResponse.json({
-        error: "maybe",
+        error: error,
         message: "done"
     });
 };
