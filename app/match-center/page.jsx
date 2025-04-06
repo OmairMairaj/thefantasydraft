@@ -26,6 +26,7 @@ const MatchCenter = () => {
     const [team, setTeam] = useState(null);
     const [pitchView, setPitchView] = useState(true); // Toggle between Pitch and List views
     const [players, setPlayers] = useState();
+    const [leaguePoints, setLeaguePoints] = useState();
     const [leagueTable, setLeagueTable] = useState([]);
     const [fixtures, setFixtures] = useState([]);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -155,6 +156,12 @@ const MatchCenter = () => {
         }
     }, [user, leagueId]);
 
+    useEffect(() => {
+        if(team && team._id && gameweekDetails && gameweekDetails._id && leagueId ){
+            fetchLeagueTeamPoints(leagueId,team._id,gameweekDetails._id);
+        }
+    }, [gameweekDetails, leagueId, team]);
+
     // const fetchStandings = () => {
     //     axios
     //         .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/standing`)
@@ -183,6 +190,7 @@ const MatchCenter = () => {
                         console.log("User's Team: ", userTeam.team);
                         setUserTeam(userTeam.team);
                         fetchTeamDetails(userTeam.team._id);
+
 
                     } else {
                         console.error("No team found for the user in this league.");
@@ -220,6 +228,22 @@ const MatchCenter = () => {
         } catch (error) {
             console.error('Error fetching team details:', error);
             addAlert("An error occurred while fetching team details.", "error");
+        }
+    };
+
+    const fetchLeagueTeamPoints = async (league, team, gameweek) => {
+        try {
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/points?teamID=`+team+`&leagueID=`+league+`&gameweekID=`+gameweek);
+            if (response.data && !response.data.error) {
+                console.log("Points Data", response.data.data);
+                setLeaguePoints(response.data.data);
+            } else {
+                console.error("Error fetching league points : ", response.data.message);
+                // addAlert(response.data.message, "error");
+            }
+        } catch (error) {
+            console.error('Error fetching team details:', error);
+            // addAlert("An error occurred while fetching team details.", "error");
         }
     };
 
@@ -401,15 +425,15 @@ const MatchCenter = () => {
     };
 
     // Function to find the gameweek points of the captain (for the selected gameweek)
-    const getCaptainGameweekPoints = (players, gameweekID) => {
-        if (!players || !players?.player || players.length === 0 || !gameweekID) return 0;
-
-        const captain = players.find(player => player.captain);
-        if (!captain) return 0;
-
-
-        const gameweekData = captain.player.points.find(gw => gw.gameweek === gameweekID);
-        return gameweekData ? gameweekData.points : 0;
+    const getCaptainGameweekPoints = (players) => {
+        try{
+            const captain = players.find(player => player.captain);
+            if (!captain) return 0;
+            return leaguePoints.players.find(x=>x.playerDetails._id == captain.player._id).playerPoints
+        }
+        catch{
+            return 0;
+        }
     };
 
     // Function to find the total points of the team (all-time points)
@@ -503,7 +527,7 @@ const MatchCenter = () => {
                                                 <h3 className="text-3xl font-bold">{userTeam.team_name}</h3>
                                                 <p>{userTeam.user_email}</p>
                                             </div>
-                                            <p>{`Points: ${getGameweekPoints(userTeam.players, gameweekDetails._id)}`}</p>
+                                            {/* <p>{`Points: ${(leaguePoints) ? leaguePoints.team.teamPoints : 0}`}</p> */}
                                             {/* <p>Form: {userTeam.form}</p> */}
                                         </div>
                                     </div>
@@ -545,7 +569,7 @@ const MatchCenter = () => {
                                                         <h3 className="text-2xl font-bold">{team.team.team_name}</h3>
                                                         <p>{team.team.user_email}</p>
                                                     </div>
-                                                    <p>{`Points: ${getGameweekPoints(team.team.players, gameweekDetails._id)}`}</p>
+                                                    {/* <p>{`Points: ${getGameweekPoints(team.team.players, gameweekDetails._id)}`}</p> */}
                                                     {/* <p>Form: {team.team.form}</p> */}
                                                 </div>
                                             </div>
@@ -584,15 +608,15 @@ const MatchCenter = () => {
                                             <div className='flex items-center justify-between'>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>GameWeek Points</p>
-                                                    <p className='text-lg font-semibold'>{players && getGameweekPoints(players, gameweekDetails._id) || 0}</p>
+                                                    <p className='text-lg font-semibold'>{(leaguePoints) ? leaguePoints.team.teamPoints : 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Captain Points</p>
-                                                    <p className='text-lg font-semibold'>{players && getCaptainGameweekPoints(players, gameweekDetails._id) || 0}</p>
+                                                    <p className='text-lg font-semibold'>{leaguePoints ?  getCaptainGameweekPoints(players) : 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Total Points</p>
-                                                    <p className='text-lg font-semibold'>{players && getTotalPoints(players) || 0}</p>
+                                                    <p className='text-lg font-semibold'>{(leaguePoints) ? leaguePoints.team.teamPoints : 0}</p>
                                                 </div>
                                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                                     <p className='text-lg'>Transfers</p>
@@ -660,7 +684,7 @@ const MatchCenter = () => {
                                                                             {player.player.position_name}
                                                                         </p>
                                                                         <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                            {gameweekPoints?.points ? gameweekPoints.points : 0} Pts
+                                                                        {(leaguePoints && leaguePoints.players.find(x=>x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x=>x.playerDetails._id == player.player._id).playerPoints : 0} Pts
                                                                         </p>
 
                                                                     </div>
@@ -698,7 +722,7 @@ const MatchCenter = () => {
                                                                             {player.player.position_name}
                                                                         </p>
                                                                         <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                            {gameweekPoints?.points ? gameweekPoints.points : 0} Pts
+                                                                        {(leaguePoints && leaguePoints.players.find(x=>x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x=>x.playerDetails._id == player.player._id).playerPoints : 0} Pts
                                                                         </p>
                                                                     </div>
                                                                 )
@@ -735,7 +759,7 @@ const MatchCenter = () => {
                                                                             {player.player.position_name}
                                                                         </p>
                                                                         <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                            {gameweekPoints?.points ? gameweekPoints.points : 0} Pts
+                                                                        {(leaguePoints && leaguePoints.players.find(x=>x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x=>x.playerDetails._id == player.player._id).playerPoints : 0} Pts
                                                                         </p>
                                                                     </div>
                                                                 )
@@ -772,7 +796,7 @@ const MatchCenter = () => {
                                                                             {player.player.position_name}
                                                                         </p>
                                                                         <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                            {gameweekPoints?.points ? gameweekPoints.points : 0} Pts
+                                                                        {(leaguePoints && leaguePoints.players.find(x=>x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x=>x.playerDetails._id == player.player._id).playerPoints : 0} Pts
                                                                         </p>
                                                                     </div>
                                                                 )
@@ -812,7 +836,7 @@ const MatchCenter = () => {
                                                                         {player.player.position_name}
                                                                     </p>
                                                                     <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0} Pts
+                                                                    {(leaguePoints && leaguePoints.players.find(x=>x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x=>x.playerDetails._id == player.player._id).playerPoints : 0} Pts
                                                                     </p>
                                                                 </div>
                                                             )

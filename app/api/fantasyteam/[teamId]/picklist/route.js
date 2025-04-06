@@ -30,15 +30,19 @@ export const POST = async (req, { params }) => {
         let payload = await req.json();
         let id_array = payload.id_array;
         const { teamId } = params;
-        const team = await FantasyTeam.find({ _id: teamId, is_deleted: false });
+        // console.log(teamId);
+        let team = await FantasyTeam.find({ _id: teamId, is_deleted: false });
+        team = team[0];
         if (!team) {
             return NextResponse.json({
                 error: true,
                 message: `Team with ID ${teamId} not found.`,
             });
         }
-        team.pick_list = id_array
-        team.save()
+        team.pick_list = id_array;
+        // console.log("team");
+        // console.log(team);
+        team.save();
         return NextResponse.json({ error: false, data: team });
 
     } catch (err) {

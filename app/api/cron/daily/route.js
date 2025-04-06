@@ -1,8 +1,9 @@
-import { GameWeek, Match, Standing } from "@/lib/models";
+import { FantasyLeague, FantasyTeam, GameWeek, Match, Standing } from "@/lib/models";
 import { connectToDb } from "@/lib/utils";
+import { calculateTeamPoints } from "@/lib/helpers";
 import { NextResponse } from "next/server";
 import https from "https";
-import axios from "axios";
+import axios, { all } from "axios";
 
 export const dynamic = 'force-dynamic'
 
@@ -743,22 +744,13 @@ export async function GET(req) {
         1695: "Shot",
     }
     let error = false;
-
-    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    //Updating League Team Points
-    try {
-        
-    }
-    catch (err) {
-        console.log(err);
-        error = true;
-        console.log("Error updating league team points");
-    }
+    let run_team_points = false;
 
     //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     //Updating Gameweek
-    console.log("Updating Game Week");
+    console.log("Updating GameWeek");
     try {
+        let current_gameweek = await GameWeek.findOne({ is_current: true });
         const seasonID = process.env.NEXT_PUBLIC_SEASON_ID
         const api_url = "https://api.sportmonks.com/v3/football/rounds/seasons/"
         const agent = new https.Agent({ rejectUnauthorized: false });
@@ -793,10 +785,137 @@ export async function GET(req) {
         } else {
             console.log("Failed to fetch data from API");
         }
+        // Check for GW Change after call. If prev GW ended then run team points
+        let updated_gameweek = await GameWeek.findOne({ is_current: true });
+        if (updated_gameweek.name !== current_gameweek.name) {
+            run_team_points = true;
+            console.log("Gameweek has changed. Let's update team points")
+        }
     } catch (err) {
         console.log(err);
         error = true;
         console.log("Error updating game week");
+    }
+
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    //Updating League Team Points
+    if (run_team_points) {
+        try {
+            let current_gameweek = await GameWeek.findOne({ is_current: true });
+            let all_leagues = await FantasyLeague.find({ is_deleted: false, paid: true }).populate("draftID").populate("head_to_head_points.team").populate("classic_points.team");
+
+            for (const one_league of all_leagues) {
+                if (one_league.draftID.state === "Ended") {
+                    if (one_league.league_configuration.format === "Head to Head") {
+                        let each_team_fpl_points = [];
+                        // GET POINTS FOR ALL TEAMS ACCORDING TO LEAGUE
+                        for (const team of one_league.head_to_head_points) {
+                            let teamDetails = team.team;
+                            let team_points = 0;
+                            // console.log("team");
+                            // console.log(teamDetails.team_name);
+                            team_points = await calculateTeamPoints(one_league, teamDetails, current_gameweek);
+                            each_team_fpl_points.push({ team: teamDetails, points: team_points, result: "draw" });
+                        }
+                        // console.log("each_team_fpl_points");
+                        // console.log(each_team_fpl_points);
+
+                        // GET CURRENT GAME WEEK
+                        let gw_fixtures = one_league.league_fixtures.filter(item => item.gameweek == current_gameweek.name);
+                        // console.log("gw_fixtures");
+                        // console.log(gw_fixtures);
+
+                        // GET FIXTURES PLAYED IN GAME WEEK AND DECIDE WINNER
+                        gw_fixtures.forEach(item => {
+                            let home = each_team_fpl_points.find(fpl_item => fpl_item.team._id.equals(item.teams[0]))
+                            let away = each_team_fpl_points.find(fpl_item => fpl_item.team._id.equals(item.teams[1]))
+                            // console.log("home")
+                            // console.log(home)
+                            // console.log("away")
+                            // console.log(away)
+                            let winner = null;
+                            let loser = null;
+                            if (home.points > away.points) {
+                                winner = each_team_fpl_points.findIndex(x => x.team._id == home.team._id);
+                                loser = each_team_fpl_points.findIndex(x => x.team._id == away.team._id);
+                            } else if (away.points > home.points) {
+                                winner = each_team_fpl_points.findIndex(x => x.team._id == away.team._id);
+                                loser = each_team_fpl_points.findIndex(x => x.team._id == home.team._id);
+                            } else {
+                                //match drew, do nothing
+                            }
+                            // mark team who won or lost
+                            // console.log("winner")
+                            // console.log(winner)
+                            // console.log("loser")
+                            // console.log(loser)
+                            if (winner !== undefined && winner !== null) each_team_fpl_points[winner].result = "win";
+                            if (loser !== undefined && loser !== null) each_team_fpl_points[loser].result = "lost";
+                        })
+
+                        // ASSIGN POINTS ACCORDING TO RESULTS
+                        one_league.head_to_head_points.forEach((team) => {
+                            // console.log("inside assign")
+                            // console.log("team")
+                            // console.log(team)
+                            let teamObj = each_team_fpl_points.find(fpl_team => fpl_team.team._id.equals(team.team._id))
+                            // console.log("teamObj")
+                            // console.log(teamObj)
+                            //Won
+                            if (teamObj.result === "win") {
+                                team.points += 3;
+                                team.wins += 1;
+                                team.form = team.form + " W";
+                            }
+                            // Lost
+                            else if (teamObj.result === "lost") {
+                                team.loses += 1;
+                                team.form = team.form + " L";
+                            }
+                            // Drew
+                            else {
+                                team.points += 1;
+                                team.draws += 1;
+                                team.form = team.form + " D";
+                            }
+                            console.log("final team output")
+                            console.log(team)
+                        })
+                    }
+                    else {
+                        let each_team_fpl_points = [];
+                        // GET POINTS FOR ALL TEAMS ACCORDING TO LEAGUE
+                        for (const team of one_league.classic_points) {
+                            let teamDetails = team.team;
+                            let team_points = 0;
+                            team_points = await calculateTeamPoints(one_league, teamDetails, current_gameweek);
+                            each_team_fpl_points.push({ team: teamDetails, points: team_points });
+                        }
+                        // console.log("each_team_fpl_points");
+                        // console.log(each_team_fpl_points);
+                        // ASSIGN POINTS ACCORDING TO RESULTS
+                        one_league.classic_points.forEach((team) => {
+                            // console.log("team")
+                            // console.log(team)
+                            let teamObj = each_team_fpl_points.find(fpl_team => fpl_team.team._id.equals(team.team._id))
+                            // console.log("teamObj")
+                            // console.log(teamObj)
+                            //Add points to total and current
+                            team.points_total = team.points_total + teamObj.points;
+                            team.points_current = teamObj.points;
+                            console.log("final team output")
+                            console.log(team)
+                        })
+                    }
+                    one_league.save();
+                }
+            }
+        }
+        catch (err) {
+            console.log(err);
+            error = true;
+            console.log("Error updating league team points");
+        }
     }
 
     //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
