@@ -335,7 +335,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                 await fetchdraftData();
                 addAlert("Player successfully picked!", "success");
             } else {
-                console.error("Failed to pick player:", response.data.message);
+                console.error("1 : Failed to pick player:", response.data.message);
                 addAlert(response.data.message, 'error');
             }
         } catch (error) {
@@ -356,7 +356,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                     if (email) addAlert("Player successfully FORCE Picked!", "success");
                     else addAlert("Player successfully AUTO Picked!", "success");
                 } else {
-                    console.error("Failed to pick player:", response.data.message);
+                    console.error("2 : Failed to pick player:", response.data.message);
                 }
             });
         } catch (error) {

@@ -47,18 +47,37 @@ export const GET = async (req) => {
       canSelectPlayers = await filterPlayers(allPlayers, draftID, teamID);
       canSelectPlayers = canSelectPlayers.sort((a, b) => b.rating - a.rating);
     }
-    if (team.players.find(playerObj => playerObj.player.toString() == canSelectPlayers[0]._id)) {
+
+    // if (team.players.find(playerObj => playerObj.player.toString() == canSelectPlayers[0]._id)) {
+    //   return NextResponse.json({
+    //     error: true,
+    //     message: "Player already picked."
+    //   });
+    // }
+
+    if (!canSelectPlayers[0] || !canSelectPlayers[0]._id) {
       return NextResponse.json({
         error: true,
-        message: "Player already picked."
+        message: "No players available to pick. Please check draft settings"
       });
     }
+
     let playerObj = {
       player: new mongoose.Types.ObjectId(canSelectPlayers[0]._id),
       in_team: players_length < 11 ? true : false,
       captain: players_length === 0 ? true : false,
       vice_captain: players_length === 1 ? true : false,
     }
+    console.log("playerObj")
+    console.log(playerObj)
+    team.players.map((player) => {
+      if (playerObj.player.toString() === player.player.toString()) {
+        return NextResponse.json({
+          error: true,
+          message: "Player already picked."
+        });
+      }
+    })
     // Updating Team
     team.players.push(playerObj);
     // Updating Draft
@@ -132,6 +151,7 @@ export const GET = async (req) => {
       team: team
     });
   } catch (err) {
+    console.error("Error fetching drafts: ", err);
     console.error("Error fetching drafts: ", err.message);
     return NextResponse.json({
       error: true,

@@ -64,6 +64,7 @@ export const POST = async (req, res) => {
     //   error: false,
     //   message: "we testing."
     // });
+
     if (team.players.find(playerObj => playerObj.player.toString() == payload.playerObj._id)) {
       return NextResponse.json({
         error: true,
@@ -79,6 +80,14 @@ export const POST = async (req, res) => {
       vice_captain: players_length === 1 ? true : false,
     }
 
+    team.players.map((player)=>{
+      if(playerObj.player.toString() === player.player.toString()){
+        return NextResponse.json({
+          error: true,
+          message: "Player already picked."
+        });
+      }
+    })
     // Updating Team
     team.players.push(playerObj);
     // Updating Draft
