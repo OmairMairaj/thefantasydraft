@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Suspense } from "react";
 import { Exo_2 } from 'next/font/google';
-import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink } from 'react-icons/fa';
+import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink, FaRegCopy } from 'react-icons/fa';
 import { LuGrip } from "react-icons/lu";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
@@ -429,9 +429,21 @@ const Drafting = () => {
                                             {(draftData?.state !== 'Ended' && draftData?.state !== 'In Process') && (
                                                 <div className="flex space-x-4 mb-8 items-center">
                                                     <div className='text-white mr-1'>Invite Code:</div>
-                                                    <div
-                                                        className="bg-[#303030] w-1/2 px-4 py-2 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
-                                                    >{draftData?.leagueID?.invite_code}</div>
+                                                    <div className="relative w-1/2">
+                                                        <div
+                                                            className="bg-[#303030] px-4 py-2 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
+                                                        >{draftData?.leagueID?.invite_code}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(draftData?.leagueID?.invite_code || '');
+                                                                addAlert("Invite code copied to clipboard!", "success");
+                                                            }}
+                                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-[#FF8A00] transition"
+                                                        >
+                                                            <FaRegCopy className="text-lg" />
+                                                        </button>
+                                                    </div>
                                                     <button
                                                         className="fade-gradient py-2 px-6 rounded-full flex items-center space-x-2"
                                                         onClick={() => {

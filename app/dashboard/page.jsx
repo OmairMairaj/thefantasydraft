@@ -517,7 +517,7 @@ const Dashboard = () => {
                           </Link>
 
                           {/* Transfers Card */}
-                          <div className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center`}
+                          <Link href={'/transfers'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative justify-between bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
                             style={{
                               backgroundImage: "url('/images/transfersimage.png')",
                             }}>
@@ -532,7 +532,7 @@ const Dashboard = () => {
                                 className="object-contain"
                               />
                             </div>
-                          </div>
+                          </Link>
 
                           {/* Match Center Card */}
                           <Link href={'/match-center'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col justify-between bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}

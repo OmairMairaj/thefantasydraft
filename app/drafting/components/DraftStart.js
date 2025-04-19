@@ -53,6 +53,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     const turnContainerRef = useRef(null);
     // const router = useRouter();
     const { addAlert } = useAlert();
+    const [isPicking, setIsPicking] = useState(false);
 
     useEffect(() => {
         try {
@@ -317,6 +318,9 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     // };
 
     const handlePick = async (player) => {
+        if (isPicking) return;
+        setIsPicking(true);
+
         if (loadingSelect) {
             addAlert("Pick is in progress. Your time ran out", "info");
             return;
@@ -342,11 +346,14 @@ const DraftStart = ({ draftID, user, onSettings }) => {
             console.error('Failed to add player:', error);
         } finally {
             setLoadingSelect(false);
+            setIsPicking(false);
         }
     };
 
 
     function autoPickCall(email) {
+        if (isPicking) return;
+        setIsPicking(true);
         try {
             let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
             axios.get(link).then((response) => {
@@ -363,6 +370,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
             console.error('Failed to add player:', error);
         } finally {
             setLoadingSelect(false);
+            setIsPicking(false);
         }
     };
 
@@ -608,7 +616,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                 {/* Show the team name */}
                                                                 <p className="text-sm">{teamData.team?.team_name || "Unnamed Team"}</p>
                                                                 {draftData && isCreator && email === draftData.turn ?
-                                                                    <button onClick={() => { autoPickCall(email) }} className={`bg-[#ff8800d6] px-4 my-1 rounded-lg shadow-lg hover:bg-[#ff8800] `}>Force Pick</button>
+                                                                    <button disabled={isPicking} onClick={() => { autoPickCall(email) }} className={`${isPicking ? "bg-[#3c3c3c]" : "bg-[#ff8800d6] hover:bg-[#ff8800]"} px-4 my-1 rounded-lg shadow-lg  `}>Force Pick</button>
                                                                     : null
                                                                 }
                                                             </>
@@ -721,12 +729,12 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                         <td className="p-2">{player.rating}</td>
                                                         <td className="p-2 sticky right-0 bg-[#1C1C1C]">
                                                             <button
-                                                                className={`${draftData?.turn !== user.email || loadingSelect ? 'bg-[#454545] cursor-not-allowed' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
+                                                                className={`${draftData?.turn !== user.email || loadingSelect || isPicking ? 'bg-[#454545] cursor-not-allowed' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
                                                                 onClick={() => {
                                                                     setLoadingSelect(true);
                                                                     handlePick(player)
                                                                 }}
-                                                                disabled={(draftData?.turn !== user.email) || loadingSelect}
+                                                                disabled={(draftData?.turn !== user.email) || loadingSelect || isPicking}
                                                             >
                                                                 Pick
                                                             </button>
@@ -785,8 +793,8 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                 </td>
                                                                 <td className="p-2 sticky right-0 bg-[#1C1C1C]">
                                                                     <button
-                                                                        disabled={draftData?.turn !== user.email || loadingSelect}
-                                                                        className={`${draftData?.turn !== user.email || draftData.players_selected.includes(player._id) ? 'bg-[#3c3c3c]' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-3 py-1 rounded-lg `}
+                                                                        disabled={draftData?.turn !== user.email || loadingSelect || isPicking}
+                                                                        className={`${draftData?.turn !== user.email || loadingSelect || isPicking || draftData.players_selected.includes(player._id) ? 'bg-[#3c3c3c]' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-3 py-1 rounded-lg `}
                                                                         onClick={() => { setLoadingSelect(true); handlePick(player); }}
                                                                     >
                                                                         <FaChevronRight />

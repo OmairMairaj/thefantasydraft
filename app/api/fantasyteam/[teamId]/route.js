@@ -12,7 +12,11 @@ export const GET = async (req, { params }) => {
         // Find the fantasy team by ID
         let team = await FantasyTeam.find({ _id: teamId, is_deleted: false }).populate({
             path: "players.player", // Path to the nested field
-            select: "name image_path common_name team_name position_name team_image_path points", // Fields to retrieve
+            select: "name image_path common_name team_name position_name team_image_path points teamID", // Fields to retrieve
+            populate: {
+                path: "points.gameweek",
+                select: "id name seasonID", // Add any additional fields you need
+            },
         });
 
         if (!team || team.length === 0) {
