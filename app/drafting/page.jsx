@@ -259,19 +259,17 @@ const Drafting = () => {
 
     const saveOrder = async () => {
         try {
-            const link = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasydraft"
+            const link = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasydraft/edit"
             const body = {
-                draftData: {
-                    _id: draftData._id,
-                    order: draftOrder
-                }
+                draftData : draftData
             }
+            body.draftData.order = draftOrder;
             // console.log(body)
             const response = await axios.post(link, body);
             // console.log(response);
             if (response.data && response.data.data && !response.data.error) {
                 addAlert("New order has been saved", "success");
-                // setDraftData(response.data.data);
+                setDraftData(response.data.data)
             }
             else addAlert("Order can not be saved. Please try again", "error");
         } catch (error) {
@@ -354,7 +352,7 @@ const Drafting = () => {
     const handleOrderSaveChanges = () => {
         // Call the function to update the draft order in the backend
         saveOrder();
-        fetchdraftData();
+        // fetchdraftData();
         setIsModalOpen(false); // Close the modal
     };
 

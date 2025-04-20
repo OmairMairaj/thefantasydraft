@@ -491,7 +491,7 @@ const Dashboard = () => {
                               backgroundImage: "url('/images/matchcenterImage.png')",
                             }}>
                             <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-2 ${exo2.className}`}>LEAGUE TABLE</h3>
-                            <p className="text-sm md:text-base lg:text-sm xl:text-base text-gray-300 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                            <p className="text-sm md:text-base lg:text-sm xl:text-base text-gray-300 mb-4">Check where your team stands in the league</p>
                             <div className="p-2 sm:p-4 w-full md:w-[80%] lg:w-[90%] xl:w-[80%] rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
                               <table className="w-full text-white text-sm md:text-sm lg:text-sm xl:text-base">
                                 <thead className="border-b border-[#5b5b5b]">

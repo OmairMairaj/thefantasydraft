@@ -1,21 +1,33 @@
+--------------------------------------WHAT'S LEFT--------------------------------------
+Notifications
+Achievements
+Super League
+Cups
+Payment Integration
+
 --------------------------------------HARIS--------------------------------------
 DONE
-in team setting (2 GKs first picked both in team)
-order of players for auto-sub
 
 IN PROCESS
-Scoring
 
 TO-DO
+Test setInTeam()
+Make API to get all players eligible for transfer
+Maximum team number does not set when league is created 
+Minimum team number does not set when league is created 
+Invite code should not be validated after draft start
+Remove a team
+Same team name cannot be in the same league
+API to get all week points for a team
+Make notifications model
+History/Points setup throughout
+Transfer API Integration
 shift email given in all models of the owner/creator to the user ID
 
 --------------------------------------OMAIR--------------------------------------
 DONE
-Add an arrow on draft order to show the way draft will work
-Please turn off timers and the calls they make after a page is exited
 
 IN PROCESS
-LeagueTable page
 
 TO-DO
 Draft pages responsiveness
@@ -23,3 +35,9 @@ Draft page ended view: remove players and autopick box and show list view and pi
 MyTeam page lineup configuration check and skeleton render accordingly
 MyTeam page list view switch and view options
 MyTeam page make captain/vice-captain option
+O: no functionality to invite user after league creation
+O: Clicking on force pick does not stop timer and does not disables button
+O: Add Loaders on picking
+O: If pick is auto and turn is last then, it makes two calls to auto pick.
+O: Image pickers picking all types of files
+O: When no teams after creating league, show next opponent as empty    

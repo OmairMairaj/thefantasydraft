@@ -136,14 +136,12 @@ export const GET = async (req) => {
         league.league_fixtures = null
       }
       league.save();
+      let response = await setInTeam(draft);
     }
 
     team.save();
     draft.save();
-    if (draftEnd) {
-      // Setting bench, in-team players, captain and v.captain for all teams
-      let response = await setInTeam(draft);
-    }
+
     return NextResponse.json({
       error: false,
       league: league,
