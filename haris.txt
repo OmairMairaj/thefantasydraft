@@ -11,11 +11,11 @@ DONE
 IN PROCESS
 
 TO-DO
-Test setInTeam()
-Make API to get all players eligible for transfer
-Maximum team number does not set when league is created 
-Minimum team number does not set when league is created 
-Invite code should not be validated after draft start
+DONE : Test setInTeam()
+DONE : Make API to get all players eligible for transfer
+DONE : Maximum team number does not set when league is created 
+DONE : Minimum team number does not set when league is created 
+DONE : Invite code should not be validated after draft start
 Remove a team
 Same team name cannot be in the same league
 API to get all week points for a team
@@ -40,4 +40,5 @@ O: Clicking on force pick does not stop timer and does not disables button
 O: Add Loaders on picking
 O: If pick is auto and turn is last then, it makes two calls to auto pick.
 O: Image pickers picking all types of files
-O: When no teams after creating league, show next opponent as empty    
+O: When no teams after creating league, show next opponent as empty
+O: Remove a team functionality

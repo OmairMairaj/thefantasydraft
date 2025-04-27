@@ -31,7 +31,6 @@ export const GET = async (req) => {
 
 export const POST = async (req, res) => {
   try {
-    let draftEnd = false;
     await connectToDb();
     //contains DraftID, PlayerID, TeamID, PlayerObj
     let payload = await req.json();
@@ -104,7 +103,6 @@ export const POST = async (req, res) => {
 
     // Checking for draft end
     if ((draft.draft_round - 1) === draft.squad_players) {
-      draftEnd = true;
       draft.state = "Ended";
       draft.start_date = null;
       draft.turn = null;
@@ -148,14 +146,12 @@ export const POST = async (req, res) => {
         league.league_fixtures = null
       }
       league.save();
+      let response = await setInTeam(draft);
     }
 
     team.save();
     draft.save();
-    if (draftEnd) {
-      // Setting bench, in-team players, captain and v.captain for all teams
-     let response = await setInTeam(draft);
-    }
+
     return NextResponse.json({
       error: false,
       league: league,
@@ -177,7 +173,6 @@ export const POST = async (req, res) => {
 //     await connectToDb();
 //     let payload = await req.json();
 //     let draft = await FantasyDraft.findOne({ _id: payload.draftID , is_deleted: false});
-//     await setInTeam(draft);
 //     return NextResponse.json({
 //       error: false,
 //       draft: draft,
