@@ -32,6 +32,8 @@ const LeagueTablePage = () => {
     const [matches, setMatches] = useState();
     const [totalPages, setTotalPages] = useState(1);
     const [gameweekName, setGameweekName] = useState(null);
+    const [headToHeadTable, setHeadToHeadTable] = useState([]);
+    const [classicTable, setClassicTable] = useState([]);
     const router = useRouter();
     const { addAlert } = useAlert();
 
@@ -50,18 +52,50 @@ const LeagueTablePage = () => {
 
             if (userData && userData.user) {
                 setUser(userData.user);
+                console.log("User (user): ", userData.user);
                 fetchCurrentGameweek();
-                console.log(userData.user.email);
 
                 // Check if selectedLeagueID is in sessionStorage
                 const storedLeagueID = sessionStorage.getItem("selectedLeagueID");
                 if (storedLeagueID) {
                     setLeagueId(storedLeagueID);
+                    console.log("League ID from session storage (leagueId): ", storedLeagueID);
                     fetchLeague(userData.user.email, storedLeagueID); // Temporarily set league with just ID
                 }
             }
         }
     }, []);
+
+    const fetchCurrentGameweek = async () => {
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`, { cache: 'no-store' });
+            if (!response.data.error) {
+                setGameweekName(parseInt(response.data.data.name, 10));
+                console.log("Gameweek (gameweekName): ", parseInt(response.data.data.name, 10));
+                // setGameweekDetails(response.data.data);
+                // fetchTotalGameweeks();
+            }
+        } catch (error) {
+            console.error('Error fetching current gameweek data:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (gameweekName) {
+            // fetchGameweekDetails(gameweekName);
+            fetchMatches(gameweekName);
+        }
+    }, [gameweekName]);
+
+    const fetchMatches = async (gameweek) => {
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match?gameweek=${gameweek}`);
+            setMatches(response.data.data);
+            console.log("Matches", response.data.data);
+        } catch (error) {
+            console.error('Error fetching match data:', error);
+        }
+    };
 
     const fetchLeague = async (user_email, leagueId) => {
         try {
@@ -69,20 +103,21 @@ const LeagueTablePage = () => {
             const leagueResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyleague?leagueId=${leagueId}`);
 
             if (leagueResponse.data && !leagueResponse.data.error) {
-                console.log(leagueResponse.data.data);
                 setLeagueData(leagueResponse.data.data);
+                console.log("League Data (leagueData): ", leagueResponse.data.data);
                 let league = leagueResponse.data.data;
                 if (league) {
                     // Step 3: Find the user's team in the selected league
                     console.log("League", league);
-                    console.log("User Email", user.email);
                     const userTeam = league.teams.find(team => team.user_email === user_email);
                     setTeam(userTeam.team);
+                    console.log("Users Team (team): ", userTeam.team);
                     setTeamRank(league.teams.indexOf(userTeam) + 1);
+                    console.log("Team rank by index of league.teams (teamRank): ", league.teams.indexOf(userTeam) + 1);
 
                     if (userTeam.team) {
                         // Step 4: Fetch the fantasy team details using teamId
-                        console.log(userTeam.team);
+                        // console.log(userTeam.team);
                         fetchTeamDetails(userTeam.team._id);
                     } else {
                         console.error("No team found for the user in this league.");
@@ -103,6 +138,20 @@ const LeagueTablePage = () => {
     };
 
     useEffect(() => {
+        if (leagueData) {
+            const headToHeadData = leagueData.head_to_head_points.sort((a, b) => b.points - a.points);
+            const classicData = leagueData.classic_points.sort((a, b) => b.points_total - a.points_total);
+
+            // Show leaderboard (you can sort or manipulate if needed)
+            setHeadToHeadTable(headToHeadData);
+            console.log("Head to Head Table (headToHeadTable): ", headToHeadData);
+            setClassicTable(classicData);
+            console.log("Classic Table (classicData): ", classicData);
+        }
+    }, [leagueData]);
+
+    //if team changes onClick, fetch the team details
+    useEffect(() => {
         if (team && team._id) {
             fetchTeamDetails(team._id);
         }
@@ -114,6 +163,7 @@ const LeagueTablePage = () => {
             if (teamResponse.data && !teamResponse.data.error) {
                 console.log("Team Data", teamResponse.data.data);
                 setPlayers(teamResponse.data.data.players);
+                console.log("Players (players): ", teamResponse.data.data.players);
             } else {
                 console.error("Error fetching team details: ", teamResponse.data.message);
                 addAlert(teamResponse.data.message, "error");
@@ -126,7 +176,6 @@ const LeagueTablePage = () => {
 
     useEffect(() => {
         if (players && players.length > 0) {
-            console.log("Players", players);
             const segregatedPlayers = segregatePlayers(players);
             console.log("Segregated Players:", segregatedPlayers);
             if (segregatedPlayers) {
@@ -177,6 +226,24 @@ const LeagueTablePage = () => {
         return result;
     };
 
+    // const fetchTotalGameweeks = async () => {
+    //     try {
+    //         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/count`);
+    //         setTotalPages(response.data.totalGameweeks);
+    //     } catch (error) {
+    //         console.error('Error fetching total gameweeks:', error);
+    //     }
+    // };
+
+    // const fetchGameweekDetails = async (gameweek) => {
+    //     try {
+    //         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/${gameweek}`);
+    //         setGameweekDetails(response.data.data);
+    //         console.log("Gameweek Details", response.data.data);
+    //     } catch (error) {
+    //         console.error('Error fetching gameweek details:', error);
+    //     }
+    // };
 
     const renderSkeletons = (required, chosenCount) => {
         if (chosenCount >= required) return null;
@@ -191,54 +258,6 @@ const LeagueTablePage = () => {
         ));
     };
 
-    useEffect(() => {
-        if (gameweekName) {
-            fetchGameweekDetails(gameweekName);
-            fetchMatches(gameweekName);
-        }
-    }, [gameweekName]);
-
-    const fetchCurrentGameweek = async () => {
-        try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`, { cache: 'no-store' });
-            if (!response.data.error) {
-                setGameweekName(parseInt(response.data.data.name, 10));
-                setGameweekDetails(response.data.data);
-                fetchTotalGameweeks();
-            }
-        } catch (error) {
-            console.error('Error fetching current gameweek data:', error);
-        }
-    };
-
-    const fetchTotalGameweeks = async () => {
-        try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/count`);
-            setTotalPages(response.data.totalGameweeks);
-        } catch (error) {
-            console.error('Error fetching total gameweeks:', error);
-        }
-    };
-
-    const fetchGameweekDetails = async (gameweek) => {
-        try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/${gameweek}`);
-            setGameweekDetails(response.data.data);
-            console.log("Gameweek Details", response.data.data);
-        } catch (error) {
-            console.error('Error fetching gameweek details:', error);
-        }
-    };
-
-    const fetchMatches = async (gameweek) => {
-        try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match?gameweek=${gameweek}`);
-            setMatches(response.data.data);
-            console.log("Matches", response.data.data);
-        } catch (error) {
-            console.error('Error fetching match data:', error);
-        }
-    };
 
     const getRankwithSuffix = (rank) => {
         if (!rank) return '';
@@ -261,7 +280,16 @@ const LeagueTablePage = () => {
                     suffix = 'th';
             }
         }
-        return `${rank}${suffix}`;
+        return (
+            <div className="flex items-end">
+                <span className="text-4xl font-semibold text-[#FF8A00]">
+                    {rank}
+                </span>
+                <span className="text-base text-[#FF8A00]">
+                    {suffix}
+                </span>
+            </div>
+        );
     };
 
     return (
@@ -280,18 +308,76 @@ const LeagueTablePage = () => {
                             <div className="overflow-y-auto h-96 scrollbar">
                                 <table className="w-full text-gray-300">
                                     <thead className="bg-[#1C1C1C] border-b border-gray-600 sticky top-0 z-10">
-                                        <tr>
-                                            <th className="py-2 px-2 text-center"></th>
-                                            <th className="py-2 px-2 text-left">Team</th>
-                                            <th className="py-2 px-2 text-center">PTS</th>
-                                            <th className="py-2 px-2 text-center">GW</th>
-                                            <th className="py-2 px-2 text-center">GW-1</th>
-                                            <th className="py-2 px-2 text-center">GW-2</th>
-                                            <th className="py-2 px-2 text-center">GW-3</th>
-                                        </tr>
+                                        {leagueData?.league_configuration.format === "Head to Head" ?
+                                            <tr>
+                                                <th className="py-2 px-2 text-center"></th>
+                                                <th className="py-2 px-2 text-left">Team</th>
+                                                <th className="py-2 px-2 text-center">Pts</th>
+                                                <th className="py-2 px-2 text-center">Won</th>
+                                                <th className="py-2 px-2 text-center">Lost</th>
+                                                <th className="py-2 px-2 text-center">Draw</th>
+                                                <th className="py-2 px-2 text-center">Form</th>
+                                            </tr>
+                                            :
+                                            <tr>
+                                                <th className="py-2 px-2 text-center"></th>
+                                                <th className="py-2 px-2 text-left">Team</th>
+                                                <th className="py-2 px-2 text-center">PTS</th>
+                                                <th className="py-2 px-2 text-center">GW</th>
+                                                {/* <th className="py-2 px-2 text-center">GW-1</th>
+                                                <th className="py-2 px-2 text-center">GW-2</th>
+                                                <th className="py-2 px-2 text-center">GW-3</th> */}
+                                            </tr>
+                                        }
                                     </thead>
                                     <tbody>
-                                        {leagueData?.teams ? (
+                                        {leagueData?.league_configuration.format === "Head to Head" &&
+                                            headToHeadTable && headToHeadTable.map((teamData, index) => (
+                                                <tr key={index} className={`border-b border-gray-600 ${team._id === teamData.team._id ? "rounded-lg bg-[#8e6b4017] z-30" : ""}`} onClick={() => { setTeam(teamData.team); setTeamRank(index + 1) }}>
+                                                    <td className="py-2 px-2 text-center">{index + 1}</td>
+                                                    <td className="py-2 px-2 text-left flex items-center space-x-2">
+                                                        <img
+                                                            src={teamData.team.team_image_path || "/images/default_team_logo.png"}
+                                                            alt={teamData.team.team_name}
+                                                            className="w-8 h-8 rounded-md"
+                                                        />
+                                                        <span className='truncate'>{teamData.team.team_name}</span>
+                                                    </td>
+                                                    <td className="py-2 px-2 text-center">{leagueData?.draftID?.state === "Ended" ? teamData.points || 0 : "--"}</td>
+                                                    <td className="py-2 px-2 text-center">{leagueData?.draftID?.state === "Ended" ? teamData.wins || 0 : "--"}</td>
+                                                    <td className="py-2 px-2 text-center">{leagueData?.draftID?.state === "Ended" ? teamData.loses || 0 : "--"}</td>
+                                                    <td className="py-2 px-2 text-center">{leagueData?.draftID?.state === "Ended" ? teamData.draws || 0 : "--"}</td>
+                                                    <td>
+                                                        <div className="py-2 px-2 text-center hidden sm:flex items-center justify-center gap-1">
+                                                            {(teamData?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                                                <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-sm sm:text-base lg:text-sm flex justify-center items-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        }
+                                        {leagueData?.league_configuration.format === "Classic" &&
+                                            classicTable && classicTable.map((teamData, index) => (
+                                                <tr key={index} className={`border-b border-gray-600 ${team._id === teamData.team._id ? "rounded-lg bg-[#8e6b4017] z-30" : ""}`} onClick={() => { setTeam(teamData.team); setTeamRank(index + 1) }}>
+                                                    <td className="py-2 px-2 text-center">{index + 1}</td>
+                                                    <td className="py-2 px-2 text-left flex items-center space-x-2">
+                                                        <img
+                                                            src={teamData.team.team_image_path || "/images/default_team_logo.png"}
+                                                            alt={teamData.team.team_name}
+                                                            className="w-8 h-8 rounded-md"
+                                                        />
+                                                        <span className='truncate'>{teamData.team.team_name}</span>
+                                                    </td>
+                                                    <td className="py-2 px-2 text-center">{leagueData?.draftID?.state === "Ended" ? teamData.points_total || 0 : "--"}</td>
+                                                    <td className="py-2 px-2 text-center">{leagueData?.draftID?.state === "Ended" ? teamData.points_current || 0 : "--"}</td>
+                                                    {/* <td className="py-2 px-2 text-center">0</td>
+                                                    <td className="py-2 px-2 text-center">0</td>
+                                                    <td className="py-2 px-2 text-center">0</td> */}
+                                                </tr>
+                                            ))
+                                        }
+                                        {/* {leagueData?.teams ? (
                                             leagueData.teams.length > 0 ? (
                                                 leagueData.teams.map((teamData, index) => {
                                                     return (
@@ -302,7 +388,7 @@ const LeagueTablePage = () => {
                                                                 <img
                                                                     src={teamData.team.team_image_path}
                                                                     alt={teamData.team.team_name}
-                                                                    className="w-8 h-8 rounded-full"
+                                                                    className="w-8 h-8 rounded-md"
                                                                 />
                                                                 <span className='truncate'>{teamData.team.team_name}</span>
                                                             </td>
@@ -327,7 +413,7 @@ const LeagueTablePage = () => {
                                                     Loading Teams......
                                                 </td>
                                             </tr>
-                                        )}
+                                        )} */}
                                     </tbody>
                                 </table>
                             </div>
@@ -404,12 +490,12 @@ const LeagueTablePage = () => {
                     <div className='flex flex-col'>
 
                         <div className="rounded-xl bg-[#1C1C1C] flex justify-between items-center w-full ">
-                            <div className='flex space-x-1 p-4'>
+                            <div className='flex space-x-4 p-4'>
                                 <div className="font-bold text-center overflow-hidden">
                                     {team?.team_image_path ? (
-                                        <img src={team.team_image_path} alt="Team Logo" className="w-24 h-24 object-cover" />
+                                        <img src={team.team_image_path || "/images/default_team_logo.png"} alt="Team Logo" className="w-24 h-24 object-cover rounded-md" />
                                     ) : (
-                                        <img src={'/images/placeholder.png'} alt="Team Logo" className="p-4 w-24 h-24 object-cover" />
+                                        <img src={'/images/default_team_logo.png'} alt="Team Logo" className="p-4 w-24 h-24 object-cover" />
                                     )}
                                 </div>
                                 <div className='flex flex-col justify-center'>
@@ -424,10 +510,21 @@ const LeagueTablePage = () => {
 
                             <div className="flex flex-col items-center m-8">
                                 <div className="text-3xl font-semibold text-[#FF8A00]">
-                                    {getRankwithSuffix(teamRank)}
+                                    {leagueData?.draftID?.state === "Ended"
+                                        ? getRankwithSuffix(
+                                            leagueData.league_configuration.format === "Head to Head"
+                                                ? headToHeadTable?.findIndex((t) => t.team._id === team?._id) + 1
+                                                : classicTable?.findIndex((t) => t.team._id === team?._id) + 1
+                                        )
+                                        : "--"}
                                 </div>
                                 <div className="text-sm text-gray-400">
-                                    {team ? `Points: ${team?.points || 0}` : ''}
+                                    {leagueData?.league_configuration.format === "Head to Head" ? "League Points: " : "Total Points: "}
+                                    {leagueData?.draftID?.state === "Ended"
+                                        ? leagueData.league_configuration.format === "Head to Head"
+                                            ? headToHeadTable?.find((t) => t.team._id === team?._id)?.points ?? 0
+                                            : classicTable?.find((t) => t.team._id === team?._id)?.points_total ?? 0
+                                        : "--"}
                                 </div>
                             </div>
 

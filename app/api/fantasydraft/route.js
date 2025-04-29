@@ -12,7 +12,7 @@ export const GET = async (req) => {
     let drafts;
     if (draftID) {
       drafts = await FantasyDraft.find({ _id: draftID, is_deleted: false })
-        .populate("leagueID", "invite_code league_image_path league_name min_teams max_teams")
+        .populate("leagueID", "invite_code league_image_path league_name min_teams max_teams points_configuration")
         .populate({
           path: "teams.team", // Path to the nested field
           select: "team_name team_image_path players", // Fields to retrieve

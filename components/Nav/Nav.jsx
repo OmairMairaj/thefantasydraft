@@ -82,7 +82,7 @@ const Nav = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownRef]);
-  console.log(user);
+  // console.log(user);
 
   return (
     <nav

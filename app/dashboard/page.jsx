@@ -28,69 +28,18 @@ const Dashboard = () => {
   const [showUnpaid, setShowUnpaid] = useState(false);
   const [team, setTeam] = useState(null);
   const [teams, setTeams] = useState(null);
+  const [gameweek, setGameweek] = useState(null);
+  const [teamStats, setTeamStats] = useState(null);
+  const [opponent, setOpponent] = useState(null);
+  const [opponentStats, setOpponentStats] = useState(null);
+  const [headToHeadTable, setHeadToHeadTable] = useState(null);
+  const [classicTable, setClassicTable] = useState(null);
+  const [currentFixtures, setCurrentFixtures] = useState(null);
+
   const { addAlert } = useAlert();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [loading, setLoading] = useState(true);
-
-
-  // const customStyles = {
-  //   control: (provided, state) => ({
-  //     ...provided,
-  //     backgroundColor: "#070E13",
-  //     color: "#FFFFFF",
-  //     border: state.isFocused ? "1px solid #ff8a00" : "1px solid #484848", // Custom border color when focused
-  //     borderRadius: "10px",
-  //     padding: "5px",
-  //     outline: "none", // Remove blue outline
-  //     minWidth: "150px",
-  //     boxShadow: "none", // Explicitly remove box shadow
-  //     "&:hover": {
-  //       border: "1px solid #ff8a00", // Custom hover border color
-  //       boxShadow: "none", // Ensure no shadow on hover
-  //       cursor: 'pointer'
-  //     },
-  //   }),
-  //   option: (provided, state) => ({
-  //     ...provided,
-  //     backgroundColor: "#070E13",
-  //     outline: "none", // Remove default outline from options
-  //     color: "#FFFFFF",
-  //     padding: "10px",
-  //     cursor: "pointer",
-  //     "&:hover": {
-  //       backgroundColor: "#232323", // Customize hover color if needed
-  //     },
-  //   }),
-  //   singleValue: (provided) => ({
-  //     ...provided,
-  //     color: "#FFFFFF",
-  //   }),
-  //   menu: (provided) => ({
-  //     ...provided,
-  //     backgroundColor: "#070E13",
-  //     borderRadius: '15px',
-  //     overflow: 'hidden',
-  //     boxShadow: '0px 0px 2px 0px #efefef88',
-  //     padding: '5px'
-  //   }),
-  //   dropdownIndicator: (provided) => ({
-  //     ...provided,
-  //     color: "#FFFFFF",
-  //     "&:hover": {
-  //       color: "#FFFFFF", // Keep the dropdown indicator color consistent on hover
-  //     },
-  //   }),
-  //   indicatorSeparator: () => ({
-  //     display: "none", // Remove the separator line between the dropdown icon and the select input
-  //   }),
-  //   placeholder: (provided) => ({
-  //     ...provided,
-  //     color: "#FFFFFF", // To match the placeholder text color with the input text
-  //   }),
-  // };
-
-
 
   useEffect(() => {
     // Check if window is defined to ensure we are on the client side
@@ -120,6 +69,28 @@ const Dashboard = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchCurrentGameweek = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`);
+        if (res.data && res.data.error) {
+          console.error("Error fetching current gameweek:", res.data.message);
+          addAlert("Unable to fetch current gameweek.", "error");
+          return;
+        }
+        // console.log("Current Gameweek Response: ", res.data.data);
+        const current = res.data?.data?.name;
+        setGameweek(current);
+        console.log("Current Gameweek: ", current);
+      } catch (err) {
+        console.error("Error fetching current gameweek:", err);
+        addAlert("Unable to fetch current gameweek.", "error");
+      }
+    };
+
+    fetchCurrentGameweek();
+  }, []);
+
 
   const fetchTeamsData = async () => {
     if (selectedLeague) {
@@ -129,7 +100,7 @@ const Dashboard = () => {
           selectedLeague.teams.map(async (team) => {
             try {
               if (team.team) {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyteam/${team.team}`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyteam/${team.team._id}`);
                 if (!response.data.error) {
                   return response.data.data;
                 } else {
@@ -149,6 +120,7 @@ const Dashboard = () => {
 
         // Filter out any null values in case some requests failed
         const validTeams = teamResponses.filter((team) => team !== null);
+        console.log("League Teams (Teams): ", validTeams);
         setTeams(validTeams);
         console.log(validTeams)
 
@@ -172,12 +144,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     console.log("teams useEffect triggered")
-    console.log(teams);
-    console.log(user);
+    // console.log("League Teams: ", teams);
+    // console.log(user);
     if (teams && user) {
       let userTeam = teams.find(team => team.user_email === user.email);
       if (userTeam) {
         setTeam(userTeam);
+        console.log("User Team (Team): ", userTeam);
       }
     }
   }, [teams]);
@@ -187,7 +160,7 @@ const Dashboard = () => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?email=${userEmail}`);
       if (!response.data.error) {
         setLeagues(response.data.data);
-        console.log(response.data.data);
+        console.log("Leagues By User: ", response.data.data);
 
         if (response.data.data.length === 0) {
           setShowEmptyView(true);
@@ -201,8 +174,10 @@ const Dashboard = () => {
 
         if (validStoredLeague) {
           setSelectedLeague(validStoredLeague);
+          console.log("Selected League (selectedLeague): ", validStoredLeague);
         } else {
           setSelectedLeague(response.data.data[0]); // Default to first league
+          console.log("Selected League (selectedLeague): ", response.data.data[0]);
         }
 
         setShowEmptyView(false);
@@ -222,8 +197,10 @@ const Dashboard = () => {
 
       if (storedLeague) {
         setSelectedLeague(storedLeague);
+        console.log("Selected League (selectedLeague): ", storedLeague);
       } else {
-        setSelectedLeague(leagues[0]); // Default to the first league if no match
+        setSelectedLeague(leagues[0]);
+        console.log("Selected League (selectedLeague): ", leagues[0]); // Default to the first league if no match
       }
       setShowEmptyView(false); // Hide the empty view if leagues exist
     } else if (leagues && leagues.length === 0) {
@@ -240,16 +217,51 @@ const Dashboard = () => {
     }
   }, [selectedLeague]);
 
-  const markPaymentAsCompleted = (leagueDetails) => {
-    const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague/payment";
-    axios.post(URL, { league: leagueDetails }).then((response) => {
-      addAlert(response.data.message, response.data.error ? "error" : "success");
-      if (!response.data.error) {
-        setSelectedLeague(response.data.data);
-        setShowUnpaid(false);
+  useEffect(() => {
+    if (team && gameweek && selectedLeague) {
+      const headToHeadData = selectedLeague.head_to_head_points;
+      const classicData = selectedLeague.classic_points;
+      const fixtures = selectedLeague.league_fixtures;
+
+      // Find user team H2H stats
+      const userStats = headToHeadData.find(entry => entry.team._id === team._id);
+      setTeamStats(userStats); // you can display points, form, etc.
+      console.log("User Team Stats (teamStats): ", userStats);
+
+      // Get next gameweek (assuming gameweek is number or numeric string)
+      const nextGW = (parseInt(gameweek, 10) + 1).toString();
+
+      // Find fixture where user's team is involved
+      const nextFixture = fixtures.find(
+        (fixture) => fixture.gameweek === nextGW &&
+          fixture.teams.some(t => t._id === team._id)
+      );
+
+      if (nextFixture) {
+        const opponent = nextFixture.teams.find(t => t._id !== team._id);
+
+        if (opponent) {
+          const opponentStats = headToHeadData.find(entry => entry.team._id === opponent._id);
+          setOpponent(opponent);
+          console.log("Opponent Team (opponent): ", opponent);
+          setOpponentStats(opponentStats); // show form, etc.
+          console.log("Opponent Team Stats (opponentStats): ", opponentStats);
+        }
       }
-    });
-  };
+
+      // Show leaderboard (you can sort or manipulate if needed)
+      setHeadToHeadTable(headToHeadData);
+      console.log("Head to Head Table (headToHeadTable): ", headToHeadData);
+      setClassicTable(classicData);
+      console.log("Classic Table (classicData): ", classicData);
+
+      // Match center: filter current gameweek fixtures
+      const currentWeekFixtures = fixtures.filter(f => f.gameweek === gameweek);
+      setCurrentFixtures(currentWeekFixtures.slice(0, 3)); // top 3 fixtures
+      console.log("Current Fixtures (currentFixtures): ", currentWeekFixtures);
+    }
+  }, [team, gameweek, selectedLeague]);
+
 
   // Handle clicking outside the dropdown to close it
   useEffect(() => {
@@ -265,16 +277,20 @@ const Dashboard = () => {
     };
   }, [dropdownRef]);
 
-  // const handleLeagueChange = (selectedOption) => {
-  //   const selectedLeagueId = selectedOption.value;
-  //   const league = leagues.find((league) => league._id === selectedLeagueId);
-  //   setSelectedLeague(league);
-  //   sessionStorage.setItem('selectedLeagueId', selectedLeagueId);
-  // };
-
   const handleLeagueChange = (league) => {
     setSelectedLeague(league);
     setDropdownOpen(false);
+  };
+
+  const markPaymentAsCompleted = (leagueDetails) => {
+    const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague/payment";
+    axios.post(URL, { league: leagueDetails }).then((response) => {
+      addAlert(response.data.message, response.data.error ? "error" : "success");
+      if (!response.data.error) {
+        setSelectedLeague(response.data.data);
+        setShowUnpaid(false);
+      }
+    });
   };
 
   return (
@@ -437,52 +453,69 @@ const Dashboard = () => {
                           {/* Team Name Card */}
                           <Link href={'/team'} className="w-full lg:w-[49.2%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col justify-between bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out"
                             style={{
-                              backgroundImage: "url('/images/myteamimage.png')",
+                              backgroundImage: `url('${team?.ground_image_path || "/images/myteamimage.png"}')`,
+                              overlay: "rgba(0, 0, 0, 0.4)",
+                              // backgroundImage: "url('/images/myteamimage.png')",
                             }}>
-                            <div className="flex flex-col sm:flex-row sm:justify-between mb-4">
+                            <div className="absolute inset-0 rounded-3xl z-0"
+                              style={{ background: 'linear-gradient(90deg, #070E13fe 20%, #070E13d0 60%, #00000020)' }}></div>
+                            <div className="flex flex-col sm:flex-row sm:justify-between mb-4 z-10">
                               <div className="flex items-center">
                                 <img
-                                  src={team && team.team_image_path ? team.team_image_path : "/images/myteamimage.png"}
+                                  src={team && team.team_image_path ? team.team_image_path : "/images/default_team_logo.png"}
                                   alt="Team Logo"
-                                  className="w-16 h-16 sm:w-12 sm:h-12 md:w-20 md:h-20 lg:w-14 lg:h-14 xl:w-20 xl:h-20 object-cover mr-4 lg:mr-2 xl:mr-3"
+                                  className="w-20 h-20 sm:w-20 sm:h-20 md:w-20 md:h-20 lg:w-20 lg:h-20 xl:w-20 xl:h-20 object-cover rounded-md mr-4 lg:mr-2 xl:mr-3"
                                 />
                                 <div>
-                                  <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>{team ? team.team_name : 'Team Name'}</h3>
-                                  <p className="sm:hidden text-white text-xs md:text-sm lg:text-sm xl:text-base">Current Points: 120</p>
-                                  <div className="sm:hidden flex space-x-1 md:space-x-2 mt-1">
-                                    {['L', 'L', 'W', 'L', 'W'].map((result, idx) => (
-                                      <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-sm sm:text-base lg:text-sm xl:text-base justify-center text-white ${result === 'W' ? 'bg-green-500' : 'bg-red-500'}`}>{result}</span>
+                                  <div className="flex flex-col gap-1 justify-center">
+                                    <h3 className={`text-3xl md:text-3xl lg:text-3xl xl:text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>{team ? team.team_name : 'Team Name'}</h3>
+                                    {selectedLeague.league_configuration.format === "Classic" &&
+                                      <p className="text-sm md:text-base lg:text-sm xl:text-base text-gray-300">Manage your squad and climb the leaderboard!</p>
+                                    }
+                                  </div>
+
+                                  {selectedLeague.league_configuration.format === "Head to Head" &&
+                                    <p className="sm:hidden text-white text-xs md:text-sm lg:text-sm xl:text-base">Current Points:<span className="ml-2">{teamStats?.points || '--'}</span></p>}
+                                  {selectedLeague.league_configuration.format === "Head to Head" &&
+                                    <div className="sm:hidden flex space-x-1 md:space-x-2 mt-1">
+                                      {(teamStats?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                        <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-sm sm:text-base lg:text-sm xl:text-base justify-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
+                                      ))}
+                                    </div>
+                                  }
+                                </div>
+                              </div>
+                              {selectedLeague.league_configuration.format === "Head to Head" &&
+                                <div className="hidden sm:flex flex-col items-center justify-center px-4 md:px-6 lg:px-2 py-2 lg:py-1 xl:px-4 xl:py-3 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
+                                  <p className="text-white text-xs md:text-sm lg:text-sm xl:text-base">Current Points: <span className="ml-2">{teamStats?.points || '--'}</span></p>
+                                  <div className="flex space-x-1 md:space-x-2 mt-1">
+                                    {(teamStats?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                      <span key={idx} className={`rounded-md lg:rounded-sm w-5 h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-base lg:text-sm xl:text-base justify-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
                                     ))}
                                   </div>
                                 </div>
-                              </div>
-                              <div className="hidden sm:flex flex-col items-center justify-center px-4 md:px-6 lg:px-2 py-2 lg:py-1 xl:px-4 xl:py-3 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
-                                <p className="text-white text-xs md:text-sm lg:text-sm xl:text-base">Current Points: 120</p>
-                                <div className="flex space-x-1 md:space-x-2 mt-1">
-                                  {['L', 'L', 'W', 'L', 'W'].map((result, idx) => (
-                                    <span key={idx} className={`rounded-md lg:rounded-sm w-5 h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-base lg:text-sm xl:text-base justify-center text-white ${result === 'W' ? 'bg-green-500' : 'bg-red-500'}`}>{result}</span>
-                                  ))}
-                                </div>
-                              </div>
+                              }
                             </div>
-                            <div>
-                              <p className="text-white font-bold text-sm md:text-base lg:text-sm xl:text-base">Next Opponent:</p>
-                              <div className="flex items-center mt-2 sm:mt-2 px-3 sm:px-3 md:px-4 py-2 sm:py-2 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
-                                <img
-                                  src="/images/man-city-logo.svg"
-                                  alt="Opponent Logo"
-                                  className="w-12 h-12 md:w-14 md:h-14 lg:w-14 lg:h-14 object-cover rounded-full mr-2 sm:mr-4 lg:mr-2 xl:mr-3"
-                                />
-                                <div>
-                                  <p className="text-white text-sm md:text-base lg:text-sm xl:text-base">Man City</p>
-                                  <div className="flex space-x-1 md:space-x-2 mt-1 sm:mt-3 lg:mt-1">
-                                    {['L', 'L', 'W', 'L', 'W'].map((result, idx) => (
-                                      <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-sm sm:text-base lg:text-sm justify-center text-white ${result === 'W' ? 'bg-green-500' : 'bg-red-500'}`}>{result}</span>
-                                    ))}
+                            {selectedLeague.league_configuration.format === "Head to Head" &&
+                              <div className="z-10">
+                                <p className="text-white font-bold text-sm md:text-base lg:text-sm xl:text-base">Next Opponent:</p>
+                                <div className="flex items-center mt-2 sm:mt-2 px-3 sm:px-3 md:px-4 py-2 sm:py-2 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
+                                  <img
+                                    src={opponent?.team_image_path || "/images/default_team_logo.png"}
+                                    alt="Opponent Logo"
+                                    className="w-12 h-12 md:w-14 md:h-14 lg:w-14 lg:h-14 object-cover rounded-full mr-2 sm:mr-4 lg:mr-2 xl:mr-3"
+                                  />
+                                  <div>
+                                    <p className="text-white text-sm md:text-base lg:text-sm xl:text-base">{opponent?.team_name || "TBD"}</p>
+                                    <div className="flex space-x-1 md:space-x-2 mt-1 sm:mt-3 lg:mt-1">
+                                      {(opponentStats?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                        <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-sm sm:text-base lg:text-sm justify-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
+                                      ))}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
+                            }
                           </Link>
 
                           {/* League Table Card */}
@@ -494,23 +527,49 @@ const Dashboard = () => {
                             <p className="text-sm md:text-base lg:text-sm xl:text-base text-gray-300 mb-4">Check where your team stands in the league</p>
                             <div className="p-2 sm:p-4 w-full md:w-[80%] lg:w-[90%] xl:w-[80%] rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
                               <table className="w-full text-white text-sm md:text-sm lg:text-sm xl:text-base">
-                                <thead className="border-b border-[#5b5b5b]">
-                                  <tr className="text-[#FF8A00] pb-4">
-                                    <th className="w-2/5 text-left">Players</th>
-                                    <th className="text-center">Played</th>
-                                    <th className="text-center">Won</th>
-                                    <th className="text-center">Lost</th>
-                                  </tr>
+                                <thead className="border-b border-[#5b5b5b] mb-1">
+                                  {selectedLeague.league_configuration.format === "Head to Head" ?
+                                    <tr className="text-[#FF8A00] pb-4">
+                                      <th className="w-2/5 text-left">Teams</th>
+                                      <th className="text-center">Pts</th>
+                                      {/* <th className="text-center">P</th> */}
+                                      <th className="text-center">W</th>
+                                      <th className="text-center">L</th>
+                                      <th className="text-center">D</th>
+                                      <th className="text-center hidden sm:block">Form</th>
+                                    </tr>
+                                    :
+                                    <tr className="text-[#FF8A00] pb-4">
+                                      <th className="w-2/5 text-left">Teams</th>
+                                      <th className="text-center">GW{gameweek}</th>
+                                      <th className="text-center">Total Points</th>
+                                    </tr>
+                                  }
                                 </thead>
                                 <tbody className="pt-4">
-                                  {teams && teams.slice(0, 3).map((team, index) => (
-                                    <tr key={index}>
-                                      <td className="w-2/5 text-sm sm:text-sm md:text-sm lg:text-sm xl:text-base">{team.team_name}</td>
-                                      <td className="text-center">{team.played || 0}</td>
-                                      <td className="text-center">{team.won || 0}</td>
-                                      <td className="text-center">{team.lost || 0}</td>
-                                    </tr>
-                                  ))}
+                                  {selectedLeague.league_configuration.format === "Head to Head" ?
+                                    headToHeadTable && headToHeadTable.sort((a, b) => b.points - a.points).slice(0, 3).map((team, index) => (
+                                      <tr key={index}>
+                                        <td className="w-2/5 text-sm sm:text-sm md:text-sm lg:text-sm xl:text-base">{team.team.team_name}</td>
+                                        <td className="text-center">{team?.points || 0}</td>
+                                        {/* <td className="text-center">{team.played || 0}</td> */}
+                                        <td className="text-center px-1">{team?.wins || 0}</td>
+                                        <td className="text-center px-1">{team?.loses || 0}</td>
+                                        <td className="text-center px-1">{team?.draws || 0}</td>
+                                        <td className="text-center hidden sm:flex justify-center gap-1">{(team?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                          <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-sm sm:text-base lg:text-sm justify-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
+                                        ))}</td>
+                                      </tr>
+                                    ))
+                                    :
+                                    classicTable && classicTable.sort((a, b) => b.points - a.points).slice(0, 3).map((team, index) => (
+                                      <tr key={index}>
+                                        <td className="w-2/5 text-sm sm:text-sm md:text-sm lg:text-sm xl:text-base">{team?.team.team_name}</td>
+                                        <td className="text-center">{team?.current_points || 0}</td>
+                                        <td className="text-center">{team?.total_points || 0}</td>
+                                      </tr>
+                                    ))
+                                  }
                                 </tbody>
                               </table>
                             </div>
@@ -539,22 +598,31 @@ const Dashboard = () => {
                             style={{
                               backgroundImage: "url('/images/gameweekimage.png')",
                             }}>
-                            <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 lg:mb-1 xl:mb-2 ${exo2.className}`}>MATCH CENTER</h3>
-                            <ul className="w-full text-white space-y-1">
-                              {[...Array(3)].map((_, idx) => (
-                                <li key={idx} className="flex items-center justify-between py-1 rounded-md shadow-md">
-                                  <div className="flex items-center w-1/2">
-                                    <img src="/images/man-city-logo.svg" alt="Man City Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
-                                    <span className="text-sm md:text-base lg:text-sm xl:text-base ml-4 lg:ml-1 xl:ml-2">Man City</span>
-                                  </div>
-                                  <span className="text-[#FF8A00] text-base md:text-xl mx-2">v/s</span>
-                                  <div className="flex items-center justify-end w-1/2">
-                                    <span className="text-sm md:text-base lg:text-sm xl:text-base mr-4 lg:mr-1 xl:mr-2">FC Barcelona</span>
-                                    <img src="/images/barcelona-logo.svg" alt="FC Barcelona Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
+                            <div className="space-y-4">
+                              <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 lg:mb-1 xl:mb-2 ${exo2.className}`}>MATCH CENTER</h3>
+                              {selectedLeague.league_configuration.format === "Classic" &&
+                                <p className="text-sm md:text-base lg:text-sm xl:text-base">Track upcoming matches and plan your transfers wisely to maximize points!</p>
+                              }
+                            </div>
+                            {selectedLeague.league_configuration.format === "Head to Head" ?
+                              <ul className="w-full text-white space-y-1 h-32 md:h-[75%]">
+                                {currentFixtures && currentFixtures?.slice(0, 3).map((fixture, idx) => (
+                                  <li key={idx} className="flex items-center justify-between py-1 rounded-md shadow-md">
+                                    <div className="flex items-center w-1/2">
+                                      <img src={fixture.teams[0]?.team_image_path || "/images/default_team_logo.png"} alt="First Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+                                      <span className="text-sm md:text-base lg:text-sm xl:text-base ml-4 lg:ml-1 xl:ml-2">{fixture.teams[0]?.team_name || "Team 1"}</span>
+                                    </div>
+                                    <span className="text-[#FF8A00] text-base md:text-xl mx-2">v/s</span>
+                                    <div className="flex items-center justify-end w-1/2">
+                                      <span className="text-sm md:text-base lg:text-sm xl:text-base mr-4 lg:mr-1 xl:mr-2">{fixture.teams[1]?.team_name || "Team 2"}</span>
+                                      <img src={fixture.teams[1]?.team_image_path || "/images/default_team_logo.png"} alt="Second Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                              :
+                              <></>
+                            }
                           </Link>
 
                           {/* Achievements Card */}

@@ -14,6 +14,7 @@ const exo2 = Exo_2({
 
 const DraftSettings = ({ draftID, user, onBack }) => {
     const [draftData, setDraftData] = useState(null);
+    const [gameweek, setGameweek] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -21,45 +22,77 @@ const DraftSettings = ({ draftID, user, onBack }) => {
     const [originalStartDate, setOriginalStartDate] = useState(null);
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [inputLeagueName, setInputLeagueName] = useState("");
+    const [finalTable, setFinalTable] = useState([]);
     const [inputError, setInputError] = useState(false);
     const { addAlert } = useAlert();
     const router = useRouter();
 
     useEffect(() => {
-        if (user && draftID) fetchDraftData();
-    }, [user, draftID]);
-
-    const fetchDraftData = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?draftID=${draftID}`
-            );
-            if (response.data && !response.data.error) {
-                setDraftData(response.data.data);
-                console.log(response.data.data);
-                // Check if the current user is the creator of the league
-                if (response.data.data.creator === user.email) {
-                    setIsCreator(true);
-                } else {
-                    setIsCreator(false);
+        const fetchCurrentGameweek = async () => {
+            try {
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`);
+                if (res.data && res.data.error) {
+                    console.error("Error fetching current gameweek:", res.data.message);
+                    addAlert("Unable to fetch current gameweek.", "error");
+                    return;
                 }
-                console.log("Draft data fetched successfully:", response.data.data[0]);
-            } else {
-                console.error("Failed to fetch draft data:", response.data.message);
+                console.log("Current Gameweek Response: ", res.data.data);
+                const current = res.data?.data?.name;
+                setGameweek(current);
+                console.log("Current Gameweek: ", current);
+            } catch (err) {
+                console.error("Error fetching current gameweek:", err);
+                addAlert("Unable to fetch current gameweek.", "error");
             }
-        } catch (error) {
-            console.error("Error fetching draft data:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
+
+        fetchCurrentGameweek();
+    }, []);
+
+    useEffect(() => {
+        const fetchDraftData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?draftID=${draftID}`
+                );
+                if (response.data && !response.data.error) {
+                    setDraftData(response.data.data);
+                    // console.log(response.data.data);
+                    // Check if the current user is the creator of the league
+                    if (response.data.data.creator === user.email) {
+                        setIsCreator(true);
+                    } else {
+                        setIsCreator(false);
+                    }
+                    console.log("Draft data fetched successfully:", response.data.data);
+                } else {
+                    console.error("Failed to fetch draft data:", response.data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching draft data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDraftData();
+    }, []);
 
     useEffect(() => {
         if (draftData) {
             setEditData({ ...draftData }); // Clone the data for editing
+            console.log("Draft Data set for editing");
         }
     }, [draftData]);
+
+    useEffect(() => {
+        if (draftData && gameweek) {
+            const table = generatePointsTable(draftData?.leagueID?.points_configuration, gameweek);
+            console.log("✅ Points Table Recalculated");
+            console.log("Points Table: ", table);
+            setFinalTable(table);
+        }
+    }, [draftData, gameweek]);
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -67,7 +100,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
     };
 
     const handleSaveClick = async () => {
-        setLoading(true);
+        // setLoading(true);
         try {
             // Log lineup configurations for debugging
             console.log("Lineup configurations:", editData?.lineup_configurations);
@@ -115,18 +148,19 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 draftData: editData
             });
             if (response.data && !response.data.error) {
-                setDraftData(response.data.data);
-                console.log("Draft settings saved successfully:", response.data.data);
+                const updatedDraft = response.data.data;
+                setDraftData(updatedDraft);
                 addAlert("Draft settings saved successfully.", "success");
                 setIsEditing(false);
+                console.log("Draft settings saved successfully:", response.data.data);
             } else {
                 console.error("Failed to save draft data:", response.data.message);
                 addAlert("Unable to edit Draft settings. Please try again later", "error");
             }
-            setLoading(false);
+            // setLoading(false);
         } catch (error) {
             console.error("Error saving draft data:", error);
-            setLoading(false);
+            // setLoading(false);
         }
     };
 
@@ -211,7 +245,60 @@ const DraftSettings = ({ draftID, user, onBack }) => {
         };
     }, [showDeletePopup]);
 
-    if (loading || !draftData) {
+    const generatePointsTable = (pointsConfig, gameweek) => {
+        const gwPoints = pointsConfig?.find(p => p.gameweek === gameweek);
+        if (!gwPoints) return [];
+        console.log("Current Gameweek: ", gameweek);
+        console.log("Current Gameweek Points: ", gwPoints);
+
+        // Define which stat affects which positions
+        const statMap = {
+            'goals': ['GK', 'DEF', 'MID', 'FWD'],
+            'assists': ['GK', 'DEF', 'MID', 'FWD'],
+            'clean-sheet': ['GK', 'DEF'],
+            'penalty_save': ['GK'],
+            'saves': ['GK'],
+            'goals-conceded': ['GK', 'DEF'],
+            'redcards': ['GK', 'DEF', 'MID', 'FWD'],
+            'yellowcards': ['GK', 'DEF', 'MID', 'FWD'],
+            'bonus': ['GK', 'DEF', 'MID', 'FWD'],
+            'minutes-played': ['GK', 'DEF', 'MID', 'FWD'],
+            'interceptions': ['GK', 'DEF', 'MID'],
+            'tackles': ['DEF', 'MID'],
+            'penalty_miss': ['MID', 'FWD'],
+        };
+
+        const positions = ['GK', 'DEF', 'MID', 'FWD'];
+        const finalTable = [];
+
+        for (const stat in gwPoints) {
+            if (['gameweek', '_id'].includes(stat)) continue;
+
+            const row = {
+                stat,
+                GK: '--',
+                DEF: '--',
+                MID: '--',
+                FWD: '--'
+            };
+
+            const value = gwPoints[stat];
+            const appliesTo = statMap[stat];
+            if (appliesTo) {
+                appliesTo.forEach(pos => {
+                    row[pos] = value;
+                });
+            }
+
+            finalTable.push(row);
+        }
+
+        console.log("Final Points Table: ", finalTable);
+
+        return finalTable;
+    };
+
+    if (loading || !draftData || !gameweek || finalTable.length === 0) {
         return (
             <div className="w-full min-h-[70vh] flex items-center justify-center">
                 <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
@@ -270,25 +357,35 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                     >
                         Back
                     </button>
-                    <h1 className={`text-4xl font-bold ${exo2.className}`}>Draft Settings</h1>
+                    <div className='flex flex-col gap-0'>
+                        <h1 className={`text-4xl font-bold ${exo2.className}`}>Draft Settings</h1>
+                        {isCreator && (
+                            <p className={`text-sm text-gray-400 items-center mr-3 ${exo2.className}`}> *Editing and removing teams is only available until the draft starts</p>
+                        )}
+
+                    </div>
                 </div>
                 {isCreator && (
-                    <div className="flex justify-end">
-                        {isEditing ? (
-                            <button
-                                className="fade-gradient px-12 py-2 rounded-3xl "
-                                onClick={handleSaveClick}
-                            >
-                                Save
-                            </button>
-                        ) : (
-                            <button
-                                className="fade-gradient px-12 py-2 rounded-3xl "
-                                onClick={handleEditClick}
-                            >
-                                Edit
-                            </button>
-                        )}
+                    <div className="flex justify-end items-center">
+                        {draftData?.state === "Scheduled" || draftData?.state === "Manual" ?
+                            isEditing ? (
+                                <button
+                                    className="fade-gradient px-12 py-2 rounded-3xl "
+                                    onClick={handleSaveClick}
+                                >
+                                    Save
+                                </button>
+                            ) : (
+                                <button
+                                    className="fade-gradient px-12 py-2 rounded-3xl "
+                                    onClick={handleEditClick}
+                                >
+                                    Edit
+                                </button>
+                            )
+                            : null
+                        }
+
                     </div>
                 )}
             </div>
@@ -401,7 +498,8 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                                 <div className="col-span-2 text-left flex items-center">
                                     <input
                                         type="number"
-                                        min="1"
+                                        min="30"
+                                        step="15"
                                         className="p-1 bg-[#2f2f2f] text-white rounded-lg w-full"
                                         value={editData?.time_per_pick || ""}
                                         onChange={(e) => handleInputChange("time_per_pick", parseInt(e.target.value, 10))}
@@ -535,150 +633,48 @@ const DraftSettings = ({ draftID, user, onBack }) => {
             <div className='mt-10 bg-[#1c1c1c] rounded-xl'>
                 <h2 className={`text-xl font-bold text-[#FF8A00] pt-6 pl-6 pb-3 ${exo2.className}`}>Points Table</h2>
                 <div className={`grid grid-cols-2 gap-6 bg-[#03070A] ${exo2.className}`}>
-                    <div className="col-span-1 rounded-b-xl shadow-lg pb-6 bg-[#1c1c1c]">
-                        <table className="table-auto w-full text-left ">
-                            <thead className='bg-[#2f2f2f]'>
-                                <tr className='text-center'>
-                                    <th className="p-2 border-b border-gray-700 text-left pl-6">Stat</th>
-                                    <th className="p-2 border-b border-gray-700">GK</th>
-                                    <th className="p-2 border-b border-gray-700">DEF</th>
-                                    <th className="p-2 border-b border-gray-700">MID</th>
-                                    <th className="p-2 border-b border-gray-700 pr-6">FWD</th>
-                                </tr>
-                            </thead>
-                            <tbody className='text-center'>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">{`< 60 mins played`}</td>
-                                    <td className="p-2 border-b border-gray-700">1</td>
-                                    <td className="p-2 border-b border-gray-700">1</td>
-                                    <td className="p-2 border-b border-gray-700">1</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">1</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">60+ mins played</td>
-                                    <td className="p-2 border-b border-gray-700">2</td>
-                                    <td className="p-2 border-b border-gray-700">2</td>
-                                    <td className="p-2 border-b border-gray-700">2</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">2</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Goal scored</td>
-                                    <td className="p-2 border-b border-gray-700">6</td>
-                                    <td className="p-2 border-b border-gray-700">6</td>
-                                    <td className="p-2 border-b border-gray-700">5</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">4</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Assist</td>
-                                    <td className="p-2 border-b border-gray-700">3</td>
-                                    <td className="p-2 border-b border-gray-700">3</td>
-                                    <td className="p-2 border-b border-gray-700">3</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">3</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Clean sheet</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">4</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Yellow card</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">4</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Red card</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">4</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Save</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700">4</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">4</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    {[true, false].map((isPositive, index) => {
+                        const filteredStats = finalTable.filter(row => {
+                            const values = [row.GK, row.DEF, row.MID, row.FWD].map(Number);
+                            // Keep only rows with at least one valid number
+                            const numeric = values.filter(val => !isNaN(val));
+                            if (numeric.length === 0) return false;
+                            return isPositive ? numeric.some(val => val > 0) : numeric.some(val => val < 0);
+                        });
 
-                    {/* Negative Points Table */}
-                    <div className="col-span-1 bg-[#1c1c1c] rounded-b-xl pb-6 shadow-lg">
-                        <table className="table-auto w-full text-left">
-                            <thead className='bg-[#2f2f2f]'>
-                                <tr className='text-center'>
-                                    <th className="p-2 border-b border-gray-700 text-left pl-6">Stat</th>
-                                    <th className="p-2 border-b border-gray-700">GK</th>
-                                    <th className="p-2 border-b border-gray-700">DEF</th>
-                                    <th className="p-2 border-b border-gray-700">MID</th>
-                                    <th className="p-2 border-b border-gray-700 pr-6">FWD</th>
-                                </tr>
-                            </thead>
-                            <tbody className='text-center'>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Own goal</td>
-                                    <td className="p-2 border-b border-gray-700">-2</td>
-                                    <td className="p-2 border-b border-gray-700">-2</td>
-                                    <td className="p-2 border-b border-gray-700">-2</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">-2</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Penalty missed</td>
-                                    <td className="p-2 border-b border-gray-700">-2</td>
-                                    <td className="p-2 border-b border-gray-700">-2</td>
-                                    <td className="p-2 border-b border-gray-700">-2</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">-2</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Penalty conceeded</td>
-                                    <td className="p-2 border-b border-gray-700">-1</td>
-                                    <td className="p-2 border-b border-gray-700">-1</td>
-                                    <td className="p-2 border-b border-gray-700">-1</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">-1</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Penalty earned</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">-3</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Penalty saved</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">-3</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Pass</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">-3</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Accurate pass %</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">-3</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-2 border-b border-gray-700 text-left pl-6">Key pass</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700">-3</td>
-                                    <td className="p-2 border-b border-gray-700 pr-6">-3</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                        return (
+                            <div
+                                key={index}
+                                className="col-span-1 bg-[#1c1c1c] rounded-b-xl pb-6 shadow-lg"
+                            >
+                                <table className="table-auto w-full text-left">
+                                    <thead className='bg-[#2f2f2f]'>
+                                        <tr className='text-center'>
+                                            <th className="p-2 border-b border-gray-700 text-left pl-6">Stat</th>
+                                            <th className="p-2 border-b border-gray-700">GK</th>
+                                            <th className="p-2 border-b border-gray-700">DEF</th>
+                                            <th className="p-2 border-b border-gray-700">MID</th>
+                                            <th className="p-2 border-b border-gray-700 pr-6">FWD</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-center">
+                                        {filteredStats.map((row, i) => (
+                                            <tr key={i}>
+                                                <td className="p-2 border-b border-gray-700 text-left pl-6 capitalize">
+                                                    {row.stat.replace(/_/g, " ")}
+                                                </td>
+                                                {['GK', 'DEF', 'MID', 'FWD'].map(pos => (
+                                                    <td key={pos} className={`p-2 border-b border-gray-700 ${pos === 'FWD' ? 'pr-6' : ''}`}>
+                                                        {typeof row[pos] === "number" ? row[pos] : '--'}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -702,15 +698,19 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                         </button>
 
                         {/* Remove a Team Button */}
-                        <button
-                            className={`bg-[#FF8A00] text-black px-6 py-2 rounded-2xl shadow-md hover:bg-[#FF8A00] hover:text-white hover:scale-105 transition duration-300 ${exo2.className}`}
-                            onClick={() => {
-                                // Handle Remove a Team logic here
-                                console.log("Remove a Team clicked");
-                            }}
-                        >
-                            REMOVE A TEAM
-                        </button>
+                        {draftData?.state === "Scheduled" || draftData?.state === "Manual" ? (
+                            <button
+                                className={`bg-[#FF8A00] text-black px-6 py-2 rounded-2xl shadow-md hover:bg-[#FF8A00] hover:text-white hover:scale-105 transition duration-300 ${exo2.className}`}
+                                onClick={() => {
+                                    // Handle Remove a Team logic here
+                                    console.log("Remove a Team clicked");
+                                }}
+                            >
+                                REMOVE A TEAM
+                            </button>
+                        )
+                            : null
+                        }
                     </div>
                 ) : (
                     <>

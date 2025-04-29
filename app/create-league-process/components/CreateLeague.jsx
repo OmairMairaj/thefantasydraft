@@ -107,6 +107,8 @@ const CreateLeague = ({ onNext }) => {
                                 id="sec-per-pick"
                                 type="number"
                                 value={secPerPick}
+                                min={30}
+                                step={15}
                                 onChange={(e) => setSecPerPick(e.target.value)}
                                 placeholder="Enter seconds per pick for the draft"
                                 className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm md:text-base"
@@ -167,6 +169,7 @@ const CreateLeague = ({ onNext }) => {
                                 <input
                                     id="league-logo"
                                     type="file"
+                                    accept='image/png'
                                     onChange={handleFileChange}
                                     className="hidden"
                                 />

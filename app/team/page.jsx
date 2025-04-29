@@ -26,6 +26,7 @@ const TeamPage = () => {
     const [fixtures, setFixtures] = useState([]);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [standings, setStandings] = useState();
+    const [selectedLeague, setSelectedLeague] = useState(null);
     const [matches, setMatches] = useState();
     const [totalPages, setTotalPages] = useState(1);
     const router = useRouter();
@@ -174,12 +175,13 @@ const TeamPage = () => {
                 if (selectedLeague) {
                     // Step 3: Find the user's team in the selected league
                     console.log(selectedLeague);
+                    setSelectedLeague(selectedLeague);
                     const userTeam = selectedLeague.teams.find(team => team.user_email === userEmail);
 
                     if (userTeam) {
                         // Step 4: Fetch the fantasy team details using teamId
                         console.log(userTeam);
-                        fetchTeamDetails(userTeam.team);
+                        fetchTeamDetails(userTeam.team._id);
                     } else {
                         console.error("No team found for the user in this league.");
                         addAlert("No team found for the selected league.", "error");
@@ -488,50 +490,23 @@ const TeamPage = () => {
                     {/* Left: Pitch/List View */}
                     <div className="col-span-3 bg-[#1C1C1C] rounded-xl p-6 relative">
                         {/* Header Section */}
-                        <div className="rounded-lg flex flex-col items-center w-full ">
+                        <div className="rounded-lg flex flex-col relative w-full ">
                             {/* Team Stats */}
-                            <div className="grid grid-cols-5 items-center w-full justify-center space-x-4 px-6">
-                                <div className="cols-span-1 rounded-md text-center">
-                                    <p className="">Points</p>
-                                    <p className="text-white font-semibold text-2xl">
-                                        {team?.total_points || '0'}
-                                    </p>
-                                </div>
-                                <div className="cols-span-1 rounded-md text-center">
-                                    <p className="">Transfers</p>
-                                    <p className="text-white font-semibold text-2xl">
-                                        {team?.transfers_made || '0'}
-                                    </p>
-                                </div>
-                                <div className=" cols-span-2 text-white rounded-full flex items-center justify-center font-bold text-center overflow-hidden">
+                            <div className="flex items-center w-full space-x-4 px-6">
+                                <div className=" cols-span-2 text-white rounded-md flex items-center justify-center font-bold text-center overflow-hidden">
                                     {team?.team_image_path ? (
-                                        <img src={team.team_image_path} alt="Team Logo" className="w-full h-full object-cover" />
+                                        <img src={team.team_image_path} alt="Team Logo" className="w-28 h-28 object-cover" />
                                     ) : (
-                                        <img src={'/images/placeholder.png'} alt="Team Logo" className="p-7 w-full h-full object-cover border border-gray-600 rounded-full" />
+                                        <img src={'/images/placeholder.png'} alt="Team Logo" className="p-7 w-28 h-28 object-cover border border-gray-600 rounded-md" />
                                     )}
                                 </div>
-                                <div className="cols-span-1 rounded-md text-center">
-                                    <p className="">Captain Points</p>
-                                    <p className="text-white font-semibold text-2xl">
-                                        {team?.captain_points || '0'}
-                                    </p>
-                                </div>
-                                <div className="cols-span-1 rounded-md text-center">
-                                    <p className="">Gameweek Points</p>
-                                    <p className="text-white font-semibold text-2xl">
-                                        {team?.gameweek_points || '0'}
-                                    </p>
+                                {/* Team Name */}
+                                <div className={`mt-1 text-3xl font-semibold text-[#FF8A00] ${exo2.className}`}>
+                                    {team?.team_name || 'Your Team'}
                                 </div>
                             </div>
 
-                            {/* Team Name */}
-                            <div className={`mt-1 text-3xl font-semibold text-[#FF8A00] ${exo2.className}`}>
-                                {team?.team_name || 'Your Team'}
-                            </div>
-                        </div>
-
-                        <div className="bg-[#1C1C1C] rounded-xl">
-                            <div className="flex justify-end my-4" >
+                            <div className="absolute right-0 bottom-0 w-max" >
                                 {/* <h3 className={`text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>Team</h3> */}
                                 <div className="flex items-center  rounded-lg overflow-hidden">
                                     <button
@@ -548,10 +523,14 @@ const TeamPage = () => {
                                     </button>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="bg-[#1C1C1C] rounded-xl mt-6">
+
 
                             {view === 'Pitch' ? (
                                 <div className="relative">
-                                    <div className={`flex flex-col gap-2 ${players?.length === 0 ? 'blur-sm' : ''}`}>
+                                    <div className={`flex flex-col gap-2 ${selectedLeague?.draftID?.state !== "Ended" ? 'blur-sm' : ''}`}>
                                         {/* Pitch layout */}
                                         <div className="py-6 px-4 text-white rounded-lg border border-[#333333] bg-[#1C1C1C] pitch-view">
                                             <div className="flex flex-col gap-4">
@@ -704,7 +683,7 @@ const TeamPage = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    {players?.length === 0 && (
+                                    {selectedLeague?.draftID?.state !== "Ended" && (
                                         <div className='ribbon-2 text-3xl text-[#ff7A00] text-center'>
                                             Drafting not completed yet.
                                         </div>
@@ -757,7 +736,7 @@ const TeamPage = () => {
                                                         </td>
                                                     </tr>
                                                 ))}
-                                                {players.length === 0 && (
+                                                {selectedLeague?.draftID?.state !== "Ended" && (
                                                     <tr>
                                                         <td colSpan="4" className="text-center py-4 text-gray-400">
                                                             No players found in Team.

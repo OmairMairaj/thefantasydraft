@@ -27,6 +27,15 @@ export const GET = async (req) => {
           },
           {
             path: "draftID", // Populate draftID separately
+          },
+          {
+            path: "head_to_head_points.team"
+          },
+          {
+            path: "classic_points.team"
+          },
+          {
+            path: "league_fixtures.teams",
           }
         ]);
       if (!leagues || leagues.length === 0) {
@@ -39,7 +48,21 @@ export const GET = async (req) => {
       }
     } else if (email) {
       // Find all leagues where the user's email is in users_onboard array
-      leagues = await FantasyLeague.find({ users_onboard: email, is_deleted: false }).populate("draftID");
+      leagues = await FantasyLeague.find({ users_onboard: email, is_deleted: false })
+        .populate("draftID")
+        .populate({
+          path: "teams.team",
+          select: "ground_name ground_image_path team_name team_image_path"
+        })
+        .populate({
+          path: "league_fixtures.teams"
+        })
+        .populate({
+          path: "head_to_head_points.team"
+        })
+        .populate({
+          path: "classic_points.team"
+        })
     } else {
       // Return all fantasy leagues if no filters are provided
       leagues = await FantasyLeague.find({ is_deleted: false });

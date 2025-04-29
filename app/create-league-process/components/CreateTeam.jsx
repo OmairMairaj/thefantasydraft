@@ -173,6 +173,7 @@ const CreateTeam = ({ onNext, onBack }) => {
                             <input
                                 id="team-logo"
                                 type="file"
+                                accept='image/png'
                                 onChange={handleFileChange}
                                 className="hidden"
                             />

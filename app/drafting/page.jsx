@@ -261,7 +261,7 @@ const Drafting = () => {
         try {
             const link = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasydraft/edit"
             const body = {
-                draftData : draftData
+                draftData: draftData
             }
             body.draftData.order = draftOrder;
             // console.log(body)
@@ -670,7 +670,7 @@ const Drafting = () => {
                                                             <th className="p-2 max-w-[100px]">Name</th>
                                                             <th className="p-2">Position</th>
                                                             <th className="p-2">Rating</th>
-                                                            <th className="p-2 sticky right-0 z-20">Actions</th>
+                                                            <th className="p-2">Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody className='text-sm'>
@@ -693,7 +693,7 @@ const Drafting = () => {
                                                                 </td>
                                                                 <td className='h-full flex justify-center items-center' style={{ verticalAlign: "middle" }}>{positionIcon(player.position_name)}</td>
                                                                 <td className="p-2">{player.rating}</td>
-                                                                <td className="p-2 sticky right-0 bg-[#1C1C1C]">
+                                                                <td className="p-2">
                                                                     <button
                                                                         className="bg-[#FF8A00] text-white px-6 py-1 rounded-lg hover:bg-[#e77d00]"
                                                                         onClick={() => handlePick(player)}

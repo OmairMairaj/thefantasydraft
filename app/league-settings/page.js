@@ -7,7 +7,7 @@ import { useAlert } from '@/components/AlertContext/AlertContext';
 
 import { Exo_2 } from 'next/font/google';
 import Image from 'next/image';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaRegCopy } from 'react-icons/fa';
 
 
 const exo2 = Exo_2({
@@ -27,7 +27,7 @@ const LeagueSettings = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
     const [saving, setSaving] = useState(false);
-    const [gameweek, setGameweek] = useState(0);
+    const [gameweek, setGameweek] = useState(null);
 
 
 
@@ -66,6 +66,28 @@ const LeagueSettings = () => {
             fetchLeagueData();
         }
     }, [user, leagueID]);
+
+    useEffect(() => {
+        const fetchCurrentGameweek = async () => {
+            try {
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`);
+                if (res.data && res.data.error) {
+                    console.error("Error fetching current gameweek:", res.data.message);
+                    addAlert("Unable to fetch current gameweek.", "error");
+                    return;
+                }
+                console.log("Current Gameweek Response: ", res.data.data);
+                const current = res.data?.data?.name;
+                setGameweek(current);
+                console.log("Current Gameweek: ", current);
+            } catch (err) {
+                console.error("Error fetching current gameweek:", err);
+                addAlert("Unable to fetch current gameweek.", "error");
+            }
+        };
+
+        fetchCurrentGameweek();
+    }, []);
 
 
 
@@ -160,7 +182,7 @@ const LeagueSettings = () => {
     };
 
 
-    if (loading || leagueData === null) {
+    if (loading || leagueData === null || gameweek === null) {
         return (
             <div className="w-full min-h-[70vh] flex items-center justify-center">
                 <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
@@ -193,10 +215,29 @@ const LeagueSettings = () => {
             <div className={`flex flex-col mt-6 ${exo2.className}`}>
                 {/* League Info Section */}
                 <div className='bg-[#0C1922] rounded-xl shadow-lg p-6'>
-                    <h2 className={`text-2xl font-bold ${exo2.className}`}>LEAGUE DETAILS</h2>
-                    <p className='text-gray-400'>Manage your league settings.</p>
+                    <div className='flex items-center justify-between'>
+                        <div className='flex flex-col'>
+                            <h2 className={`text-2xl font-bold ${exo2.className}`}>LEAGUE DETAILS</h2>
+                            <p className='text-gray-400'>Manage your league settings.</p>
+                        </div>
+                        <div className='flex items-center gap-4'>
+                            <label className='block text-gray-300'>Invite Code:</label>
+                            <div className={`w-40 cursor-none relative px-4 py-2 rounded-lg text-white bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]`} >
+                                {leagueData?.invite_code}
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(leagueData?.invite_code || '');
+                                        addAlert("Invite code copied to clipboard!", "success");
+                                    }}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-[#FF8A00] transition"
+                                >
+                                    <FaRegCopy className="text-lg" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div className='flex gap-12 w-full items-center justify-between p-6 '>
-                        <div className={`w-44 h-40 relative rounded-lg ${isEditing && 'border border-[#333333]'}`}>
+                        <div className={`w-40 h-40 relative rounded-lg ${isEditing && 'border border-[#333333]'}`}>
                             {leagueData.league_image_path ? (
                                 <Image
                                     src={leagueData.league_image_path}
@@ -267,46 +308,17 @@ const LeagueSettings = () => {
                                     />
                                 </div>
                                 <div className='flex items-center gap-4'>
-                                    <label className='block w-1/4 text-gray-300'>Starting Waiver:</label>
+                                    <label className='block w-1/4 text-gray-300'>League Creator:</label>
                                     <input
-                                        type='Number'
-                                        value={leagueData.league_configuration.starting_waiver || ''}
-                                        onChange={(e) =>
-                                            setLeagueData({
-                                                ...leagueData,
-                                                league_configuration: {
-                                                    ...leagueData.league_configuration,
-                                                    starting_waiver: e.target.value
-                                                }
-                                            })
-                                        }
-                                        disabled={!isEditing}
-                                        className={`w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
+                                        type='text'
+                                        value={leagueData.creator || ''}
+                                        disabled
+                                        className={`w-3/4 px-4 py-2 rounded-lg text-white ${isEditing ? 'bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]' : 'bg-transparent'}`}
                                     />
                                 </div>
                                 <div className='flex items-center gap-4'>
-                                    <label className='block w-1/4 text-gray-300'>Auto Subs:</label>
-                                    {isEditing &&
-                                        <div
-                                            className={`relative w-16 h-7 flex items-center rounded-full p-2 my-2 cursor-pointer transition-all duration-300 border border-[#333333] ${leagueData.league_configuration?.auto_subs ? 'bg-[#FF8A00]' : 'bg-transparent'}`}
-                                            onClick={() =>
-                                                setLeagueData({
-                                                    ...leagueData,
-                                                    league_configuration: {
-                                                        ...leagueData.league_configuration,
-                                                        auto_subs: !leagueData.league_configuration?.auto_subs
-                                                    }
-                                                })
-                                            }
-                                        >
-                                            <div
-                                                className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300 ${leagueData.league_configuration?.auto_subs ? 'translate-x-7' : 'translate-x-[-6px]'}`}
-                                            >
-
-                                            </div>
-                                        </div>
-                                    }
-                                    <div className={`${!isEditing && 'w-3/4 px-4 py-2'} rounded-lg font-semibold`}>{leagueData.league_configuration?.auto_subs ? 'On' : 'Off'}</div>
+                                    <label className='block w-1/4 text-gray-300'>Payment Status:</label>
+                                    <div className={`w-3/4 px-4 py-2 rounded-lg font-semibold ${leagueData.paid ? 'text-green-400' : 'text-red-500'}`}>{leagueData.paid ? 'Paid' : 'Unpaid'}</div>
                                 </div>
                             </div>
                         </div>
@@ -448,8 +460,8 @@ const LeagueSettings = () => {
                                 </div>
                             ))}
                         </div>
-
                     </div>
+                    <p className='text-gray-400 text-sm'>Note: All changes in Points will be applied from the next gameweek.</p>
                 </div>
 
             </div>
