@@ -409,7 +409,7 @@ const Drafting = () => {
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <div className="min-h-[88vh] flex flex-col my-8 text-white px-6 md:px-10 lg:px-16 xl:px-20 pb-10">
-                {loading ? (
+                {loading || !draftData || !players || !autoPickList ? (
                     <div className="w-full min-h-[70vh] flex items-center justify-center">
                         <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
                     </div>

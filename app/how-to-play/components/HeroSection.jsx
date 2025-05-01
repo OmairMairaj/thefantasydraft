@@ -9,7 +9,7 @@ const exo2 = Exo_2({
     subsets: ['latin'],
 });
 
-const HeroSection = ({ scrollToContent }) => {
+const HeroSection = () => {
     return (
         // <section className=" my-10">
         //     <div className="flex flex-col md:flex-row items-center justify-between mb-10 ">
@@ -47,9 +47,9 @@ const HeroSection = ({ scrollToContent }) => {
                         3 points are awarded for a win and 1 point for a draw, teams are then ranked on points earned in Head-to-Head matches.
                         Head-to-Head fixtures are generated at the start of the league's first Gameweek.
                     </p>
-                    <button className={`fade-gradient px-6 md:px-8 lg:px-12 pt-2 pb-3 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg cursor-pointer ${exo2.className}`} onClick={scrollToContent}>
+                    {/* <button className={`fade-gradient px-6 md:px-8 lg:px-12 pt-2 pb-3 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg cursor-pointer ${exo2.className}`} onClick={scrollToContent}>
                         LEARN MORE <span className="ml-2 text-xl md:text-2xl items-center mb-1.5"> »</span>
-                    </button>
+                    </button> */}
                 </div>
                 <div className="md:w-1/2 relative mt-6 md:mt-0">
                     <Image

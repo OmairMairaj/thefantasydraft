@@ -17,7 +17,7 @@ const exo2 = Exo_2({
     subsets: ['latin'],
 });
 
-const Trade = () => {
+const Transfer = () => {
     const [leagueId, setLeagueId] = useState(null);
     const [user, setUser] = useState(null);
     const [viewType, setViewType] = useState('List');
@@ -25,8 +25,8 @@ const Trade = () => {
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [userPlayers, setUserPlayers] = useState([]);
     const [otherPlayers, setOtherPlayers] = useState([]);
-    const [playersOut, setPlayersOut] = useState([]);
-    const [playersIn, setPlayersIn] = useState([]);
+    const [playersOut, setPlayersOut] = useState(null);
+    const [playersIn, setPlayersIn] = useState(null);
     const [comparePlayer1, setComparePlayer1] = useState(null);
     const [comparePlayer2, setComparePlayer2] = useState(null);
     const { addAlert } = useAlert();
@@ -44,6 +44,11 @@ const Trade = () => {
     const [otherTeam, setOtherTeam] = useState(null);
     const [selectedGameweek, setSelectedGameweek] = useState(null);
     const [leagueTeams, setLeagueTeams] = useState([]);
+    const [sort, setSort] = useState('rating');
+    const [filter, setFilter] = useState('');
+    const [filteredPlayers, setFilteredPlayers] = useState([]);
+    const [teamFilter, setTeamFilter] = useState('');
+    const [search, setSearch] = useState('');
     const router = useRouter();
     const [gameweekName, setGameweekName] = useState(null);
     const [gameweekDetails, setGameweekDetails] = useState({});
@@ -108,8 +113,16 @@ const Trade = () => {
     }, [user, leagueId]);
 
     useEffect(() => {
+        if(leagueId && team){
+        console.log("Fetch Other Players", leagueId, team._id);
+            fetchOtherPlayers(leagueId, team._id);
+        }
+    }, [leagueId, team]);
+
+    useEffect(() => {
         if (team && team._id && gameweekDetails && gameweekDetails._id && leagueId) {
             fetchLeagueTeamPoints(leagueId, team._id, gameweekDetails._id);
+            
         }
     }, [gameweekDetails, leagueId, team]);
 
@@ -196,6 +209,22 @@ const Trade = () => {
         } catch (error) {
             console.error('Error fetching team details:', error);
             // addAlert("An error occurred while fetching team details.", "error");
+        }
+    };
+
+    const fetchOtherPlayers = async (leagueId, teamId) => {
+        try {
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/transfer/players?teamID=${teamId}&leagueID=${leagueId}`);
+            if (response.data && !response.data.error) {
+                console.log("Other Players", response.data.data);
+                setOtherPlayers(response.data.data);
+            } else {
+                console.error("Error fetching other players: ", response.data.message);
+                addAlert(response.data.message, "error");
+            }
+        } catch (error) {
+            console.error('Error fetching other players:', error);
+            addAlert("An error occurred while fetching other players.", "error");
         }
     };
 
@@ -327,9 +356,11 @@ const Trade = () => {
     // Render options menu
     const renderOptionsMenu = (player, team) => (
         <div ref={optionsRef} className="absolute bottom-0 bg-[#1c1c1cc9] w-full text-white rounded-lg shadow-md z-50">
-            <button onClick={() => team === "other" ? setPlayersIn([...playersIn, player]) : setPlayersOut([...playersOut, player])} className='py-1 hover:text-[#ff8a00] hover:bg-[#1c1c1cde] w-full text-center'>Trade</button>
-            <button onClick={() => setComparePlayer1(player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#1c1c1cde] w-full text-center'>Compare With</button>
-            <button onClick={() => setComparePlayer2(player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#1c1c1cde] w-full text-center'>Compare To</button>
+            {(!playersIn || playersIn?.position_name === player.player.position_name) && 
+                <button onClick={() => setPlayersOut(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#1c1c1cde] w-full text-center'>Transfer</button>
+            }
+            <button onClick={() => setComparePlayer1(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#1c1c1cde] w-full text-center'>Compare With</button>
+            <button onClick={() => setComparePlayer2(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#1c1c1cde] w-full text-center'>Compare To</button>
         </div>
     );
 
@@ -370,59 +401,123 @@ const Trade = () => {
         console.log("Other Team Data", otherTeamData);
     };
 
-    const handleTradeClick = () => {
+    const handleTransferClick = () => {
         if (playersIn.length !== 0 && playersOut.length !== 0) {
-            addAlert('Trade submitted successfully', 'success');
+            addAlert('Transfer submitted successfully', 'success');
             setPlayersIn([]);
             setPlayersOut([]);
         }
         else {
-            addAlert('Please select players to trade', 'error');
+            addAlert('Please select players to transfer', 'error');
             return;
         }
         // Submit logic here
     };
 
-    const renderPlayerCard = (player, side) => (
-        <div key={player.id} className='bg-[#333] p-4 rounded-lg flex justify-between items-center'>
-            <span>{player.name}</span>
-            <div className='flex gap-2'>
-                <button onClick={() => side === 'user' ? setPlayersOut([...playersOut, player]) : setPlayersIn([...playersIn, player])} className='bg-[#FF8A00] text-sm px-2 py-1 rounded'>Trade</button>
-                <button onClick={() => setComparePlayer1(player)} className='bg-blue-500 text-sm px-2 py-1 rounded'>Compare With</button>
-                <button onClick={() => setComparePlayer2(player)} className='bg-purple-500 text-sm px-2 py-1 rounded'>Compare To</button>
+    // const renderPlayerCard = (player, side) => (
+    //     <div key={player.id} className='bg-[#333] p-4 rounded-lg flex justify-between items-center'>
+    //         <span>{player.name}</span>
+    //         <div className='flex gap-2'>
+    //             <button onClick={() => side === 'user' ? setPlayersOut([...playersOut, player]) : setPlayersIn([...playersIn, player])} className='bg-[#FF8A00] text-sm px-2 py-1 rounded'>Transfer</button>
+    //             <button onClick={() => setComparePlayer1(player)} className='bg-blue-500 text-sm px-2 py-1 rounded'>Compare With</button>
+    //             <button onClick={() => setComparePlayer2(player)} className='bg-purple-500 text-sm px-2 py-1 rounded'>Compare To</button>
+    //         </div>
+    //     </div>
+    // );
+
+
+    useEffect(() => {
+        try {
+            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/team`)
+                .then((response) => {
+                    if (response && response.data && response.data.data) setTeams(response.data.data);
+                    else addAlert("Error fetching teams. Please try again", 'error');
+                });
+        } catch (error) {
+            console.error("Error fetching teams data:", error);
+        }
+    }, []);
+
+    const handleSearch = (value) => {
+        setSearch(value);
+    }
+
+    useEffect(() => {
+        filterPlayers();
+    }, [search, teamFilter, filter, sort, otherPlayers]);
+
+    const filterPlayers = () => { 
+       const filtered =  otherPlayers.filter((player) =>
+            // Filter players by name or common_name
+            player.name.toLowerCase().includes(search.toLowerCase()) ||
+            player.common_name?.toLowerCase().includes(search.toLowerCase())
+            // ||
+            // player.team_name?.toLowerCase().includes(search.toLowerCase())
+        )
+        .filter((player) =>
+            // Filter by team name if filter is set
+            !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase()
+        )
+        .filter((player) =>
+            // Filter by position if filter is set
+            !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
+        )
+        .sort((a, b) => {
+            if (sort === 'name') return a.name.localeCompare(b.name);
+            if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
+            return 0;
+        });
+
+        setFilteredPlayers(filtered);
+    }
+
+
+    const positionIcon = (position) => {
+        const positionStyles = {
+            Attacker: { bg: 'bg-[#D3E4FE]', text: 'F' },
+            Midfielder: { bg: 'bg-[#D5FDE1]', text: 'M' },
+            Defender: { bg: 'bg-[#F8E1FF]', text: 'D' },
+            Goalkeeper: { bg: 'bg-[#FEF9B6]', text: 'G' },
+        };
+
+        const { bg, text } = positionStyles[position] || { bg: 'bg-gray-500', text: '?' };
+
+        return (
+            <div
+                className={`${bg} w-5 h-5 text-black flex items-center justify-center text-xs my-4 rounded-full `}
+            >
+                {text}
             </div>
-        </div>
-    );
+        );
+    };
+
+
     return (
         <div className={``}>
             <div className='grid grid-cols-3 gap-6 mb-8'>
                 <div className='bg-[#1c1c1c] rounded-lg p-4'>
-                    <h3 className='font-bold text-lg mb-2'>Players Out</h3>
-                    {playersOut.length > 0 ?
-                        playersOut.map(p => {
-                            return (
-                                <div className="flex items-center space-x-2">
-                                    {p.player.image_path && (
-                                        <img
-                                            src={p.player.image_path}
-                                            alt={p.player.team_name || 'Team Logo'}
-                                            className="w-12 h-12 my-2 rounded-lg"
-                                        />
-                                    )}
-                                    <div className="overflow-hidden flex w-full justify-between items-center">
-                                        <div className='flex flex-col'>
-                                            <p className="font-bold truncate">{p.player.common_name} </p>
-                                            <p className='text-sm font-normal text-gray-400'>{p.player.team_name}</p>
-                                        </div>
-                                        <button onClick={() => setPlayersOut(playersOut.filter(player => player.player._id !== p.player._id))} className='bg-red-500 text-sm px-2 py-1 rounded'>Remove</button>
-                                    </div>
+                    <h3 className='font-bold text-lg mb-2'>Player Out</h3>
+                    {playersOut ?                          
+                        <div className="flex items-center space-x-2">
+                            {playersOut.image_path && (
+                                <img
+                                    src={playersOut.image_path}
+                                    alt={playersOut.team_name || 'Team Logo'}
+                                    className="w-12 h-12 my-2 rounded-lg"
+                                />
+                            )}
+                            <div className="overflow-hidden flex w-full justify-between items-center">
+                                <div className='flex flex-col'>
+                                    <p className="font-bold truncate">{playersOut.common_name} </p>
+                                    <p className='text-sm font-normal text-gray-400'>{playersOut.team_name}</p>
                                 </div>
-                                // <div key={p.player.id} className='flex justify-between items-center mb-2'>
-                                //     <span>{p.player.common_name}</span>
-                                //     <button onClick={() => setPlayersOut(playersOut.filter(player => player.id !== p.id))} className='bg-red-500 text-sm px-2 py-1 rounded'>Remove</button>
-                                // </div>
-                            );
-                        })
+                                <button onClick={() => setPlayersOut(null)} className='bg-red-500 text-sm px-2 py-1 rounded'>Remove</button>
+                            </div>
+                        </div>
+                        // <div key={playersOut.id} className='flex justify-between items-center mb-2'>
+                        //     <span>{playersOut.common_name}</span>
+                        //     <button onClick={() => setPlayersOut(playersOut.filter(player => player.id !== playersOut.id))} className='bg-red-500 text-sm px-2 py-1 rounded'>Remove</button>
+                        // </div>
                         :
                         <>
                             <p className='text-gray-400'>Select a player to transfer out</p>
@@ -432,31 +527,27 @@ const Trade = () => {
                 </div>
                 <div className='bg-[#1c1c1c] rounded-lg p-4'>
                     <h3 className='font-bold text-lg mb-2'>Players In</h3>
-                    {playersIn.length > 0 ?
-                        playersIn.map(p => {
-                            return (
-                                <div className="flex items-center space-x-2">
-                                    {p.player.image_path && (
-                                        <img
-                                            src={p.player.image_path}
-                                            alt={p.player.team_name || 'Team Logo'}
-                                            className="w-12 h-12 my-2 rounded-lg"
-                                        />
-                                    )}
-                                    <div className="overflow-hidden flex w-full justify-between items-center">
-                                        <div className='flex flex-col'>
-                                            <p className="font-bold truncate">{p.player.common_name} </p>
-                                            <p className='text-sm font-normal text-gray-400'>{p.player.team_name}</p>
-                                        </div>
-                                        <button onClick={() => setPlayersIn(playersIn.filter(player => player.player._id !== p.player._id))} className='bg-red-500 text-sm px-2 py-1 rounded'>Remove</button>
-                                    </div>
+                    {playersIn ?
+                        <div className="flex items-center space-x-2">
+                            {playersIn.image_path && (
+                                <img
+                                    src={playersIn.image_path}
+                                    alt={playersIn.team_name || 'Team Logo'}
+                                    className="w-12 h-12 my-2 rounded-lg"
+                                />
+                            )}
+                            <div className="overflow-hidden flex w-full justify-between items-center">
+                                <div className='flex flex-col'>
+                                    <p className="font-bold truncate">{playersIn.common_name} </p>
+                                    <p className='text-sm font-normal text-gray-400'>{playersIn.team_name}</p>
                                 </div>
-                                // <div key={p.player.id} className='flex justify-between items-center mb-2'>
-                                //     <span>{p.player.common_name}</span>
-                                //     <button onClick={() => setPlayersOut(playersOut.filter(player => player.id !== p.id))} className='bg-red-500 text-sm px-2 py-1 rounded'>Remove</button>
-                                // </div>
-                            );
-                        })
+                                <button onClick={() => setPlayersIn(null)} className='bg-red-500 text-sm px-2 py-1 rounded'>Remove</button>
+                            </div>
+                        </div>
+                        // <div key={playersIn.id} className='flex justify-between items-center mb-2'>
+                        //     <span>{playersIn.common_name}</span>
+                        //     <button onClick={() => setPlayersOut(playersOut.filter(player => player.id !== playersIn.id))} className='bg-red-500 text-sm px-2 py-1 rounded'>Remove</button>
+                        // </div>   
                         :
                         <>
                             <p className='text-gray-400'>Select a player to transfer in</p>
@@ -464,12 +555,12 @@ const Trade = () => {
                     }
                 </div>
                 <div className='bg-[#1c1c1c] rounded-lg p-4'>
-                    <h3 className='font-bold text-lg mb-2'>Trade</h3>
+                    <h3 className='font-bold text-lg mb-2'>Transfer</h3>
                     <p className='text-sm text-gray-400 mb-2'>Waiver Budget: $200</p>
-                    {playersIn.length === 0 && playersOut.length === 0 ? <p className='text-gray-400 text-sm'>No players selected</p> : null}
-                    {playersIn.length > 0 && playersOut.length === 0 ? <p className='text-gray-400 text-sm'>Some players selected</p> : null}
-                    {playersOut.length > 0 && playersIn.length === 0 ? <p className='text-gray-400 text-sm'>Some players selected</p> : null}
-                    <button onClick={handleTradeClick} className='mt-4 w-full bg-[#FF8A00] py-2 rounded text-center font-semibold'>Offer Trade</button>
+                    {!playersIn && !playersOut ? <p className='text-gray-400 text-sm'>No players selected</p> : null}
+                    {playersIn && !playersOut ? <p className='text-gray-400 text-sm'>Some players selected</p> : null}
+                    {playersOut && !playersIn ? <p className='text-gray-400 text-sm'>Some players selected</p> : null}
+                    <button onClick={handleTransferClick} className='mt-4 w-full bg-[#FF8A00] py-2 rounded text-center font-semibold'>Make Transfer</button>
                 </div>
             </div>
 
@@ -515,12 +606,19 @@ const Trade = () => {
             </div>
 
             {/* Pitch/List Views */}
-            <div className='grid grid-cols-2 gap-6'>
+            <div className='grid grid-cols-2 gap-2'>
                 {/* User Team */}
                 <div className='bg-[#1c1c1c] rounded-lg p-4'>
                     <div className='flex justify-between items-center mb-4'>
-                        <div className='bg-[#333] px-4 py-2 rounded'>
-                            {userTeam?.team_name}
+                        <div className='flex items-center gap-2'>
+                        <img 
+                            src={userTeam?.team_image_path || '/images/default_team_logo.png'}
+                            alt={userTeam?.team_name || 'Team Logo'}
+                            className="w-10 h-10 rounded-lg"
+                        />
+                        <div className='text-2xl text-[#FF8A00] font-semibold'>
+                            {userTeam?.team_name || 'Your Team'}
+                        </div>
                         </div>
                         <div className='flex gap-2'>
                             <button onClick={() => setViewType('List')} className={`px-4 py-1 ${viewType === 'List' ? 'bg-[#FF8A00]' : 'bg-[#333]'} rounded`}>List</button>
@@ -745,12 +843,12 @@ const Trade = () => {
                                                 <th className="p-2 text-left pl-4">Player</th>
                                                 {/* <th className="p-2">Role</th> */}
                                                 <th className="p-2">Team</th>
-                                                <th className="p-2">Position</th>
+                                                <th className="p-2">Pos.</th>
                                                 <th className="p-2"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {players && players.map((player) => {
+                                            {players && players.sort((a,b) => (b.in_team ? 1 : 0) - (a.in_team ? 1 : 0)).map((player) => {
                                                 const gameweekPoints = player.player.points.find(
                                                     (p) => p.gameweek === gameweekDetails._id
                                                 );
@@ -773,6 +871,7 @@ const Trade = () => {
                                                                             {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
                                                                         </span>
                                                                     </p>
+                                                                    <p className="text-xs text-gray-400 truncate">{player.in_team ? "" : "(Sub)"}</p>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -784,13 +883,15 @@ const Trade = () => {
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
                                                         </td>
                                                         <td className="p-2 text-center truncate">
-                                                            {player.player.position_name}
+                                                            <div className='flex justify-center items-center'>
+                                                                {positionIcon(player.player.position_name)}
+                                                            </div>
                                                         </td>
                                                         <td className="p-2 text-center truncate">
                                                             <div className='flex truncate gap-2 my-auto items-center align-middle h-full'>
-                                                                <button onClick={() => setPlayersOut([...playersOut, player])} className='bg-[#FF8A00] text-sm px-2 py-1 rounded'>Trade</button>
-                                                                <button onClick={() => setComparePlayer1(player)} className='bg-[#2563EB] text-sm px-2 py-1 rounded'>Compare With</button>
-                                                                <button onClick={() => setComparePlayer2(player)} className='bg-[#7C3AED] text-sm px-2 py-1 rounded'>Compare To</button>
+                                                                <button disabled={playersIn && playersIn?.position_name !== player.player.position_name} onClick={() => setPlayersOut(player.player)} className={`${playersIn && playersIn?.position_name !== player.player.position_name ? "bg-[#191218]" : "bg-[#FF8A00]"} text-sm px-2 py-1 rounded`}>Transfer</button>
+                                                                <button onClick={() => setComparePlayer1(player.player)} className='bg-[#2563EB] text-sm px-2 py-1 rounded'>Compare With</button>
+                                                                <button onClick={() => setComparePlayer2(player.player)} className='bg-[#7C3AED] text-sm px-2 py-1 rounded'>Compare To</button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -811,8 +912,132 @@ const Trade = () => {
                     </div>
                 </div>
 
+                <div className="bg-[#1C1C1C] rounded-xl p-4 h-full">
+                    <div className='flex justify-between py-2'>
+                        <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className}`}>
+                            Players
+                        </h3>
+                        {/* Search, Filter, and Sort */}
+                        <div className="flex gap-2 w-9/12">
+                            <div className='flex items-center gap-2 w-3/12'>
+                                {/* <p className="text-gray-400 text-sm">Sort:</p> */}
+                                <select
+                                    value={sort}
+                                    onChange={(e) => setSort(e.target.value)}
+                                    className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                >
+                                    <option value="name">Name</option>
+                                    <option value="rating">Rating</option>
+                                </select>
+                            </div>
+                            <div className='flex items-center gap-2 w-4/12'>
+                                {/* <p className="text-gray-400 text-sm">Filter:</p> */}
+                                <select
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value)}
+                                    className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                >
+                                    <option value="">Position</option>
+                                    <option value="attacker">Attacker</option>
+                                    <option value="midfielder">Midfielder</option>
+                                    <option value="defender">Defender</option>
+                                    <option value="goalkeeper">Goalkeeper</option>
+                                </select>
+                            </div>
+                            <div className='flex items-center gap-2 w-4/12'>
+                                {/* <p className="text-gray-400 text-sm">Filter:</p> */}
+                                <select
+                                    value={teamFilter}
+                                    onChange={(e) => setTeamFilter(e.target.value)}
+                                    className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                >
+                                    <option value="">Team</option>
+                                    {teams ? teams.map((item) => <>
+                                        <option value={item.name}>{item.name}</option>
+                                    </>) : null}
+                                </select>
+                            </div>
+                            <div className='flex items-center gap-2 w-5/12 '>
+                                <input
+                                    type="text"
+                                    placeholder="Search ..."
+                                    value={search}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                    className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    {/* Table */}
+                    <div className="relative w-full max-h-[67rem] overflow-hidden rounded-lg mt-2 border border-[#333333] bg-[#1C1C1C]">
+                        {/* Scrollable Wrapper */}
+                        <div className="overflow-x-auto max-h-[67rem] overflow-y-auto scrollbar">
+                            <table className="w-full text-left text-white">
+                                {/* Table Header */}
+                                <thead className="bg-[#2f2f2f] sticky top-0 z-10">
+                                    <tr className="text-center">
+                                        <th className="p-2 text-left pl-4">Player</th>
+                                        <th className='p-2'>Team</th>
+                                        <th className="p-2">Pos.</th>
+                                        <th className="p-2"></th>
+                                        {/* <th className="p-2 sticky right-0 z-20">Actions</th> */}
+                                    </tr>
+                                </thead>
+                                <tbody className='text-sm'>
+                                    {filteredPlayers && filteredPlayers?.map((player) => (
+                                        <tr key={player.id} className="border-b border-[#333333] text-center items-center justify-center">
+                                            <td className="px-2 text-left truncate">
+                                                <div className="flex items-center space-x-2">
+                                                    {player.image_path && (
+                                                        <img
+                                                            src={player.image_path}
+                                                            alt={player.team_name || "Team Logo"}
+                                                            className="w-10 h-10 my-2 rounded-lg"
+                                                        />
+                                                    )}
+                                                    <div className="overflow-hidden">
+                                                        <p className="font-bold truncate">{player.common_name}</p>
+                                                        {/* <p className="text-xs text-gray-400 truncate">{player.team_name}</p> */}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-2 text-center truncate">
+                                                <img src={player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
+                                            </td>
+                                            <td className='p-2'>
+                                                <div className='flex justify-center items-center'>
+                                                    {positionIcon(player.position_name)}
+                                                </div>
+                                            </td>
+                                            <td className="p-2 text-center truncate">
+                                                <div className='flex truncate gap-2 my-auto items-center align-middle h-full'>
+                                                    <button disabled={playersOut && playersOut?.position_name !== player.position_name} onClick={() => setPlayersIn(player)} className={`${playersOut && playersOut?.position_name !== player.position_name ? "bg-[#191218]" : "bg-[#FF8A00]"} text-sm px-2 py-1 rounded`}>Transfer</button>
+                                                    <button onClick={() => setComparePlayer1(player)} className='bg-[#2563EB] text-sm px-2 py-1 rounded'>Compare With</button>
+                                                    <button onClick={() => setComparePlayer2(player)} className='bg-[#7C3AED] text-sm px-2 py-1 rounded'>Compare To</button>
+                                                </div>
+                                            </td>
+                                            {/* <td className="p-2 sticky right-0 bg-[#1C1C1C]">
+                                                <button
+                                                    className={`${draftData?.turn !== user.email || loadingSelect || isPicking ? 'bg-[#454545] cursor-not-allowed' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
+                                                    onClick={() => {
+                                                        setLoadingSelect(true);
+                                                        handlePick(player)
+                                                    }}
+                                                    disabled={(draftData?.turn !== user.email) || loadingSelect || isPicking}
+                                                >
+                                                    Pick
+                                                </button>
+                                            </td> */}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Other Team */}
-                <div className='bg-[#1c1c1c] rounded-lg p-4'>
+                {/* <div className='bg-[#1c1c1c] rounded-lg p-4'>
                     <div className='flex justify-between items-center mb-4'>
                         <select value={selectedTeam?.team_name || ''} onChange={(e) => handleTeamSelect(e.target.value)} className='bg-[#333] px-4 py-2 rounded'>
                             <option hidden value=''>Select Team</option>
@@ -828,14 +1053,11 @@ const Trade = () => {
                         </div>
                     </div>
                     <div className='space-y-2'>
-                        {/* {userPlayers.map(p => renderPlayerCard(p, 'user'))} */}
                         {viewType === 'Pitch' && otherPlayers && otherPlayers.length > 0 ? (
                             <div className="relative">
                                 <div className={`flex flex-col gap-2 ${otherPlayers?.length === 0 ? 'blur-sm' : ''}`}>
-                                    {/* Pitch layout */}
                                     <div className="py-6 px-4 text-white rounded-lg border border-[#333333] bg-[#1C1C1C] pitch-view">
                                         <div className="flex flex-col gap-4">
-                                            {/* Goalkeeper */}
                                             <div className="flex justify-center items-center gap-4">
                                                 {otherPitchViewList.lineup.Goalkeeper.map((player) => {
                                                     // Find the specific gameweek points for the current gameweek
@@ -863,9 +1085,6 @@ const Trade = () => {
                                                             <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
                                                                 {player.player.position_name}
                                                             </p>
-                                                            {/* <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                {(leaguePoints && leaguePoints.players.find(x => x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x => x.playerDetails._id == player.player._id).playerPoints : 0} Pts
-                                                            </p> */}
                                                             {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
                                                         </div>
                                                     )
@@ -873,7 +1092,6 @@ const Trade = () => {
                                                 {renderSkeletons(1, otherPitchViewList.lineup.Goalkeeper.length)}
                                             </div>
 
-                                            {/* Defenders */}
                                             <div className="flex justify-center items-center gap-4">
                                                 {otherPitchViewList.lineup.Defender.map((player) => {
                                                     // Find the specific gameweek points for the current gameweek
@@ -901,9 +1119,6 @@ const Trade = () => {
                                                             <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
                                                                 {player.player.position_name}
                                                             </p>
-                                                            {/* <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                {(leaguePoints && leaguePoints.players.find(x => x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x => x.playerDetails._id == player.player._id).playerPoints : 0} Pts
-                                                            </p> */}
                                                             {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
                                                         </div>
                                                     )
@@ -911,7 +1126,6 @@ const Trade = () => {
                                                 {renderSkeletons(3, otherPitchViewList.lineup.Defender.length)}
                                             </div>
 
-                                            {/* Midfielders */}
                                             <div className="flex justify-center items-center gap-4">
                                                 {otherPitchViewList.lineup.Midfielder.map((player) => {
                                                     // Find the specific gameweek points for the current gameweek
@@ -939,9 +1153,6 @@ const Trade = () => {
                                                             <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
                                                                 {player.player.position_name}
                                                             </p>
-                                                            {/* <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                {(leaguePoints && leaguePoints.players.find(x => x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x => x.playerDetails._id == player.player._id).playerPoints : 0} Pts
-                                                            </p> */}
                                                             {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
                                                         </div>
                                                     )
@@ -949,7 +1160,6 @@ const Trade = () => {
                                                 {renderSkeletons(3, otherPitchViewList.lineup.Midfielder.length)}
                                             </div>
 
-                                            {/* Attackers */}
                                             <div className="flex justify-center items-center gap-4">
                                                 {otherPitchViewList.lineup.Attacker.map((player) => {
                                                     // Find the specific gameweek points for the current gameweek
@@ -977,9 +1187,6 @@ const Trade = () => {
                                                             <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
                                                                 {player.player.position_name}
                                                             </p>
-                                                            {/* <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                                {(leaguePoints && leaguePoints.players.find(x => x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x => x.playerDetails._id == player.player._id).playerPoints : 0} Pts
-                                                            </p> */}
                                                             {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
                                                         </div>
                                                     )
@@ -989,7 +1196,6 @@ const Trade = () => {
                                         </div>
                                     </div>
 
-                                    {/* Substitute Players */}
                                     <div className='w-full flex flex-col py-3 px-4 bg-[#131313] rounded-lg'>
                                         <div className="flex justify-center items-center gap-4">
                                             {otherPitchViewList.bench.map((player) => {
@@ -1018,9 +1224,6 @@ const Trade = () => {
                                                         <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
                                                             {player.player.position_name}
                                                         </p>
-                                                        {/* <p className="px-2 truncate w-full whitespace-nowrap text-xs mt-2 py-1 bg-[#4333105e]">
-                                                            {(leaguePoints && leaguePoints.players.find(x => x.playerDetails._id == player.player._id)) ? leaguePoints.players.find(x => x.playerDetails._id == player.player._id).playerPoints : 0} Pts
-                                                        </p> */}
                                                         {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
                                                     </div>
                                                 )
@@ -1043,7 +1246,6 @@ const Trade = () => {
                                         <thead className="bg-[#2f2f2f] sticky top-0 z-10">
                                             <tr className="text-center">
                                                 <th className="p-2 text-left pl-4">Player</th>
-                                                {/* <th className="p-2">Role</th> */}
                                                 <th className="p-2">Team</th>
                                                 <th className="p-2">Position</th>
                                                 <th className="p-2"></th>
@@ -1078,10 +1280,6 @@ const Trade = () => {
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        {/* <td className="p-2 text-center truncate">
-                                                        {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">Captain</span>}
-                                                        {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">Vice Captain</span>}
-                                                    </td> */}
                                                         <td className="p-2 text-center truncate">
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
                                                         </td>
@@ -1090,7 +1288,7 @@ const Trade = () => {
                                                         </td>
                                                         <td className="p-2 text-center truncate">
                                                             <div className='flex truncate gap-2 my-auto items-center align-middle h-full'>
-                                                                <button onClick={() => setPlayersIn([...playersIn, player])} className='bg-[#FF8A00] text-sm px-2 py-1 rounded'>Trade</button>
+                                                                <button onClick={() => setPlayersIn([...playersIn, player])} className='bg-[#FF8A00] text-sm px-2 py-1 rounded'>Transfer</button>
                                                                 <button onClick={() => setComparePlayer1(player)} className='bg-[#2563EB] text-sm px-2 py-1 rounded'>Compare With</button>
                                                                 <button onClick={() => setComparePlayer2(player)} className='bg-[#7C3AED] text-sm px-2 py-1 rounded'>Compare To</button>
                                                             </div>
@@ -1111,10 +1309,10 @@ const Trade = () => {
                             </div>
                         )}
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     )
 }
 
-export default Trade
+export default Transfer

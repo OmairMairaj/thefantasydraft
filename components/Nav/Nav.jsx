@@ -62,7 +62,7 @@ const Nav = () => {
 
   React.useEffect(() => {
     if (
-      (pathname != "/" && pathname != "/how-to-play" && pathname != "/contact" && pathname != "/signup") &&
+      (pathname != "/" && pathname != "/how-to-play" && pathname != "/contact" && pathname != "/signup" && pathname != "/forgot-password" && pathname != "/change-password" && pathname != "/login" && pathname != "/verify" && pathname != "/privacy-policy" && pathname != "/terms-and-conditions") &&
       user === "nothing"
     ) {
       router.push("/login?redirect=" + window.location.toString());
@@ -124,7 +124,7 @@ const Nav = () => {
             href="/contact"
             className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
           >
-            CONTACT ME
+            CONTACT US
           </Link>
         </div>
       ) : (

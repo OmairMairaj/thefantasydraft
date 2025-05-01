@@ -6,7 +6,7 @@ import { Exo_2 } from 'next/font/google';
 import { FaExchangeAlt, FaUserPlus, FaUserMinus, FaClipboard, FaChevronDown } from 'react-icons/fa';
 import { MdOutlineCompareArrows } from 'react-icons/md';
 import { useAlert } from '@/components/AlertContext/AlertContext';
-import Trade from './components/Trade';
+import Transfer from './components/Transfer';
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],
@@ -15,7 +15,7 @@ const exo2 = Exo_2({
 });
 
 const Transfers = () => {
-    const [activeTab, setActiveTab] = useState('Trade');
+    const [activeTab, setActiveTab] = useState('Transfer');
 
 
     return (
@@ -24,7 +24,7 @@ const Transfers = () => {
 
             {/* Tabs */}
             <div className='flex gap-2 mb-4'>
-                {['Trade', 'Offers', 'History', 'Waiver Order'].map(tab => (
+                {['Transfer', 'History'].map(tab => (
                     <button key={tab} onClick={() => setActiveTab(tab)} className={` ${activeTab === tab ? "bg-[#FF8A00]" : "bg-[#2c2c2c] hover:bg-[#3a3a3a]"} px-8 py-1 rounded-lg`}>{tab}</button>
                 ))}
                 {/* <div className='ml-auto bg-[#303030] px-4 py-2 rounded-lg flex items-center gap-2'>
@@ -32,8 +32,8 @@ const Transfers = () => {
                 </div> */}
             </div>
 
-            {activeTab === 'Trade' &&
-                <Trade />
+            {activeTab === 'Transfer' &&
+                <Transfer />
             }
 
 

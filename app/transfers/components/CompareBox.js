@@ -10,7 +10,7 @@ const CompareBox = ({ playerObj, label }) => {
     const [fixtures, setFixtures] = useState([]);
 
     useEffect(() => {
-        if (playerObj?.player?.teamID && playerObj?.player?.points?.[0]?.seasonID) {
+        if (playerObj?.teamID && playerObj?.points?.[0]?.seasonID) {
             fetchMatches();
         }
         console.log("Player Object:", playerObj);
@@ -19,7 +19,7 @@ const CompareBox = ({ playerObj, label }) => {
     const fetchMatches = async () => {
         try {
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/match/team-season?seasonID=${playerObj?.player?.points[0]?.seasonID}&teamID=${playerObj?.player?.teamID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/match/team-season?seasonID=${playerObj?.points[0]?.seasonID}&teamID=${playerObj?.teamID}`
             );
             if (!response.data.error) {
                 setMatches(response.data.data);
@@ -35,8 +35,8 @@ const CompareBox = ({ playerObj, label }) => {
         if (!match) return null;
 
         // Identify opponent team
-        const opponentTeam = match.teams.find(t => t.team_id !== playerObj?.player?.teamID);
-        const playerTeam = match.teams.find(t => t.team_id === playerObj?.player?.teamID);
+        const opponentTeam = match.teams.find(t => t.team_id !== playerObj?.teamID);
+        const playerTeam = match.teams.find(t => t.team_id === playerObj?.teamID);
 
         if (!opponentTeam || !playerTeam) return null;
 
@@ -73,7 +73,7 @@ const CompareBox = ({ playerObj, label }) => {
         );
     };
 
-    if (!playerObj || !playerObj.player) {
+    if (!playerObj || !playerObj) {
         return <div className="bg-[#222] rounded-lg p-4 text-white">Loading...</div>;
     }
 
@@ -81,10 +81,10 @@ const CompareBox = ({ playerObj, label }) => {
     return (
         <div className="">
             <div className="flex gap-4 items-center border-b pb-2 mb-2">
-                <img src={playerObj.player.image_path} className="w-16 h-16 rounded-full" />
+                <img src={playerObj.image_path} className="w-16 h-16 rounded-full" />
                 <div>
-                    <p className="text-lg font-bold flex items-center">{playerObj.player.common_name}<span className='ml-2'>{positionIcon(playerObj.player.position_name)}</span></p>
-                    <p className="text-gray-400 text-sm">{playerObj.player.team_name}</p>
+                    <p className="text-lg font-bold flex items-center">{playerObj.common_name}<span className='ml-2'>{positionIcon(playerObj.position_name)}</span></p>
+                    <p className="text-gray-400 text-sm">{playerObj.team_name}</p>
                 </div>
             </div>
             <div className="overflow-x-auto max-h-[154px] scrollbar">
@@ -109,7 +109,7 @@ const CompareBox = ({ playerObj, label }) => {
                     <tbody>
                         {matches.map((game, i) => {
                             const match = getMatchDetails(game.gameweekID);
-                            const matchedPoints = playerObj.player.points.find(
+                            const matchedPoints = playerObj.points.find(
                                 p => p?.gameweek?.id?.toString() === game.gameweekID.toString() && p?.gameweek?.seasonID === game.seasonID
                             );
                             const stats = matchedPoints?.fpl_stats || {};
