@@ -28,6 +28,10 @@ const LeagueSettings = () => {
     const [editData, setEditData] = useState(null);
     const [saving, setSaving] = useState(false);
     const [gameweek, setGameweek] = useState(null);
+    const [finalTable, setFinalTable] = useState([]);
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [inputLeagueName, setInputLeagueName] = useState("");
+    const [inputError, setInputError] = useState(false);
 
 
 
@@ -181,6 +185,116 @@ const LeagueSettings = () => {
         }
     };
 
+     useEffect(() => {
+            if (leagueData && gameweek) {
+                const table = generatePointsTable(leagueData?.points_configuration, gameweek);
+                console.log("✅ Points Table Recalculated");
+                console.log("Points Table: ", table);
+                setFinalTable(table);
+            }
+        }, [leagueData, gameweek]);
+
+    const generatePointsTable = (pointsConfig, gameweek) => {
+        const gwPoints = pointsConfig?.find(p => p.gameweek === gameweek);
+        if (!gwPoints) return [];
+        console.log("Current Gameweek: ", gameweek);
+        console.log("Current Gameweek Points: ", gwPoints);
+
+        // Define which stat affects which positions
+        const statMap = {
+            'goals': ['GK', 'DEF', 'MID', 'FWD'],
+            'assists': ['GK', 'DEF', 'MID', 'FWD'],
+            'clean-sheet': ['GK', 'DEF'],
+            'penalty_save': ['GK'],
+            'saves': ['GK'],
+            'goals-conceded': ['GK', 'DEF'],
+            'redcards': ['GK', 'DEF', 'MID', 'FWD'],
+            'yellowcards': ['GK', 'DEF', 'MID', 'FWD'],
+            'bonus': ['GK', 'DEF', 'MID', 'FWD'],
+            'minutes-played': ['GK', 'DEF', 'MID', 'FWD'],
+            'interceptions': ['GK', 'DEF', 'MID'],
+            'tackles': ['DEF', 'MID'],
+            'penalty_miss': ['MID', 'FWD'],
+        };
+
+        const positions = ['GK', 'DEF', 'MID', 'FWD'];
+        const finalTable = [];
+
+        for (const stat in gwPoints) {
+            if (['gameweek', '_id'].includes(stat)) continue;
+
+            const row = {
+                stat,
+                GK: '--',
+                DEF: '--',
+                MID: '--',
+                FWD: '--'
+            };
+
+            const value = gwPoints[stat];
+            const appliesTo = statMap[stat];
+            if (appliesTo) {
+                appliesTo.forEach(pos => {
+                    row[pos] = value;
+                });
+            }
+
+            finalTable.push(row);
+        }
+
+        console.log("Final Points Table: ", finalTable);
+
+        return finalTable;
+    };
+
+
+    const handleDeleteLeague = async () => {
+            if (!inputLeagueName) {
+                setInputError(true);
+                return;
+            }
+    
+            if (inputLeagueName !== leagueData?.league_name) {
+                setInputError(true);
+                return;
+            }
+            try {
+                const response = await axios.delete(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${leagueData?._id}`
+                );
+    
+                if (response.data && !response.data.error) {
+                    addAlert("League deleted successfully.", "success");
+                    console.log("League deleted successfully");
+                    setShowDeletePopup(false);
+                    router.push('/dashboard');
+                } else {
+                    addAlert(response.data.message || "Failed to delete league.", "error");
+                    console.error("Error deleting league:", response.data.message);
+                }
+            } catch (error) {
+                console.error("Error deleting league:", error);
+                addAlert("An unexpected error occurred while deleting the league.", "error");
+            }
+        };
+    
+        const handleDeleteInputChange = (e) => {
+            setInputLeagueName(e.target.value);
+            setInputError(false);
+        };
+    
+        useEffect(() => {
+            if (showDeletePopup) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+    
+            return () => {
+                document.body.style.overflow = 'auto';
+            };
+        }, [showDeletePopup]);
+
 
     if (loading || leagueData === null || gameweek === null) {
         return (
@@ -190,20 +304,62 @@ const LeagueSettings = () => {
         )
     } else return (
         <div className="min-h-[88vh] flex flex-col my-8 text-white px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-10">
+            {showDeletePopup && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+                    <div className={`bg-[#1c1c1c] p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center max-w-96 w-[90vw] ${exo2.className}`}>
+                        <h2 className="text-lg md:text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4">Delete League</h2>
+                        <p className="text-sm xl:text-base mb-4 text-gray-300 mx-2 sm:mx-6">
+                            Are you sure you want to delete this league? This will remove all <strong className='text-white'>teams</strong>, <strong className='text-white'>draft data</strong>, and related information.
+                        </p>
+                        <p className="text-sm xl:text-base mb-4 text-gray-400">
+                            Type <span className="font-bold text-white">{leagueData?.league_name}</span> to confirm:
+                        </p>
+                        <input
+                            type="text"
+                            value={inputLeagueName}
+                            onChange={handleDeleteInputChange}
+                            className={`w-full p-1 md:p-2 bg-[#2F2F2F] text-white rounded-lg mb-1 text-center text-sm xl:text-base
+                                ${inputError ? "border border-red-500" : "border-none"}
+                            `}
+                            placeholder="Enter league name"
+                        />
+                        {inputError && <p className="text-sm xl:text-base text-red-500 mb-1">League name does not match.</p>}
+                        <div className="flex justify-between mt-4">
+                            <button
+                                className={`px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md ${!inputLeagueName ? "fade-gradient-no-hover opacity-50 cursor-not-allowed" : "fade-gradient"}`}
+                                onClick={handleDeleteLeague}
+                                disabled={!inputLeagueName}
+                            >
+                                Yes, I'm sure
+                            </button>
+                            <button
+                                className="fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md"
+                                onClick={() => {
+                                    setShowDeletePopup(false);
+                                    setInputLeagueName("");
+                                    setInputError(false);
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className='flex justify-between items-center'>
-                <h1 className={`text-4xl font-bold ${exo2.className}`}>League Settings</h1>
+                <h1 className={`text-2xl md:text-3xl xl:text-4xl font-bold ${exo2.className}`}>League Settings</h1>
                 {isCreator && (
                     <div className="flex justify-end">
                         {isEditing ? (
                             <button
-                                className="fade-gradient px-12 py-2 rounded-3xl "
+                                className="fade-gradient rounded-3xl px-8 sm:px-10 xl:px-12 py-1 md:py-2 text-sm xl:text-base "
                                 onClick={handleSaveClick}
                             >
                                 Save
                             </button>
                         ) : (
                             <button
-                                className="fade-gradient px-12 py-2 rounded-3xl "
+                                className="fade-gradient rounded-3xl px-8 sm:px-10 xl:px-12 py-1 md:py-2 text-sm xl:text-base "
                                 onClick={handleEditClick}
                             >
                                 Edit
@@ -214,36 +370,38 @@ const LeagueSettings = () => {
             </div>
             <div className={`flex flex-col mt-6 ${exo2.className}`}>
                 {/* League Info Section */}
-                <div className='bg-[#0C1922] rounded-xl shadow-lg p-6'>
-                    <div className='flex items-center justify-between'>
+                <div className='bg-[#0C1922] rounded-xl shadow-lg p-4 md:p-6'>
+                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
                         <div className='flex flex-col'>
-                            <h2 className={`text-2xl font-bold ${exo2.className}`}>LEAGUE DETAILS</h2>
-                            <p className='text-gray-400'>Manage your league settings.</p>
+                            <h2 className={`text-lg md:text-xl xl:text-2xl font-bold ${exo2.className}`}>LEAGUE DETAILS</h2>
+                            <p className='text-sm xl:text-base text-gray-400'>Manage your league settings.</p>
                         </div>
-                        <div className='flex items-center gap-4'>
-                            <label className='block text-gray-300'>Invite Code:</label>
-                            <div className={`w-40 cursor-none relative px-4 py-2 rounded-lg text-white bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]`} >
-                                {leagueData?.invite_code}
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(leagueData?.invite_code || '');
-                                        addAlert("Invite code copied to clipboard!", "success");
-                                    }}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-[#FF8A00] transition"
-                                >
-                                    <FaRegCopy className="text-lg" />
-                                </button>
+                        {isCreator &&
+                            <div className='flex items-center gap-4 text-sm xl:text-base'>
+                                <label className='block text-sm xl:text-base text-gray-300'>Invite Code:</label>
+                                <div className={`w-40 cursor-none relative px-4 py-1 md:py-2 rounded-lg text-white bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]`} >
+                                    {leagueData?.invite_code}
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(leagueData?.invite_code || '');
+                                            addAlert("Invite code copied to clipboard!", "success");
+                                        }}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-[#FF8A00] transition"
+                                    >
+                                        <FaRegCopy className="text-base md:text-lg" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        }
                     </div>
-                    <div className='flex gap-12 w-full items-center justify-between p-6 '>
-                        <div className={`w-40 h-40 relative rounded-lg ${isEditing && 'border border-[#333333]'}`}>
+                    <div className='flex flex-col md:flex-row gap-4 xl:gap-12 w-full md:items-center justify-between p-0 xl:p-6 mt-4 '>
+                        <div className={`w-28 h-28 xl:w-40 xl:h-40 xl:w-40 xl:h-40 relative rounded-lg ${isEditing && 'border border-[#333333]'}`}>
                             {leagueData.league_image_path ? (
                                 <Image
                                     src={leagueData.league_image_path}
                                     alt='League Logo'
                                     layout='fill'
-                                    className='rounded-md object-contain '
+                                    className='rounded-md object-cover '
                                 />
                             ) : (
                                 <div className='w-full h-full flex items-center justify-center bg-gray-700 text-gray-400 rounded-full'>No Image</div>
@@ -264,61 +422,61 @@ const LeagueSettings = () => {
                                 </>
                             )}
                         </div>
-                        <div className='grid grid-cols-2 gap-12 w-[85%]'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-2 xl:gap-12 w-full md:w-[85%]'>
                             <div className='flex flex-col gap-2'>
-                                <div className='flex items-center gap-4'>
-                                    <label className='block w-1/4 text-gray-300'>League Name: </label>
+                                <div className='flex text-sm xl:text-base items-center gap-4'>
+                                    <label className='block w-2/5 text-gray-300'>League Name: </label>
                                     <input
                                         type='text'
                                         value={leagueData.league_name || ''}
                                         onChange={(e) => setLeagueData({ ...leagueData, league_name: e.target.value })}
                                         disabled={!isEditing}
-                                        className={`w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
+                                        className={`w-3/5 md:w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
                                     />
                                 </div>
-                                <div className='flex items-center gap-4'>
-                                    <label className='block w-1/4 text-gray-300'>Minimum Teams:</label>
+                                <div className='flex text-sm xl:text-base items-center gap-4'>
+                                    <label className='block w-2/5 text-gray-300'>Minimum Teams:</label>
                                     <input
                                         type='Number'
                                         value={leagueData.min_teams || ''}
                                         onChange={(e) => setLeagueData({ ...leagueData, min_teams: e.target.value })}
                                         disabled={!isEditing}
-                                        className={`w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
+                                        className={`w-3/5 md:w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
                                     />
                                 </div>
-                                <div className='flex items-center gap-4'>
-                                    <label className='block w-1/4 text-gray-300'>Maximum Teams:</label>
+                                <div className='flex text-sm xl:text-base items-center gap-4'>
+                                    <label className='block w-2/5 text-gray-300'>Maximum Teams:</label>
                                     <input
                                         type='Number'
                                         value={leagueData.max_teams || ''}
                                         onChange={(e) => setLeagueData({ ...leagueData, max_teams: e.target.value })}
                                         disabled={!isEditing}
-                                        className={`w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
+                                        className={`w-3/5 md:w-3/4 bg-transparent px-4 py-2 rounded-lg text-white ${isEditing && 'focus:outline-none focus:border-[#FF8A00] border border-[#333333]'}`}
                                     />
                                 </div>
                             </div>
                             <div className='flex flex-col gap-2'>
-                                <div className='flex items-center gap-4'>
-                                    <label className='block w-1/4 text-gray-300'>Format: </label>
+                                <div className='flex text-sm xl:text-base items-center gap-4'>
+                                    <label className='block w-2/5 text-gray-300'>Format: </label>
                                     <input
                                         type='text'
                                         value={leagueData.league_configuration?.format || ''}
                                         disabled
-                                        className={`w-3/4 px-4 py-2 rounded-lg text-white ${isEditing ? 'bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]' : 'bg-transparent'}`}
+                                        className={`w-3/5 md:w-3/4 px-4 py-2 rounded-lg text-white ${isEditing ? 'bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]' : 'bg-transparent'}`}
                                     />
                                 </div>
-                                <div className='flex items-center gap-4'>
-                                    <label className='block w-1/4 text-gray-300'>League Creator:</label>
+                                <div className='flex text-sm xl:text-base items-center gap-4'>
+                                    <label className='block w-2/5 text-gray-300'>League Creator:</label>
                                     <input
                                         type='text'
                                         value={leagueData.creator || ''}
                                         disabled
-                                        className={`w-3/4 px-4 py-2 rounded-lg text-white ${isEditing ? 'bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]' : 'bg-transparent'}`}
+                                        className={`w-3/5 md:w-3/4 pl-4 truncate py-2 rounded-lg text-white ${isEditing ? 'bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]' : 'bg-transparent'}`}
                                     />
                                 </div>
-                                <div className='flex items-center gap-4'>
-                                    <label className='block w-1/4 text-gray-300'>Payment Status:</label>
-                                    <div className={`w-3/4 px-4 py-2 rounded-lg font-semibold ${leagueData.paid ? 'text-green-400' : 'text-red-500'}`}>{leagueData.paid ? 'Paid' : 'Unpaid'}</div>
+                                <div className='flex text-sm xl:text-base items-center gap-4'>
+                                    <label className='block w-2/5 text-gray-300'>Payment Status:</label>
+                                    <div className={`w-3/5 md:w-3/4 px-4 py-2 rounded-lg font-semibold ${leagueData.paid ? 'text-green-400' : 'text-red-500'}`}>{leagueData.paid ? 'Paid' : 'Unpaid'}</div>
                                 </div>
                             </div>
                         </div>
@@ -326,14 +484,14 @@ const LeagueSettings = () => {
                 </div>
 
                 {/* Points Configuration Section */}
-                <div className='bg-[#0C1922] rounded-xl shadow-lg p-6 mt-6'>
-                    <h2 className={`text-2xl font-bold ${exo2.className}`}>POINTS CONFIGURATION</h2>
-                    <p className='text-gray-400'>Manage points settings for various actions.</p>
+                <div className='bg-[#0C1922] rounded-xl shadow-lg p-4 md:p-6 mt-6'>
+                    <h2 className={`text-lg md:text-xl xl:text-2xl font-bold ${exo2.className}`}>POINTS CONFIGURATION</h2>
+                    <p className='text-sm xl:text-base text-gray-400'>Manage points settings for various actions.</p>
 
-                    <div className='grid grid-cols-4 gap-12 w-full p-6'>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-x-6 xl:gap-12 w-full p-0 xl:p-6 mt-4 xl:mt-0 text-sm xl:text-base'>
 
                         {/* Column 1 */}
-                        <div className='flex flex-col gap-4'>
+                        <div className='flex flex-col gap-2 xl:gap-4'>
                             {[
                                 { label: "Goals", key: "goals" },
                                 { label: "Assists", key: "assists" },
@@ -359,14 +517,14 @@ const LeagueSettings = () => {
                                             });
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-1/3 bg-transparent pl-2 py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
+                                        className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
                                 </div>
                             ))}
                         </div>
 
                         {/* Column 2 */}
-                        <div className='flex flex-col gap-4'>
+                        <div className='flex flex-col gap-2 xl:gap-4'>
                             {[
                                 { label: "Goals Conceded", key: "goals-conceded" },
                                 { label: "Clean Sheet", key: "clean-sheet" },
@@ -391,14 +549,14 @@ const LeagueSettings = () => {
                                             });
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-1/3 bg-transparent pl-2 py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
+                                        className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
                                 </div>
                             ))}
                         </div>
 
                         {/* Column 3 */}
-                        <div className='flex flex-col gap-4'>
+                        <div className='flex flex-col gap-2 xl:gap-4'>
                             {[
                                 { label: "Penalty Save", key: "penalty_save" },
                                 { label: "Penalty Miss", key: "penalty_miss" },
@@ -423,14 +581,14 @@ const LeagueSettings = () => {
                                             });
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-1/3 bg-transparent pl-2 py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
+                                        className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
                                 </div>
                             ))}
                         </div>
 
                         {/* Column 4 */}
-                        <div className='flex flex-col gap-4'>
+                        <div className='flex flex-col gap-2 xl:gap-4'>
                             {[
                                 { label: "Yellow Cards", key: "yellowcards" },
                                 { label: "Red Cards", key: "redcards" },
@@ -455,15 +613,113 @@ const LeagueSettings = () => {
                                             });
                                         }}
                                         disabled={!isEditing}
-                                        className={`w-1/3 bg-transparent pl-2 py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
+                                        className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <p className='text-gray-400 text-sm'>Note: All changes in Points will be applied from the next gameweek.</p>
+                    <p className='text-gray-400 text-xs xl:text-sm mt-4 xl:mt-0'>Note: All changes in Points will be applied from the next gameweek.</p>
                 </div>
 
+                {/* Points Table */}
+                <div className='bg-[#0C1922] rounded-xl shadow-lg pt-4 md:pt-6 mt-6 overflow-hidden'>
+                    <h2 className={`text-lg md:text-xl xl:text-2xl pl-4 md:pl-6 font-bold ${exo2.className}`}>POINTS TABLE</h2>
+                    <div className={`grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6 bg-[#03070A] mt-2 ${exo2.className}`}>
+                        {[true, false].map((isPositive, index) => {
+                            const filteredStats = finalTable.filter(row => {
+                                const values = [row.GK, row.DEF, row.MID, row.FWD].map(Number);
+                                // Keep only rows with at least one valid number
+                                const numeric = values.filter(val => !isNaN(val));
+                                if (numeric.length === 0) return false;
+                                return isPositive ? numeric.some(val => val > 0) : numeric.some(val => val < 0);
+                            });
+
+                            return (
+                                <div
+                                    key={index}
+                                    className="col-span-1 bg-[#0C1922] md:rounded-b-xl pb-6 shadow-lg"
+                                >
+                                    <table className="table-auto w-full text-left text-xs sm:text-sm xl:text-base">
+                                        <thead className='bg-[#091218]'>
+                                            <tr className='text-center'>
+                                                <th className="p-2 border-b border-gray-700 text-left pl-6">Stat</th>
+                                                <th className="p-2 border-b border-gray-700">GK</th>
+                                                <th className="p-2 border-b border-gray-700">DEF</th>
+                                                <th className="p-2 border-b border-gray-700">MID</th>
+                                                <th className="p-2 border-b border-gray-700 pr-6">FWD</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-center text-gray-300">
+                                            {filteredStats.map((row, i) => (
+                                                <tr key={i}>
+                                                    <td className="p-2 border-b border-gray-700 text-left pl-6 capitalize">
+                                                        {row.stat.replace(/_/g, " ")}
+                                                    </td>
+                                                    {['GK', 'DEF', 'MID', 'FWD'].map(pos => (
+                                                        <td key={pos} className={`p-2 border-b border-gray-700 ${pos === 'FWD' ? 'pr-6' : ''}`}>
+                                                            {typeof row[pos] === "number" ? row[pos] : '--'}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                 {/* Actions */}
+                <div className="flex flex-row mt-6 items-center gap-2 sm:gap-4">
+                    <h2 className={`text-lg md:text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className}`}>Actions</h2>
+                    {/* <div className="flex gap-4 px-6 pb-6"> */}
+                    {isCreator ? (
+                        <div className='flex justify-center items-center gap-1 sm:gap-4'>
+                            {/* Delete League Button */}
+                            <button
+                                className={`fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-xs sm:text-sm xl:text-base rounded-2xl transition duration-300 ${exo2.className}`}
+                                onClick={() => {
+                                    // Handle Delete League logic here
+                                    console.log("Delete League clicked");
+                                    setShowDeletePopup(true);
+                                }}
+                            >
+                                DELETE LEAGUE
+                            </button>
+
+                            {/* Remove a Team Button */}
+                            {/* {leagueData?.draftID?.state === "Scheduled" || leagueData?.draftID?.state === "Manual" ? ( */}
+                                <button
+                                    className={`bg-[#FF8A00] text-black px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-xs sm:text-sm xl:text-base rounded-2xl shadow-md hover:bg-[#FF8A00] hover:text-white hover:scale-105 transition duration-300 ${exo2.className}`}
+                                    onClick={() => {
+                                        // Handle Remove a Team logic here
+                                        console.log("Remove a Team clicked");
+                                    }}
+                                >
+                                    REMOVE A TEAM
+                                </button>
+                            {/* )
+                                : null
+                            } */}
+                        </div>
+                    ) : (
+                        <>
+                            {/* Leave League Button */}
+                            <button
+                                className={`fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-2xl transition duration-300 ${exo2.className}`}
+                                onClick={() => {
+                                    // Handle Leave League logic here
+                                    console.log("Leave League clicked");
+                                }}
+                            >
+                                LEAVE LEAGUE
+                            </button>
+                        </>
+                    )}
+                    {/* </div> */}
+                </div>
             </div>
         </div>
     )

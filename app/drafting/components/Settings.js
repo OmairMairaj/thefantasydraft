@@ -22,7 +22,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
     const [originalStartDate, setOriginalStartDate] = useState(null);
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [inputLeagueName, setInputLeagueName] = useState("");
-    const [finalTable, setFinalTable] = useState([]);
+    // const [finalTable, setFinalTable] = useState([]);
     const [inputError, setInputError] = useState(false);
     const { addAlert } = useAlert();
     const router = useRouter();
@@ -85,14 +85,14 @@ const DraftSettings = ({ draftID, user, onBack }) => {
         }
     }, [draftData]);
 
-    useEffect(() => {
-        if (draftData && gameweek) {
-            const table = generatePointsTable(draftData?.leagueID?.points_configuration, gameweek);
-            console.log("✅ Points Table Recalculated");
-            console.log("Points Table: ", table);
-            setFinalTable(table);
-        }
-    }, [draftData, gameweek]);
+    // useEffect(() => {
+    //     if (draftData && gameweek) {
+    //         const table = generatePointsTable(draftData?.leagueID?.points_configuration, gameweek);
+    //         console.log("✅ Points Table Recalculated");
+    //         console.log("Points Table: ", table);
+    //         setFinalTable(table);
+    //     }
+    // }, [draftData, gameweek]);
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -198,107 +198,107 @@ const DraftSettings = ({ draftID, user, onBack }) => {
         });
     };
 
-    const handleDeleteLeague = async () => {
-        if (!inputLeagueName) {
-            setInputError(true);
-            return;
-        }
+    // const handleDeleteLeague = async () => {
+    //     if (!inputLeagueName) {
+    //         setInputError(true);
+    //         return;
+    //     }
 
-        if (inputLeagueName !== draftData?.leagueID?.league_name) {
-            setInputError(true);
-            return;
-        }
-        try {
-            const response = await axios.delete(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${draftData?.leagueID?._id}`
-            );
+    //     if (inputLeagueName !== draftData?.leagueID?.league_name) {
+    //         setInputError(true);
+    //         return;
+    //     }
+    //     try {
+    //         const response = await axios.delete(
+    //             `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${draftData?.leagueID?._id}`
+    //         );
 
-            if (response.data && !response.data.error) {
-                addAlert("League deleted successfully.", "success");
-                console.log("League deleted successfully");
-                setShowDeletePopup(false);
-                router.push('/dashboard');
-            } else {
-                addAlert(response.data.message || "Failed to delete league.", "error");
-                console.error("Error deleting league:", response.data.message);
-            }
-        } catch (error) {
-            console.error("Error deleting league:", error);
-            addAlert("An unexpected error occurred while deleting the league.", "error");
-        }
-    };
+    //         if (response.data && !response.data.error) {
+    //             addAlert("League deleted successfully.", "success");
+    //             console.log("League deleted successfully");
+    //             setShowDeletePopup(false);
+    //             router.push('/dashboard');
+    //         } else {
+    //             addAlert(response.data.message || "Failed to delete league.", "error");
+    //             console.error("Error deleting league:", response.data.message);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error deleting league:", error);
+    //         addAlert("An unexpected error occurred while deleting the league.", "error");
+    //     }
+    // };
 
-    const handleDeleteInputChange = (e) => {
-        setInputLeagueName(e.target.value);
-        setInputError(false);
-    };
+    // const handleDeleteInputChange = (e) => {
+    //     setInputLeagueName(e.target.value);
+    //     setInputError(false);
+    // };
 
-    useEffect(() => {
-        if (showDeletePopup) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
+    // useEffect(() => {
+    //     if (showDeletePopup) {
+    //         document.body.style.overflow = 'hidden';
+    //     } else {
+    //         document.body.style.overflow = 'auto';
+    //     }
 
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, [showDeletePopup]);
+    //     return () => {
+    //         document.body.style.overflow = 'auto';
+    //     };
+    // }, [showDeletePopup]);
 
-    const generatePointsTable = (pointsConfig, gameweek) => {
-        const gwPoints = pointsConfig?.find(p => p.gameweek === gameweek);
-        if (!gwPoints) return [];
-        console.log("Current Gameweek: ", gameweek);
-        console.log("Current Gameweek Points: ", gwPoints);
+    // const generatePointsTable = (pointsConfig, gameweek) => {
+    //     const gwPoints = pointsConfig?.find(p => p.gameweek === gameweek);
+    //     if (!gwPoints) return [];
+    //     console.log("Current Gameweek: ", gameweek);
+    //     console.log("Current Gameweek Points: ", gwPoints);
 
-        // Define which stat affects which positions
-        const statMap = {
-            'goals': ['GK', 'DEF', 'MID', 'FWD'],
-            'assists': ['GK', 'DEF', 'MID', 'FWD'],
-            'clean-sheet': ['GK', 'DEF'],
-            'penalty_save': ['GK'],
-            'saves': ['GK'],
-            'goals-conceded': ['GK', 'DEF'],
-            'redcards': ['GK', 'DEF', 'MID', 'FWD'],
-            'yellowcards': ['GK', 'DEF', 'MID', 'FWD'],
-            'bonus': ['GK', 'DEF', 'MID', 'FWD'],
-            'minutes-played': ['GK', 'DEF', 'MID', 'FWD'],
-            'interceptions': ['GK', 'DEF', 'MID'],
-            'tackles': ['DEF', 'MID'],
-            'penalty_miss': ['MID', 'FWD'],
-        };
+    //     // Define which stat affects which positions
+    //     const statMap = {
+    //         'goals': ['GK', 'DEF', 'MID', 'FWD'],
+    //         'assists': ['GK', 'DEF', 'MID', 'FWD'],
+    //         'clean-sheet': ['GK', 'DEF'],
+    //         'penalty_save': ['GK'],
+    //         'saves': ['GK'],
+    //         'goals-conceded': ['GK', 'DEF'],
+    //         'redcards': ['GK', 'DEF', 'MID', 'FWD'],
+    //         'yellowcards': ['GK', 'DEF', 'MID', 'FWD'],
+    //         'bonus': ['GK', 'DEF', 'MID', 'FWD'],
+    //         'minutes-played': ['GK', 'DEF', 'MID', 'FWD'],
+    //         'interceptions': ['GK', 'DEF', 'MID'],
+    //         'tackles': ['DEF', 'MID'],
+    //         'penalty_miss': ['MID', 'FWD'],
+    //     };
 
-        const positions = ['GK', 'DEF', 'MID', 'FWD'];
-        const finalTable = [];
+    //     const positions = ['GK', 'DEF', 'MID', 'FWD'];
+    //     const finalTable = [];
 
-        for (const stat in gwPoints) {
-            if (['gameweek', '_id'].includes(stat)) continue;
+    //     for (const stat in gwPoints) {
+    //         if (['gameweek', '_id'].includes(stat)) continue;
 
-            const row = {
-                stat,
-                GK: '--',
-                DEF: '--',
-                MID: '--',
-                FWD: '--'
-            };
+    //         const row = {
+    //             stat,
+    //             GK: '--',
+    //             DEF: '--',
+    //             MID: '--',
+    //             FWD: '--'
+    //         };
 
-            const value = gwPoints[stat];
-            const appliesTo = statMap[stat];
-            if (appliesTo) {
-                appliesTo.forEach(pos => {
-                    row[pos] = value;
-                });
-            }
+    //         const value = gwPoints[stat];
+    //         const appliesTo = statMap[stat];
+    //         if (appliesTo) {
+    //             appliesTo.forEach(pos => {
+    //                 row[pos] = value;
+    //             });
+    //         }
 
-            finalTable.push(row);
-        }
+    //         finalTable.push(row);
+    //     }
 
-        console.log("Final Points Table: ", finalTable);
+    //     console.log("Final Points Table: ", finalTable);
 
-        return finalTable;
-    };
+    //     return finalTable;
+    // };
 
-    if (loading || !draftData || !gameweek || finalTable.length === 0) {
+    if (loading || !draftData || !gameweek) {
         return (
             <div className="w-full min-h-[70vh] flex items-center justify-center">
                 <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
@@ -307,7 +307,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
     }
     return (
         <div className="min-h-[88vh] flex flex-col text-white relative">
-            {showDeletePopup && (
+            {/* {showDeletePopup && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
                     <div className={`bg-[#1c1c1c] p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center min-w-96 w-1/3 ${exo2.className}`}>
                         <h2 className="text-2xl font-bold text-[#FF8A00] mb-4">Delete League</h2>
@@ -348,7 +348,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
             <div className='flex justify-between mb-4'>
                 <div className='flex items-center gap-4'>
                     <button
@@ -629,7 +629,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 </div>
             </div>
 
-            {/* Points Table */}
+            {/* Points Table
             <div className='mt-10 bg-[#1c1c1c] rounded-xl'>
                 <h2 className={`text-xl font-bold text-[#FF8A00] pt-6 pl-6 pb-3 ${exo2.className}`}>Points Table</h2>
                 <div className={`grid grid-cols-2 gap-6 bg-[#03070A] ${exo2.className}`}>
@@ -676,16 +676,14 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                         );
                     })}
                 </div>
-            </div>
+            </div> */}
 
 
             {/* Actions */}
-            <div className="flex flex-row mt-10 items-center gap-4">
+            {/* <div className="flex flex-row mt-10 items-center gap-4">
                 <h2 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className}`}>Actions</h2>
-                {/* <div className="flex gap-4 px-6 pb-6"> */}
                 {isCreator ? (
                     <div className='flex justify-center items-center gap-4'>
-                        {/* Delete League Button */}
                         <button
                             className={`fade-gradient px-6 py-2 rounded-2xl transition duration-300 ${exo2.className}`}
                             onClick={() => {
@@ -697,7 +695,6 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                             DELETE LEAGUE
                         </button>
 
-                        {/* Remove a Team Button */}
                         {draftData?.state === "Scheduled" || draftData?.state === "Manual" ? (
                             <button
                                 className={`bg-[#FF8A00] text-black px-6 py-2 rounded-2xl shadow-md hover:bg-[#FF8A00] hover:text-white hover:scale-105 transition duration-300 ${exo2.className}`}
@@ -714,7 +711,6 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                     </div>
                 ) : (
                     <>
-                        {/* Leave League Button */}
                         <button
                             className={`fade-gradient px-6 py-2 rounded-2xl transition duration-300 ${exo2.className}`}
                             onClick={() => {
@@ -726,8 +722,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                         </button>
                     </>
                 )}
-                {/* </div> */}
-            </div>
+            </div> */}
 
         </div >
     );
