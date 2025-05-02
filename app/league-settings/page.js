@@ -32,7 +32,19 @@ const LeagueSettings = () => {
     const [showDeletePopup, setShowDeletePopup] = useState(false);
     const [inputLeagueName, setInputLeagueName] = useState("");
     const [inputError, setInputError] = useState(false);
+    const [isMdOnly, setIsMdOnly] = useState(false);
 
+    useEffect(() => {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            setIsMdOnly(width >= 768 && width < 1024);
+        };
+    
+        handleResize(); // Initial check
+        window.addEventListener('resize', handleResize);
+    
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
 
     useEffect(() => {
@@ -425,7 +437,7 @@ const LeagueSettings = () => {
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-2 xl:gap-12 w-full md:w-[85%]'>
                             <div className='flex flex-col gap-2'>
                                 <div className='flex text-sm xl:text-base items-center gap-4'>
-                                    <label className='block w-2/5 text-gray-300'>League Name: </label>
+                                    <label className='block w-2/5 text-gray-300'>{isMdOnly ? 'League:' : 'League Name:'}</label>
                                     <input
                                         type='text'
                                         value={leagueData.league_name || ''}
@@ -435,7 +447,7 @@ const LeagueSettings = () => {
                                     />
                                 </div>
                                 <div className='flex text-sm xl:text-base items-center gap-4'>
-                                    <label className='block w-2/5 text-gray-300'>Minimum Teams:</label>
+                                    <label className='block w-2/5 text-gray-300'>{isMdOnly ? 'Min Teams:' : 'Minimum Teams:'}</label>
                                     <input
                                         type='Number'
                                         value={leagueData.min_teams || ''}
@@ -445,7 +457,7 @@ const LeagueSettings = () => {
                                     />
                                 </div>
                                 <div className='flex text-sm xl:text-base items-center gap-4'>
-                                    <label className='block w-2/5 text-gray-300'>Maximum Teams:</label>
+                                    <label className='block w-2/5 text-gray-300'>{isMdOnly ? 'Max Teams:' : 'Maximum Teams:'}</label>
                                     <input
                                         type='Number'
                                         value={leagueData.max_teams || ''}
@@ -466,7 +478,7 @@ const LeagueSettings = () => {
                                     />
                                 </div>
                                 <div className='flex text-sm xl:text-base items-center gap-4'>
-                                    <label className='block w-2/5 text-gray-300'>League Creator:</label>
+                                    <label className='block w-2/5 text-gray-300'>{isMdOnly ? 'Creator:' : 'League Creator:'}</label>
                                     <input
                                         type='text'
                                         value={leagueData.creator || ''}
@@ -475,7 +487,7 @@ const LeagueSettings = () => {
                                     />
                                 </div>
                                 <div className='flex text-sm xl:text-base items-center gap-4'>
-                                    <label className='block w-2/5 text-gray-300'>Payment Status:</label>
+                                    <label className='block w-2/5 text-gray-300'>{isMdOnly ? 'Status:' : 'Payment Status:'}</label>
                                     <div className={`w-3/5 md:w-3/4 px-4 py-2 rounded-lg font-semibold ${leagueData.paid ? 'text-green-400' : 'text-red-500'}`}>{leagueData.paid ? 'Paid' : 'Unpaid'}</div>
                                 </div>
                             </div>
