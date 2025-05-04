@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAlert } from '@/components/AlertContext/AlertContext';
-
 import { Exo_2 } from 'next/font/google';
 import Image from 'next/image';
 import { FaEdit, FaRegCopy } from 'react-icons/fa';
@@ -25,8 +24,8 @@ const LeagueSettings = () => {
     const [leagueData, setLeagueData] = useState(null);
     const [isCreator, setIsCreator] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState(null);
-    const [saving, setSaving] = useState(false);
+    // const [editData, setEditData] = useState(null);
+    // const [saving, setSaving] = useState(false);
     const [gameweek, setGameweek] = useState(null);
     const [finalTable, setFinalTable] = useState([]);
     const [showDeletePopup, setShowDeletePopup] = useState(false);
@@ -39,10 +38,10 @@ const LeagueSettings = () => {
             const width = window.innerWidth;
             setIsMdOnly(width >= 768 && width < 1024);
         };
-    
+
         handleResize(); // Initial check
         window.addEventListener('resize', handleResize);
-    
+
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
@@ -197,14 +196,14 @@ const LeagueSettings = () => {
         }
     };
 
-     useEffect(() => {
-            if (leagueData && gameweek) {
-                const table = generatePointsTable(leagueData?.points_configuration, gameweek);
-                console.log("✅ Points Table Recalculated");
-                console.log("Points Table: ", table);
-                setFinalTable(table);
-            }
-        }, [leagueData, gameweek]);
+    useEffect(() => {
+        if (leagueData && gameweek) {
+            const table = generatePointsTable(leagueData?.points_configuration, gameweek);
+            console.log("✅ Points Table Recalculated");
+            console.log("Points Table: ", table);
+            setFinalTable(table);
+        }
+    }, [leagueData, gameweek]);
 
     const generatePointsTable = (pointsConfig, gameweek) => {
         const gwPoints = pointsConfig?.find(p => p.gameweek === gameweek);
@@ -261,51 +260,51 @@ const LeagueSettings = () => {
 
 
     const handleDeleteLeague = async () => {
-            if (!inputLeagueName) {
-                setInputError(true);
-                return;
-            }
-    
-            if (inputLeagueName !== leagueData?.league_name) {
-                setInputError(true);
-                return;
-            }
-            try {
-                const response = await axios.delete(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${leagueData?._id}`
-                );
-    
-                if (response.data && !response.data.error) {
-                    addAlert("League deleted successfully.", "success");
-                    console.log("League deleted successfully");
-                    setShowDeletePopup(false);
-                    router.push('/dashboard');
-                } else {
-                    addAlert(response.data.message || "Failed to delete league.", "error");
-                    console.error("Error deleting league:", response.data.message);
-                }
-            } catch (error) {
-                console.error("Error deleting league:", error);
-                addAlert("An unexpected error occurred while deleting the league.", "error");
-            }
-        };
-    
-        const handleDeleteInputChange = (e) => {
-            setInputLeagueName(e.target.value);
-            setInputError(false);
-        };
-    
-        useEffect(() => {
-            if (showDeletePopup) {
-                document.body.style.overflow = 'hidden';
+        if (!inputLeagueName) {
+            setInputError(true);
+            return;
+        }
+
+        if (inputLeagueName !== leagueData?.league_name) {
+            setInputError(true);
+            return;
+        }
+        try {
+            const response = await axios.delete(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${leagueData?._id}`
+            );
+
+            if (response.data && !response.data.error) {
+                addAlert("League deleted successfully.", "success");
+                console.log("League deleted successfully");
+                setShowDeletePopup(false);
+                router.push('/dashboard');
             } else {
-                document.body.style.overflow = 'auto';
+                addAlert(response.data.message || "Failed to delete league.", "error");
+                console.error("Error deleting league:", response.data.message);
             }
-    
-            return () => {
-                document.body.style.overflow = 'auto';
-            };
-        }, [showDeletePopup]);
+        } catch (error) {
+            console.error("Error deleting league:", error);
+            addAlert("An unexpected error occurred while deleting the league.", "error");
+        }
+    };
+
+    const handleDeleteInputChange = (e) => {
+        setInputLeagueName(e.target.value);
+        setInputError(false);
+    };
+
+    useEffect(() => {
+        if (showDeletePopup) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [showDeletePopup]);
 
 
     if (loading || leagueData === null || gameweek === null) {
@@ -318,7 +317,7 @@ const LeagueSettings = () => {
         <div className="min-h-[88vh] flex flex-col my-8 text-white px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-10">
             {showDeletePopup && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
-                    <div className={`bg-[#1c1c1c] p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center max-w-96 w-[90vw] ${exo2.className}`}>
+                    <div className={`bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-sm p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center max-w-96 w-[90vw] ${exo2.className}`}>
                         <h2 className="text-lg md:text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4">Delete League</h2>
                         <p className="text-sm xl:text-base mb-4 text-gray-300 mx-2 sm:mx-6">
                             Are you sure you want to delete this league? This will remove all <strong className='text-white'>teams</strong>, <strong className='text-white'>draft data</strong>, and related information.
@@ -330,12 +329,10 @@ const LeagueSettings = () => {
                             type="text"
                             value={inputLeagueName}
                             onChange={handleDeleteInputChange}
-                            className={`w-full p-1 md:p-2 bg-[#2F2F2F] text-white rounded-lg mb-1 text-center text-sm xl:text-base
-                                ${inputError ? "border border-red-500" : "border-none"}
-                            `}
+                            className={`w-full p-1 md:p-2 bg-[#1b3546] text-white rounded-lg mb-1 text-center text-sm xl:text-base focus:placeholder-transparent focus:outline-none  ${inputError ? "border border-[#832626]" : "focus:ring-1 focus:ring-[#425460]"}`}
                             placeholder="Enter league name"
                         />
-                        {inputError && <p className="text-sm xl:text-base text-red-500 mb-1">League name does not match.</p>}
+                        {inputError && <p className="text-sm xl:text-base text-[#ca3c3c] mb-1">League name does not match.</p>}
                         <div className="flex justify-between mt-4">
                             <button
                                 className={`px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md ${!inputLeagueName ? "fade-gradient-no-hover opacity-50 cursor-not-allowed" : "fade-gradient"}`}
@@ -683,7 +680,7 @@ const LeagueSettings = () => {
                     </div>
                 </div>
 
-                 {/* Actions */}
+                {/* Actions */}
                 <div className="flex flex-row mt-6 items-center gap-2 sm:gap-4">
                     <h2 className={`text-lg md:text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className}`}>Actions</h2>
                     {/* <div className="flex gap-4 px-6 pb-6"> */}
@@ -703,15 +700,15 @@ const LeagueSettings = () => {
 
                             {/* Remove a Team Button */}
                             {/* {leagueData?.draftID?.state === "Scheduled" || leagueData?.draftID?.state === "Manual" ? ( */}
-                                <button
-                                    className={`bg-[#FF8A00] text-black px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-xs sm:text-sm xl:text-base rounded-2xl shadow-md hover:bg-[#FF8A00] hover:text-white hover:scale-105 transition duration-300 ${exo2.className}`}
-                                    onClick={() => {
-                                        // Handle Remove a Team logic here
-                                        console.log("Remove a Team clicked");
-                                    }}
-                                >
-                                    REMOVE A TEAM
-                                </button>
+                            <button
+                                className={`bg-[#FF8A00] text-black px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-xs sm:text-sm xl:text-base rounded-2xl shadow-md hover:bg-[#FF8A00] hover:text-white hover:scale-105 transition duration-300 ${exo2.className}`}
+                                onClick={() => {
+                                    // Handle Remove a Team logic here
+                                    console.log("Remove a Team clicked");
+                                }}
+                            >
+                                REMOVE A TEAM
+                            </button>
                             {/* )
                                 : null
                             } */}
