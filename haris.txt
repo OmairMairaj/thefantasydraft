@@ -16,7 +16,7 @@ DONE : Make API to get all players eligible for transfer
 DONE : Maximum team number does not set when league is created 
 DONE : Minimum team number does not set when league is created 
 DONE : Invite code should not be validated after draft start
-Remove a team
+DONE : Remove a team
 Same team name cannot be in the same league
 API to get all week points for a team
 Make notifications model

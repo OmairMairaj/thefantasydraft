@@ -15,18 +15,3 @@ export const GET = async (req, res) => {
     });
   }
 };
-
-export const POST = async (req, res) => {
-  try {
-    await connectToDb();
-    const payload = await req.json();
-    const newGameweek = await GameWeek.create(payload);
-    return NextResponse.json({ error: false, data: newGameweek });
-  } catch (err) {
-    console.log(err);
-    return NextResponse.json({
-      error: true,
-      message: "An unexpected error occurred, please try again."
-    });
-  }
-};
