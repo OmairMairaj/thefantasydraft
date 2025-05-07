@@ -4,6 +4,8 @@ Achievements
 Super League
 Cups
 Payment Integration
+Waivers
+Captain On/Off
 
 --------------------------------------HARIS--------------------------------------
 DONE
@@ -17,11 +19,12 @@ DONE : Maximum team number does not set when league is created
 DONE : Minimum team number does not set when league is created 
 DONE : Invite code should not be validated after draft start
 DONE : Remove a team
+Team points not showing in league table
+Transfer API Integration
+History/Points setup throughout
 Same team name cannot be in the same league
 API to get all week points for a team
 Make notifications model
-History/Points setup throughout
-Transfer API Integration
 shift email given in all models of the owner/creator to the user ID
 
 --------------------------------------OMAIR--------------------------------------
@@ -45,4 +48,3 @@ O: Remove a team functionality
 Realign settings from draft settings and move to league settings
 team name, team logo, stadium name, stadium image change option? and till when allowed
 league creation middle of season or start so points display by gameweek how?
-

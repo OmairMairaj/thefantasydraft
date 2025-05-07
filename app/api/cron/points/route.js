@@ -868,21 +868,3 @@ export async function GET(req) {
         message: "done"
     });
 };
-
-export async function POST(req) {
-    let db = await connectToDb();
-    let player = await Player.find({ common_name: "C. Palmer" }).populate("points.gameweek");
-    // let output = [];
-    // player.map((item) => {
-    //     output.push({
-    //         name: item.name,
-    //         points: item.points.find((item) => item.gameweek.name == "26").points,
-    //         stats: item.points.find((item) => item.gameweek.name == "26").fpl_stats
-    //     })
-    // })
-    // output.sort((a, b) => b.points - a.points);
-    return NextResponse.json({
-        error: false,
-        players: player
-    });
-};
