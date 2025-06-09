@@ -31,7 +31,8 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "app/achievements/page.jsx"
   ],
   "exclude": [
     "node_modules"

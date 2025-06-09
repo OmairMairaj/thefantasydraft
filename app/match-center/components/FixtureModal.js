@@ -258,10 +258,10 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                                                                     )}
                                                                     <div className="overflow-hidden">
                                                                         <p className="font-bold truncate">{player.player.common_name}
-                                                                            <span className='p-2'>
+                                                                            {/* <span className='p-2'>
                                                                                 {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
                                                                                 {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                            </span>
+                                                                            </span> */}
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -376,10 +376,10 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                                                                     )}
                                                                     <div className="overflow-hidden">
                                                                         <p className="font-bold truncate">{player.player.common_name}
-                                                                            <span className='p-2'>
+                                                                            {/* <span className='p-2'>
                                                                                 {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
                                                                                 {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                            </span>
+                                                                            </span> */}
                                                                         </p>
                                                                     </div>
                                                                 </div>

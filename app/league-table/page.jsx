@@ -349,7 +349,7 @@ const LeagueTablePage = () => {
                                                     <td className="py-2 px-2 text-center">{leagueData?.draftID?.state === "Ended" ? teamData.draws || 0 : "--"}</td>
                                                     <td>
                                                         <div className="py-2 px-2 text-center hidden sm:flex items-center justify-center gap-1">
-                                                            {(teamData?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                                            {(teamData?.form?.replace(/\s/g, '') || '').split('').slice(-5).map((result, idx) => (
                                                                 <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-sm sm:text-base lg:text-sm flex justify-center items-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
                                                             ))}
                                                         </div>
@@ -567,7 +567,7 @@ const LeagueTablePage = () => {
                                                                 <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                                 <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                                {player.captain && (
+                                                                {/* {player.captain && (
                                                                     <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                         C
                                                                     </span>
@@ -576,7 +576,7 @@ const LeagueTablePage = () => {
                                                                     <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                         VC
                                                                     </span>
-                                                                )}
+                                                                )} */}
                                                                 <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                     {player.player.common_name}
                                                                 </p>
@@ -596,7 +596,7 @@ const LeagueTablePage = () => {
                                                                 <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                                 <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                                {player.captain && (
+                                                                {/* {player.captain && (
                                                                     <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                         C
                                                                     </span>
@@ -605,7 +605,7 @@ const LeagueTablePage = () => {
                                                                     <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                         VC
                                                                     </span>
-                                                                )}
+                                                                )} */}
                                                                 <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                     {player.player.common_name}
                                                                 </p>
@@ -625,7 +625,7 @@ const LeagueTablePage = () => {
                                                                 <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                                 <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                                {player.captain && (
+                                                                {/* {player.captain && (
                                                                     <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                         C
                                                                     </span>
@@ -634,7 +634,7 @@ const LeagueTablePage = () => {
                                                                     <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                         VC
                                                                     </span>
-                                                                )}
+                                                                )} */}
                                                                 <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                     {player.player.common_name}
                                                                 </p>
@@ -654,7 +654,7 @@ const LeagueTablePage = () => {
                                                                 <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                                 <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                                {player.captain && (
+                                                                {/* {player.captain && (
                                                                     <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                         C
                                                                     </span>
@@ -663,7 +663,7 @@ const LeagueTablePage = () => {
                                                                     <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                         VC
                                                                     </span>
-                                                                )}
+                                                                )} */}
                                                                 <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                     {player.player.common_name}
                                                                 </p>
@@ -686,7 +686,7 @@ const LeagueTablePage = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -695,7 +695,7 @@ const LeagueTablePage = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -742,10 +742,10 @@ const LeagueTablePage = () => {
                                                                     )}
                                                                     <div className="overflow-hidden">
                                                                         <p className="font-bold truncate">{player.player.common_name}
-                                                                            <span className='p-2'>
+                                                                            {/* <span className='p-2'>
                                                                                 {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
                                                                                 {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                            </span>
+                                                                            </span> */}
                                                                         </p>
                                                                     </div>
                                                                 </div>

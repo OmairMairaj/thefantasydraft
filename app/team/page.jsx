@@ -541,7 +541,7 @@ const TeamPage = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -550,7 +550,7 @@ const TeamPage = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -570,7 +570,7 @@ const TeamPage = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -579,7 +579,7 @@ const TeamPage = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -599,7 +599,7 @@ const TeamPage = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -608,7 +608,7 @@ const TeamPage = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -628,7 +628,7 @@ const TeamPage = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -637,7 +637,7 @@ const TeamPage = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -660,7 +660,7 @@ const TeamPage = () => {
                                                         <img src={player.player.image_path} alt={player.player.name} className="w-20 rounded-lg" />
                                                         <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                        {player.captain && (
+                                                        {/* {player.captain && (
                                                             <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                 C
                                                             </span>
@@ -669,7 +669,7 @@ const TeamPage = () => {
                                                             <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                 VC
                                                             </span>
-                                                        )}
+                                                        )} */}
                                                         <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                             {player.player.common_name}
                                                         </p>
@@ -716,10 +716,10 @@ const TeamPage = () => {
                                                                 )}
                                                                 <div className="overflow-hidden">
                                                                     <p className="font-bold truncate">{player.player.common_name}
-                                                                        <span className='p-2'>
+                                                                        {/* <span className='p-2'>
                                                                             {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
                                                                             {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                        </span>
+                                                                        </span> */}
                                                                     </p>
                                                                 </div>
                                                             </div>

@@ -113,8 +113,8 @@ const Transfer = () => {
     }, [user, leagueId]);
 
     useEffect(() => {
-        if(leagueId && team){
-        console.log("Fetch Other Players", leagueId, team._id);
+        if (leagueId && team) {
+            console.log("Fetch Other Players", leagueId, team._id);
             fetchOtherPlayers(leagueId, team._id);
         }
     }, [leagueId, team]);
@@ -122,7 +122,7 @@ const Transfer = () => {
     useEffect(() => {
         if (team && team._id && gameweekDetails && gameweekDetails._id && leagueId) {
             fetchLeagueTeamPoints(leagueId, team._id, gameweekDetails._id);
-            
+
         }
     }, [gameweekDetails, leagueId, team]);
 
@@ -356,7 +356,7 @@ const Transfer = () => {
     // Render options menu
     const renderOptionsMenu = (player, team) => (
         <div ref={optionsRef} className="absolute bottom-0 bg-[#1c1c1cc9] w-full text-white rounded-lg shadow-md z-50">
-            {(!playersIn || playersIn?.position_name === player.player.position_name) && 
+            {(!playersIn || playersIn?.position_name === player.player.position_name) &&
                 <button onClick={() => setPlayersOut(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#1c1c1cde] w-full text-center'>Transfer</button>
             }
             <button onClick={() => setComparePlayer1(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#1c1c1cde] w-full text-center'>Compare With</button>
@@ -446,27 +446,27 @@ const Transfer = () => {
         filterPlayers();
     }, [search, teamFilter, filter, sort, otherPlayers]);
 
-    const filterPlayers = () => { 
-       const filtered =  otherPlayers.filter((player) =>
+    const filterPlayers = () => {
+        const filtered = otherPlayers.filter((player) =>
             // Filter players by name or common_name
             player.name.toLowerCase().includes(search.toLowerCase()) ||
             player.common_name?.toLowerCase().includes(search.toLowerCase())
             // ||
             // player.team_name?.toLowerCase().includes(search.toLowerCase())
         )
-        .filter((player) =>
-            // Filter by team name if filter is set
-            !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase()
-        )
-        .filter((player) =>
-            // Filter by position if filter is set
-            !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
-        )
-        .sort((a, b) => {
-            if (sort === 'name') return a.name.localeCompare(b.name);
-            if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
-            return 0;
-        });
+            .filter((player) =>
+                // Filter by team name if filter is set
+                !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase()
+            )
+            .filter((player) =>
+                // Filter by position if filter is set
+                !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
+            )
+            .sort((a, b) => {
+                if (sort === 'name') return a.name.localeCompare(b.name);
+                if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
+                return 0;
+            });
 
         setFilteredPlayers(filtered);
     }
@@ -497,7 +497,7 @@ const Transfer = () => {
             <div className='grid grid-cols-3 gap-6 mb-8'>
                 <div className='bg-[#1c1c1c] rounded-lg p-4'>
                     <h3 className='font-bold text-lg mb-2'>Player Out</h3>
-                    {playersOut ?                          
+                    {playersOut ?
                         <div className="flex items-center space-x-2">
                             {playersOut.image_path && (
                                 <img
@@ -611,14 +611,14 @@ const Transfer = () => {
                 <div className='bg-[#1c1c1c] rounded-lg p-4'>
                     <div className='flex justify-between items-center mb-4'>
                         <div className='flex items-center gap-2'>
-                        <img 
-                            src={userTeam?.team_image_path || '/images/default_team_logo.png'}
-                            alt={userTeam?.team_name || 'Team Logo'}
-                            className="w-10 h-10 rounded-lg"
-                        />
-                        <div className='text-2xl text-[#FF8A00] font-semibold'>
-                            {userTeam?.team_name || 'Your Team'}
-                        </div>
+                            <img
+                                src={userTeam?.team_image_path || '/images/default_team_logo.png'}
+                                alt={userTeam?.team_name || 'Team Logo'}
+                                className="w-10 h-10 rounded-lg"
+                            />
+                            <div className='text-2xl text-[#FF8A00] font-semibold'>
+                                {userTeam?.team_name || 'Your Team'}
+                            </div>
                         </div>
                         <div className='flex gap-2'>
                             <button onClick={() => setViewType('List')} className={`px-4 py-1 ${viewType === 'List' ? 'bg-[#FF8A00]' : 'bg-[#333]'} rounded`}>List</button>
@@ -645,7 +645,7 @@ const Transfer = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -654,7 +654,7 @@ const Transfer = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -683,7 +683,7 @@ const Transfer = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -692,7 +692,7 @@ const Transfer = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -721,7 +721,7 @@ const Transfer = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -730,7 +730,7 @@ const Transfer = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -759,7 +759,7 @@ const Transfer = () => {
                                                             <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                             <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                            {player.captain && (
+                                                            {/* {player.captain && (
                                                                 <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     C
                                                                 </span>
@@ -768,7 +768,7 @@ const Transfer = () => {
                                                                 <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                     VC
                                                                 </span>
-                                                            )}
+                                                            )} */}
                                                             <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                                 {player.player.common_name}
                                                             </p>
@@ -800,7 +800,7 @@ const Transfer = () => {
                                                         <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
                                                         <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
 
-                                                        {player.captain && (
+                                                        {/* {player.captain && (
                                                             <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                 C
                                                             </span>
@@ -809,7 +809,7 @@ const Transfer = () => {
                                                             <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
                                                                 VC
                                                             </span>
-                                                        )}
+                                                        )} */}
                                                         <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
                                                             {player.player.common_name}
                                                         </p>
@@ -848,7 +848,7 @@ const Transfer = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {players && players.sort((a,b) => (b.in_team ? 1 : 0) - (a.in_team ? 1 : 0)).map((player) => {
+                                            {players && players.sort((a, b) => (b.in_team ? 1 : 0) - (a.in_team ? 1 : 0)).map((player) => {
                                                 const gameweekPoints = player.player.points.find(
                                                     (p) => p.gameweek === gameweekDetails._id
                                                 );
@@ -866,10 +866,10 @@ const Transfer = () => {
                                                                 )}
                                                                 <div className="overflow-hidden">
                                                                     <p className="font-bold truncate">{player.player.common_name}
-                                                                        <span className='p-2'>
+                                                                        {/* <span className='p-2'>
                                                                             {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
                                                                             {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                        </span>
+                                                                        </span> */}
                                                                     </p>
                                                                     <p className="text-xs text-gray-400 truncate">{player.in_team ? "" : "(Sub)"}</p>
                                                                 </div>

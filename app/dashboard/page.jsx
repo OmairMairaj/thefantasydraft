@@ -478,7 +478,7 @@ const Dashboard = () => {
                                     <p className="sm:hidden text-white text-xs md:text-sm lg:text-sm xl:text-base">Current Points:<span className="ml-2">{teamStats?.points || '--'}</span></p>}
                                   {selectedLeague.league_configuration.format === "Head to Head" &&
                                     <div className="sm:hidden flex space-x-1 md:space-x-2 mt-1">
-                                      {(teamStats?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                      {(teamStats?.form?.replace(/\s/g, '') || '').split('').slice(-5).map((result, idx) => (
                                         <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-sm sm:text-base lg:text-sm xl:text-base justify-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
                                       ))}
                                     </div>
@@ -489,7 +489,7 @@ const Dashboard = () => {
                                 <div className="hidden sm:flex flex-col items-center justify-center px-4 md:px-6 lg:px-2 py-2 lg:py-1 xl:px-4 xl:py-3 rounded-xl" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}>
                                   <p className="text-white text-xs md:text-sm lg:text-sm xl:text-base">Current Points: <span className="ml-2">{teamStats?.points || '--'}</span></p>
                                   <div className="flex space-x-1 md:space-x-2 mt-1">
-                                    {(teamStats?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                    {(teamStats?.form?.replace(/\s/g, '') || '').split('').slice(-5).map((result, idx) => (
                                       <span key={idx} className={`rounded-md lg:rounded-sm w-5 h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-base lg:text-sm xl:text-base justify-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
                                     ))}
                                   </div>
@@ -508,7 +508,7 @@ const Dashboard = () => {
                                   <div>
                                     <p className="text-white text-sm md:text-base lg:text-sm xl:text-base">{opponent?.team_name || "TBD"}</p>
                                     <div className="flex space-x-1 md:space-x-2 mt-1 sm:mt-3 lg:mt-1">
-                                      {(opponentStats?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                      {(opponentStats?.form?.replace(/\s/g, '') || '').split('').slice(-5).map((result, idx) => (
                                         <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-sm sm:text-base lg:text-sm justify-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
                                       ))}
                                     </div>
@@ -556,7 +556,7 @@ const Dashboard = () => {
                                         <td className="text-center px-1">{team?.wins || 0}</td>
                                         <td className="text-center px-1">{team?.loses || 0}</td>
                                         <td className="text-center px-1">{team?.draws || 0}</td>
-                                        <td className="text-center hidden sm:flex justify-center gap-1">{(team?.form?.replace(/\s/g, '') || '').split('').map((result, idx) => (
+                                        <td className="text-center hidden sm:flex justify-center gap-1">{(team?.form?.replace(/\s/g, '') || '').split('').slice(-5).map((result, idx) => (
                                           <span key={idx} className={`rounded-sm sm:rounded-md lg:rounded-sm w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-4 lg:h-4 xl:w-5 xl:h-5 flex items-center text-sm sm:text-base lg:text-sm justify-center text-white ${result === 'W' ? 'bg-green-500' : result === 'L' ? 'bg-red-500' : result === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}>{result}</span>
                                         ))}</td>
                                       </tr>
@@ -626,7 +626,7 @@ const Dashboard = () => {
                           </Link>
 
                           {/* Achievements Card */}
-                          <div className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center`}
+                          <Link href={'/achievements'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
                             style={{
                               backgroundImage: "url('/images/achievementsimage.png')",
                             }}>
@@ -639,7 +639,7 @@ const Dashboard = () => {
                                 <p className="text-xs md:text-sm text-gray-300">Total Achievements Completed</p>
                               </div>
                             </div>
-                          </div>
+                          </Link>
                         </div>
                       </div>
                     </div>
