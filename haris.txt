@@ -13,6 +13,15 @@ DONE
 IN PROCESS
 
 TO-DO
+DONE: Classic Points table
+Transfers Complete
+Achievements
+
+
+
+
+
+
 DONE : Test setInTeam()
 DONE : Make API to get all players eligible for transfer
 DONE : Maximum team number does not set when league is created 

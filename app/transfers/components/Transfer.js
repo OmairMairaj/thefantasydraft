@@ -29,6 +29,7 @@ const Transfer = () => {
     const [playersIn, setPlayersIn] = useState(null);
     const [comparePlayer1, setComparePlayer1] = useState(null);
     const [comparePlayer2, setComparePlayer2] = useState(null);
+    const [transferOfferAmount, setTransferOfferAmount] = useState(0);
     const { addAlert } = useAlert();
     const [team, setTeam] = useState(null);
     const [pitchView, setPitchView] = useState(true); // Toggle between Pitch and List views
@@ -370,6 +371,17 @@ const Transfer = () => {
         }
     };
 
+    const handleSetTransferOfferAmount = (value) => {
+        let max = userTeam?.waiver_wallet ? userTeam?.waiver_wallet : 100;
+        if (value < 0) {
+            setTransferOfferAmount(0);
+        } else if (value > max) {
+            setTransferOfferAmount(max);
+        } else {
+            setTransferOfferAmount(value);
+        }
+    };
+
     const handleTeamSelect = async (teamName) => {
         console.log("Selected Team ID: ", teamName);
 
@@ -402,10 +414,40 @@ const Transfer = () => {
     };
 
     const handleTransferClick = () => {
-        if (playersIn.length !== 0 && playersOut.length !== 0) {
-            addAlert('Transfer submitted successfully', 'success');
-            setPlayersIn([]);
-            setPlayersOut([]);
+        console.log("userTeam")
+        console.log(userTeam)
+        console.log("leagueId")
+        console.log(leagueId)
+        console.log("playersIn")
+        console.log(playersIn)
+        console.log("playersOut")
+        console.log(playersOut)
+        console.log("transferOfferAmount")
+        console.log(transferOfferAmount)
+        if (playersIn && playersOut && playersIn._id && playersOut._id) {
+            // Logic to handle transfer submission
+            try {
+                const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/transfer";
+                const body = {
+                    "teamID": userTeam._id,
+                    "leagueID": leagueId,
+                    "playerInID": playersIn._id,
+                    "playerOutID": playersOut._id,
+                    "owned": playersIn.owned,
+                    "amount": transferOfferAmount
+                }
+                axios.post(URL, body).then((response) => {
+                    console.log("response");
+                    console.log(response);
+                    addAlert('Transfer submitted successfully', 'success');
+                    setPlayersIn(null);
+                    setPlayersOut(null);
+                })
+            } catch (err) {
+                addAlert("An unexpected error occurred. Please try again", "error");
+                console.log("error");
+                console.log(err);
+            }
         }
         else {
             addAlert('Please select players to transfer', 'error');
@@ -556,11 +598,21 @@ const Transfer = () => {
                 </div>
                 <div className='bg-[#1c1c1c] rounded-lg p-4'>
                     <h3 className='font-bold text-lg mb-2'>Transfer</h3>
-                    <p className='text-sm text-gray-400 mb-2'>Waiver Budget: $200</p>
+                    <p className='text-sm text-gray-400 mb-2'>Waiver Budget: {userTeam && userTeam.waiver_wallet ? userTeam.waiver_wallet : 0}</p>
                     {!playersIn && !playersOut ? <p className='text-gray-400 text-sm'>No players selected</p> : null}
                     {playersIn && !playersOut ? <p className='text-gray-400 text-sm'>Some players selected</p> : null}
                     {playersOut && !playersIn ? <p className='text-gray-400 text-sm'>Some players selected</p> : null}
-                    <button onClick={handleTransferClick} className='mt-4 w-full bg-[#FF8A00] py-2 rounded text-center font-semibold'>Make Transfer</button>
+                    {playersIn && playersIn.owned ? <div>
+                        <span className="text-white text-sm">Additional Transfer Offer Amount : </span>
+                        <input
+                            type="number"
+                            placeholder="Offer Amount"
+                            value={transferOfferAmount}
+                            onChange={(e) => { handleSetTransferOfferAmount(e.target.value) }}
+                            className="p-1 rounded-lg bg-[#333333] text-white text-sm"
+                        />
+                    </div> : null}
+                    <button onClick={handleTransferClick} className='mt-4 w-full bg-[#FF8A00] py-2 rounded text-center font-semibold'>{playersIn && playersIn.owned ? "Make Offer" : "Make Transfer"}</button>
                 </div>
             </div>
 
@@ -978,6 +1030,7 @@ const Transfer = () => {
                                     <tr className="text-center">
                                         <th className="p-2 text-left pl-4">Player</th>
                                         <th className='p-2'>Team</th>
+                                        <th className='p-2'>Owned</th>
                                         <th className="p-2">Pos.</th>
                                         <th className="p-2"></th>
                                         {/* <th className="p-2 sticky right-0 z-20">Actions</th> */}
@@ -1003,6 +1056,9 @@ const Transfer = () => {
                                             </td>
                                             <td className="p-2 text-center truncate">
                                                 <img src={player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
+                                            </td>
+                                            <td className="p-2 text-center truncate">
+                                                <div className="flex items-center space-x-2">{player.owned ? "Yes" : "No"}</div>
                                             </td>
                                             <td className='p-2'>
                                                 <div className='flex justify-center items-center'>

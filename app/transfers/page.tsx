@@ -7,6 +7,8 @@ import { FaExchangeAlt, FaUserPlus, FaUserMinus, FaClipboard, FaChevronDown } fr
 import { MdOutlineCompareArrows } from 'react-icons/md';
 import { useAlert } from '@/components/AlertContext/AlertContext';
 import Transfer from './components/Transfer';
+import History from './components/History';
+import Offers from './components/Offers';
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],
@@ -15,7 +17,7 @@ const exo2 = Exo_2({
 });
 
 const Transfers = () => {
-    const [activeTab, setActiveTab] = useState('Transfer');
+    const [activeTab, setActiveTab] = useState('Make Transfer');
 
 
     return (
@@ -24,16 +26,19 @@ const Transfers = () => {
 
             {/* Tabs */}
             <div className='flex gap-2 mb-4'>
-                {['Transfer', 'History'].map(tab => (
+                {['Make Transfer', 'Offers', 'History'].map(tab => (
                     <button key={tab} onClick={() => setActiveTab(tab)} className={` ${activeTab === tab ? "bg-[#FF8A00]" : "bg-[#2c2c2c] hover:bg-[#3a3a3a]"} px-8 py-1 rounded-lg`}>{tab}</button>
                 ))}
-                {/* <div className='ml-auto bg-[#303030] px-4 py-2 rounded-lg flex items-center gap-2'>
-                    INVITE-CODE-123 <FaClipboard className='cursor-pointer' onClick={handleCopy} />
-                </div> */}
             </div>
 
-            {activeTab === 'Transfer' &&
+            {activeTab === 'Make Transfer' &&
                 <Transfer />
+            }
+			{activeTab === 'History' &&
+                <History />
+            }
+			{activeTab === 'Offers' &&
+                <Offers />
             }
 
 
