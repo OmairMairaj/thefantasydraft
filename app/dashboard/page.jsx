@@ -300,7 +300,7 @@ const Dashboard = () => {
           <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
         </div>
       ) : showEmptyView ? (
-        <div className={`w-full relative bg-[#070A0A] custom-dash-spacing px-4 rounded-3xl shadow-lg flex flex-col items-center ${selectedLeague && !showEmptyView ? 'space-y-4 sm:space-y-8 py-10 sm:py-16' : 'space-y-12 py-36 lg:py-16 xl:py-24 2xl:py-36'}`}>
+        <div className={`w-full relative custom-dash-spacing px-4 rounded-3xl shadow-lg flex flex-col items-center ${selectedLeague && !showEmptyView ? 'space-y-4 sm:space-y-8 py-10 sm:py-16' : 'space-y-12 py-36 lg:py-16 xl:py-24 2xl:py-36'}`}>
           <div className="flex items-center space-x-2 sm:space-x-4 ">
             <FaExclamationCircle className="text-3xl md:text-4xl lg:text-3xl xl:text-4xl text-[#FF8A00]" />
             <h2 className={`text-xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-4xl font-bold ${exo2.className}`}>CREATE OR JOIN A LEAGUE</h2>

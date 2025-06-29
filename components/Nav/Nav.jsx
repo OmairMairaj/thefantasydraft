@@ -161,6 +161,12 @@ const Nav = () => {
           >
             PLAYERS
           </Link>
+          <Link
+            href="/super-league"
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+          >
+            SUPER LEAGUE
+          </Link>
         </div>
       )}
 
