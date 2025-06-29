@@ -82,3 +82,28 @@ export const POST = async (req) => {
         return NextResponse.json({ error: true, message: "Failed to create super league." });
     }
 };
+
+// GET Super Leagues (GET) by User
+export const DELETE = async (req) => {
+    try {
+        await connectToDb();
+        const url = new URL(req.url)
+        const Id = url.searchParams.get("Id");
+        if (!Id) {
+            return NextResponse.json(
+                { error: true, message: "League ID not found. Please contact support." },
+                { status: 401 }
+            );
+        }
+
+        const superLeaguesDeleted = await SuperLeague.findByIdAndDelete(Id);
+        return NextResponse.json({  data:superLeaguesDeleted, error: false, message : "Super League deleted successfully." }); // [] if none found
+
+    } catch (err) {
+        console.error("Error deleting super leagues:", err);
+        return NextResponse.json(
+            { error: true, message: "Failed to delete super leagues." },
+            { status: 500 }
+        );
+    }
+};
