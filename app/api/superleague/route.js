@@ -23,7 +23,15 @@ export const GET = async (req) => {
         }
 
         const userId = new mongoose.Types.ObjectId(user);
-        const superLeagues = await SuperLeague.find({ owner: userId }).populate("leagues");
+        const superLeagues = await SuperLeague.find({ owner: userId })
+            .populate({
+                path: "leagues",
+                populate: [
+                    { path: "classic_points.team" },
+                    { path: "head_to_head_points.team" }
+                ]
+            });
+
 
         return NextResponse.json({ error: false, data: superLeagues }); // [] if none found
     } catch (err) {
@@ -83,6 +91,59 @@ export const POST = async (req) => {
     }
 };
 
+// PATCH (Update) Super League by ID
+export const PATCH = async (req) => {
+    try {
+        await connectToDb();
+        const url = new URL(req.url);
+        const Id = url.searchParams.get("Id");
+
+        if (!Id) {
+            return NextResponse.json(
+                { error: true, message: "Super League ID is required." },
+                { status: 400 }
+            );
+        }
+
+        const body = await req.json();
+        const { name, image, leagues } = body;
+
+        // Validate leagues if present
+        if (leagues) {
+            if (!Array.isArray(leagues) || leagues.length < 1)
+                return NextResponse.json({ error: true, message: "At least 1 league required." });
+            if (leagues.length > 6)
+                return NextResponse.json({ error: true, message: "Maximum 6 leagues allowed." });
+
+            // Check all league IDs exist and are not deleted
+            const foundLeagues = await FantasyLeague.find({ _id: { $in: leagues }, is_deleted: false });
+            if (foundLeagues.length !== leagues.length)
+                return NextResponse.json({ error: true, message: "Some leagues not found or invalid." });
+        }
+
+        // Build update object
+        const update = {};
+        if (name) update.name = name;
+        if (typeof image === "string") update.image = image;
+        if (leagues) update.leagues = leagues;
+
+        const updated = await SuperLeague.findByIdAndUpdate(
+            Id,
+            { $set: update },
+            { new: true }
+        );
+
+        if (!updated)
+            return NextResponse.json({ error: true, message: "Super League not found." }, { status: 404 });
+
+        return NextResponse.json({ error: false, data: updated, message: "Super League updated." });
+    } catch (err) {
+        console.error("Error updating super league:", err);
+        return NextResponse.json({ error: true, message: "Failed to update super league." }, { status: 500 });
+    }
+};
+
+
 // GET Super Leagues (GET) by User
 export const DELETE = async (req) => {
     try {
@@ -97,7 +158,7 @@ export const DELETE = async (req) => {
         }
 
         const superLeaguesDeleted = await SuperLeague.findByIdAndDelete(Id);
-        return NextResponse.json({  data:superLeaguesDeleted, error: false, message : "Super League deleted successfully." }); // [] if none found
+        return NextResponse.json({ data: superLeaguesDeleted, error: false, message: "Super League deleted successfully." }); // [] if none found
 
     } catch (err) {
         console.error("Error deleting super leagues:", err);

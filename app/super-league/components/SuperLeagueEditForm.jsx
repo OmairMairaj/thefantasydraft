@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import axios from "axios";
 import { Exo_2 } from "next/font/google";
 import { FaImage, FaPlus, FaSpinner, FaTimes } from "react-icons/fa";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { useAlert } from "@/components/AlertContext/AlertContext";
 
 const exo2 = Exo_2({
     weight: ["700", "800"],
@@ -12,18 +14,26 @@ const exo2 = Exo_2({
     subsets: ["latin"],
 });
 
-const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
-    // Form state
-    const [name, setName] = useState("");
-    const [image, setImage] = useState(""); // base64 data URL
+const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
+    // Pre-fill state from existing superLeague prop
+    const [name, setName] = useState(superLeague?.name || "");
+    const [image, setImage] = useState(superLeague?.image || "");
     const [inviteCode, setInviteCode] = useState("");
     const [searchResult, setSearchResult] = useState(null);
-    const [selectedLeagues, setSelectedLeagues] = useState([]);
+    const [selectedLeagues, setSelectedLeagues] = useState(
+        superLeague.leagues?.map(lg => ({
+            _id: lg._id,
+            inviteCode: lg.invite_code,
+            leagueName: lg.league_name,
+            leagueImage: lg.league_image_path,
+        })) || []
+    );
     const [error, setError] = useState("");
     const [searching, setSearching] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const { addAlert } = useAlert();
 
-    // Handle image upload and preview as base64
+    // Image upload logic
     const toBase64 = (file) =>
         new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -35,13 +45,11 @@ const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
     const handleImageChange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        if (file) {
-            const base64 = await toBase64(file);
-            setImage(base64);
-        }
+        const base64 = await toBase64(file);
+        setImage(base64);
     };
 
-    // Add league via invite code
+    // Invite code add/search
     const handleSearchLeague = async () => {
         setError("");
         setSearchResult(null);
@@ -89,13 +97,27 @@ const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
         setError("");
     };
 
+    // Remove league (don't allow if only 1 left)
     const handleRemoveLeague = (inviteCode) => {
+        if (selectedLeagues.length <= 1) {
+            setError("At least 1 league must remain.");
+            return;
+        }
         setSelectedLeagues((prev) =>
             prev.filter((l) => l.inviteCode !== inviteCode)
         );
     };
 
-    // Form validation and submit
+    // Drag and drop handler
+    const onDragEnd = (result) => {
+        if (!result.destination) return;
+        const items = Array.from(selectedLeagues);
+        const [reordered] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reordered);
+        setSelectedLeagues(items);
+    };
+
+    // Update Super League
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
@@ -105,30 +127,37 @@ const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
         if (selectedLeagues.length > 6)
             return setError("Maximum 6 leagues allowed.");
 
+        if (name === superLeague.name &&
+            image === superLeague.image &&
+            selectedLeagues.length === superLeague.leagues.length &&
+            selectedLeagues.every((l, idx) => l._id === superLeague.leagues[idx]._id)) {
+            return addAlert("No changes detected.", "info");
+        }
+
         setSubmitting(true);
         try {
             const payload = {
-                user: User?._id,
+                // user: user._id, // if you use it
                 name: name.trim(),
-                image, // For now base64, replace with uploaded URL for production
+                image,
                 leagues: selectedLeagues.map((l) => l._id),
             };
-            const res = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague`,
+            const res = await axios.patch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague?Id=${superLeague._id}`,
                 payload
             );
             if (!res.data.error) {
-                addAlert("Super League created successfully!", "success");
+                addAlert("Super League Updated Successfully", "success");
                 setTimeout(() => {
-                    if (onCreated) onCreated();
+                    if (onUpdate) onUpdate();
                 }, 2000);
             } else {
-                // setError(res.data.message || "Could not create Super League.");
-                addAlert(res.data.message || "Could not create Super League.", "error");
+                // setError(res.data.message || "Could not update Super League.");
+                addAlert(res.data.message || "Could not update Super League.", "error");
             }
         } catch (err) {
-            // setError("Error submitting form.");
-            addAlert("Error submitting form.", "error");
+            // setError("Error updating Super League.");
+            addAlert("Error updating Super League.", "error");
         } finally {
             setSubmitting(false);
         }
@@ -136,13 +165,10 @@ const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
 
     return (
         <div className="w-full flex flex-col items-center">
-            <form
-                onSubmit={handleSubmit}
-                className="w-full text-white"
-            >
+            <form onSubmit={handleSubmit} className="w-full text-white">
                 <div className="grid grid-cols-2 gap-24">
                     <div className="flex flex-col space-y-8">
-                        {/* Image (optional) */}
+                        {/* Image */}
                         <div className="flex flex-col space-y-1">
                             <label
                                 className="font-bold text-sm md:text-lg"
@@ -247,37 +273,7 @@ const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
                                             Confirm Add
                                         </button>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm md:text-base mt-2">
-                                        <div className="space-y-2">
-                                            <p>
-                                                Players Joined:
-                                                <strong className="ml-2 text-white">
-                                                    {searchResult.users_onboard?.length}
-                                                </strong>
-                                            </p>
-                                            <p>
-                                                Auto Subs:
-                                                <strong className="ml-2 text-white">
-                                                    {searchResult.league_configuration?.auto_subs ? "Enabled" : "Disabled"}
-                                                </strong>
-                                            </p>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p>
-                                                Format:
-                                                <strong className="ml-2 text-white">
-                                                    {searchResult.league_configuration?.format}
-                                                </strong>
-                                            </p>
-                                            <p>
-                                                Waiver Format:
-                                                <strong className="ml-2 text-white">
-                                                    {searchResult.league_configuration?.waiver_format}
-                                                </strong>
-                                            </p>
-                                        </div>
-                                    </div>
-
+                                    {/* ...League details... */}
                                 </div>
                             )}
                         </div>
@@ -303,77 +299,91 @@ const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
                                 required
                             />
                         </div>
-                        {/* Added Leagues */}
+                        {/* Added Leagues - Drag and Drop */}
                         <div className="flex flex-col">
                             <label className="font-bold text-sm md:text-lg mb-2 block">
-                                Added Leagues (At least 1)<span className="text-red-400">*</span>
+                                Added Leagues (Drag to reorder, At least 1)<span className="text-red-400">*</span>
                             </label>
                             {/* 3x2 grid, always 6 slots */}
-                            <div className="grid grid-cols-2 gap-4 w-full max-w-2xl">
-                                {Array.from({ length: 6 }).map((_, idx) => {
-                                    const lg = selectedLeagues[idx];
-                                    return (
+                            <DragDropContext onDragEnd={onDragEnd}>
+                                <Droppable droppableId="leagues" direction="vertical">
+                                    {(provided) => (
                                         <div
-                                            key={idx}
-                                            className={`h-16 flex items-center justify-center rounded-xl border-2 border-dashed ${lg ? "border-[#1bffa2]" : "border-gray-400/60"} bg-transparent px-4 transition`}
+                                            {...provided.droppableProps}
+                                            ref={provided.innerRef}
+                                            className="grid grid-cols-2 gap-4 w-full max-w-2xl"
                                         >
-                                            {lg ? (
-                                                <div className="flex items-center w-full">
-                                                    <Image
-                                                        src={lg.leagueImage || "/images/default_team_logo.png"}
-                                                        alt=""
-                                                        width={44}
-                                                        height={44}
-                                                        className="rounded-full"
-                                                    />
-                                                    <span className="ml-3 font-semibold flex-1 truncate">
-                                                        {lg.leagueName}
-                                                    </span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveLeague(lg.inviteCode)}
-                                                        className="ml-3 text-red-400 hover:text-red-700"
-                                                        aria-label="Remove league"
+                                            {Array.from({ length: 6 }).map((_, idx) => {
+                                                const lg = selectedLeagues[idx];
+                                                return (
+                                                    <Draggable
+                                                        key={lg?.inviteCode || `empty-${idx}`}
+                                                        draggableId={lg?.inviteCode || `empty-${idx}`}
+                                                        index={idx}
+                                                        isDragDisabled={!lg}
                                                     >
-                                                        <FaTimes />
-                                                    </button>
-                                                </div>
-                                            ) : (
-
-                                                <FaPlus />
-
-                                            )}
+                                                        {(dragProvided) => (
+                                                            <div
+                                                                ref={dragProvided.innerRef}
+                                                                {...dragProvided.draggableProps}
+                                                                {...dragProvided.dragHandleProps}
+                                                                className={`h-16 flex items-center justify-center rounded-xl border-2 border-dashed ${lg ? "border-[#1bffa2]" : "border-gray-400/60"} bg-transparent px-4 transition`}
+                                                            >
+                                                                {lg ? (
+                                                                    <div className="flex items-center w-full">
+                                                                        <Image
+                                                                            src={lg.leagueImage || "/images/default_team_logo.png"}
+                                                                            alt=""
+                                                                            width={44}
+                                                                            height={44}
+                                                                            className="rounded-full"
+                                                                        />
+                                                                        <span className="ml-3 font-semibold flex-1 truncate">
+                                                                            {lg.leagueName}
+                                                                        </span>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleRemoveLeague(lg.inviteCode)}
+                                                                            className={`ml-3 text-red-400 hover:text-red-700 ${selectedLeagues.length <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                                            aria-label="Remove league"
+                                                                            disabled={selectedLeagues.length <= 1}
+                                                                        >
+                                                                            <FaTimes />
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <FaPlus className="opacity-50" />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                );
+                                            })}
+                                            {provided.placeholder}
                                         </div>
-                                    );
-                                })}
-                            </div>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
                         </div>
-
                     </div>
                 </div>
 
-
                 <div className="w-full flex items-end justify-between mt-12">
-                    {/* Errors */}
                     {error ?
                         <div className="text-[#df2d2d] text-end mb-2 text-lg font-bold">Error: {error}</div>
                         : <div className="text-[#df2d2d] text-end mb-2 text-lg font-bold"></div>
                     }
-                    {/* Submit Button */}
                     <button
                         type="submit"
-                        className={`fade-gradient  py-3 rounded-full px-12 font-bold text-lg mt-3`}
+                        className={`fade-gradient py-3 rounded-full px-12 font-bold text-lg mt-3`}
                         disabled={submitting}
                     >
-                        {submitting ? "Creating..." : "Create Super League"}
+                        {submitting ? "Updating..." : "Update Super League"}
                     </button>
-
                 </div>
-
-
             </form>
         </div>
     );
 };
 
-export default SuperLeagueCreateForm;
+export default SuperLeagueEditForm;
