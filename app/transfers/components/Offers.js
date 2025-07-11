@@ -3,13 +3,24 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useAlert } from "@/components/AlertContext/AlertContext";
+import { Exo_2 } from 'next/font/google';
+
+const exo2 = Exo_2({
+    weight: ['400', '500', '700', '800'],
+    style: ['italic'],
+    subsets: ['latin'],
+});
 
 const Offers = () => {
     const { addAlert } = useAlert();
     const [leagueId, setLeagueId] = useState(sessionStorage.getItem("selectedLeagueID"));
     const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("user")));
     const [userTeam, setUserTeam] = useState(null);
+    const [refresh, setRefresh] = useState(true)
     const [history, setHistory] = useState(null)
+    const [sent, setSent] = useState(null)
+    const [received, setReceived] = useState(null)
+
 
     useEffect(() => {
         if (leagueId && user) {
@@ -51,7 +62,7 @@ const Offers = () => {
     useEffect(() => {
         if (userTeam) {
             try {
-                let URL = process.env.NEXT_PUBLIC_BACKEND_URL + `/transfer?teamId=${userTeam._id}`
+                let URL = process.env.NEXT_PUBLIC_BACKEND_URL + `/transfer?teamID=${userTeam._id}`
                 axios.get(URL)
                     .then((response) => {
                         console.log("response")
@@ -65,7 +76,20 @@ const Offers = () => {
                 addAlert("An unexpected error occurred trying to retrieve history. Please try again.", "error");
             }
         }
-    }, [userTeam])
+    }, [userTeam, refresh])
+
+    useEffect(() => {
+        if (history && userTeam) {
+            try {
+                setSent(history.filter(item => item.teamInID._id !== userTeam._id))
+                setReceived(history.filter(item => item.teamInID._id === userTeam._id))
+            } catch (error) {
+                console.log("error")
+                console.log(error)
+                addAlert("An unexpected error occurred trying to filter history. Please try again.", "error");
+            }
+        }
+    }, [history])
 
     function handleClick(operation, ID) {
         try {
@@ -76,8 +100,7 @@ const Offers = () => {
             axios.post(URL, body).then((response) => {
                 console.log("response");
                 console.log(response);
-                setLeagueId(sessionStorage.getItem("selectedLeagueID"));
-                setUserTeam(JSON.parse(sessionStorage.getItem("user")));
+                setRefresh(!refresh);
                 addAlert('Offer ' + operation + 'ed successfully', 'success');
             })
         } catch (err) {
@@ -88,31 +111,64 @@ const Offers = () => {
     }
 
     return <>
-        {history ?
-            <div>
-                {history.length > 0 ?
-                    <div>
-                        {history.map((item) => {
-                            return <>
-                                <div style={{ border: "1px solid", padding: "10px" }}>
-                                    <p>Player Transferred In : {item.playerInID.common_name}</p>
-                                    <p>Player Transferred Out : {item.playerOutID.common_name}</p>
-                                    <p>Offer : {item.is_offer + ""}</p>
-                                    <p>Amount Offered : {item.amount}</p>
-                                    <p>STATUS : {item.status}</p>
-                                    <p>Going In Team : {item.teamInID?.team_name}</p>
-                                    <p>Going From Team : {item.teamOutID?.team_name}</p>
-                                    <br/>
-                                    <button className={"bg-[#FF8A00] px-8 py-1 rounded-lg"} onClick={()=>{handleClick("reject", item._id)}}>Reject</button>
-                                    <button className={"bg-[#FF8A00] px-8 py-1 rounded-lg"} onClick={()=>{handleClick("accept", item._id)}}>Accept</button>
-                                </div>
-                            </>
-                        })}
-                    </div>
-                    :
-                    <div>No active offers pending</div>
-                }
-            </div>
+        {(history && sent && received) ?
+            <>
+                <div style={{ border: "1px solid", padding: "20px", borderRadius: "10px" }}>
+                    <div style={{ color: "#FF8A00" }} className={`text-2xl font-bold mb-4 ${exo2.className}`} >Offers Received</div>
+                    {received.length > 0 ?
+                        <>
+                            <div>
+                                {received.map((item) => {
+                                    return <>
+                                        <div style={{ border: "2px solid", padding: "15px 20px", borderColor: "#FF8A00", borderRadius: "5px" }}>
+                                            <p>Player In : {item.playerInID.common_name}</p>
+                                            <p>From Team : {item.teamInID?.team_name}</p>
+                                            <p>Player Out : {item.playerOutID.common_name}</p>
+                                            <p>From Team : {item.teamOutID?.team_name}</p>
+                                            <p>Offer : {item.is_offer + ""}</p>
+                                            <p>Amount Offered : {item.amount}</p>
+                                            <p>STATUS : {item.status}</p>
+                                            <br />
+                                            <button style={{ marginRight: "10px" }} className={"bg-[#FF8A00] px-8 py-1 rounded-lg"} onClick={() => { handleClick("reject", item._id) }}>Reject</button>
+                                            <button className={"bg-[#FF8A00] px-8 py-1 rounded-lg"} onClick={() => { handleClick("accept", item._id) }}>Accept</button>
+                                        </div>
+                                    </>
+                                })}
+                            </div>
+                        </>
+                        :
+                        <div>No active offers</div>
+                    }
+                </div>
+                <br />
+                <div style={{ border: "1px solid", padding: "20px", borderRadius: "10px" }}>
+                    <div style={{ color: "#FF8A00" }} className={`text-2xl font-bold mb-4 ${exo2.className}`} >Offers Sent</div>
+                    {sent.length > 0 ?
+                        <>
+                            <div>
+                                {sent.map((item) => {
+                                    return <>
+                                        <div style={{ border: "2px solid", padding: "15px 20px", borderColor: "#FF8A00", borderRadius: "5px" }}>
+                                            <p>Player In : {item.playerInID.common_name}</p>
+                                            <p>From Team : {item.teamInID?.team_name}</p>
+                                            <p>Player Out : {item.playerOutID.common_name}</p>
+                                            <p>From Team : {item.teamOutID?.team_name}</p>
+                                            <p>Offer : {item.is_offer + ""}</p>
+                                            <p>Amount Offered : {item.amount}</p>
+                                            <p>STATUS : {item.status}</p>
+                                            <br />
+                                            <button style={{ marginRight: "10px" }} className={"bg-[#FF8A00] px-8 py-1 rounded-lg"} onClick={() => { handleClick("withdraw", item._id) }}>Withdraw</button>
+                                            {/* <button className={"bg-[#FF8A00] px-8 py-1 rounded-lg"} onClick={() => { handleClick("accept", item._id) }}>Accept</button> */}
+                                        </div>
+                                    </>
+                                })}
+                            </div>
+                        </>
+                        :
+                        <div>No active offers</div>
+                    }
+                </div>
+            </>
             :
             <div>Loading...</div>}
     </>

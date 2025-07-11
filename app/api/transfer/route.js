@@ -66,17 +66,20 @@ export const POST = async (req, res) => {
         let draft = await FantasyDraft.findById(league.draftID._id);
 
         // Get team from where transfer is being made
-        let teamOut = null
+        let teamIn = null
         if (payload.owned) {
             let allTeams = await FantasyTeam.find({ leagueID: league._id })
             let found = false;
             allTeams.map((one_team) => {
-                one_team.players.map((one_player) => {
-                    if (one_player.player.equals(playerIn._id)) found = true;
-                })
-                if (found) { teamOut = one_team }
+                console.log("one_team")
+                if (found === false) {
+                    one_team.players.map((one_player) => {
+                        if (one_player.player.equals(playerIn._id)) found = true;
+                    })
+                    if (found) { teamIn = one_team }
+                }
             })
-            if (teamOut === null) {
+            if (teamIn === null) {
                 return NextResponse.json({
                     error: true,
                     message: "No team found for the owned player. Contact support"
@@ -150,8 +153,8 @@ export const POST = async (req, res) => {
 
             // create transfer object
             let newTransfer = await FantasyTransfer.create({
-                "teamInID": team._id,
-                "teamOutID": teamOut._id,
+                "teamInID": teamIn._id,
+                "teamOutID": team._id,
                 "leagueID": league._id,
                 "playerInID": playerIn._id,
                 "playerOutID": playerOut._id,

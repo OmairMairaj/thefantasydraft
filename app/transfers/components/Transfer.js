@@ -79,6 +79,7 @@ const Transfer = () => {
     const [currentGameweek, setCurrentGameweek] = useState(null);
     const [history, setHistory] = useState([]);
     const [activeTab, setActiveTab] = useState('history');
+    const [refresh, setRefresh] = useState(true)
 
     useEffect(() => {
         // Check if window is defined to ensure we are on the client side
@@ -111,7 +112,7 @@ const Transfer = () => {
         if (user?.email && leagueId) {
             fetchUserTeamForLeague(user.email, leagueId);
         }
-    }, [user, leagueId]);
+    }, [user, leagueId, refresh]);
 
     useEffect(() => {
         if (leagueId && team) {
@@ -414,20 +415,21 @@ const Transfer = () => {
     };
 
     const handleTransferClick = () => {
-        console.log("userTeam")
-        console.log(userTeam)
-        console.log("leagueId")
-        console.log(leagueId)
-        console.log("playersIn")
-        console.log(playersIn)
-        console.log("playersOut")
-        console.log(playersOut)
-        console.log("transferOfferAmount")
-        console.log(transferOfferAmount)
+        // console.log("userTeam")
+        // console.log(userTeam)
+        // console.log("leagueId")
+        // console.log(leagueId)
+        // console.log("playersIn")
+        // console.log(playersIn)
+        // console.log("playersOut")
+        // console.log(playersOut)
+        // console.log("transferOfferAmount")
+        // console.log(transferOfferAmount)
         if (playersIn && playersOut && playersIn._id && playersOut._id) {
             // Logic to handle transfer submission
             try {
                 const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/transfer";
+                console.log(URL);
                 const body = {
                     "teamID": userTeam._id,
                     "leagueID": leagueId,
@@ -440,6 +442,7 @@ const Transfer = () => {
                     console.log("response");
                     console.log(response);
                     addAlert('Transfer submitted successfully', 'success');
+                    setRefresh(!refresh);
                     setPlayersIn(null);
                     setPlayersOut(null);
                 })

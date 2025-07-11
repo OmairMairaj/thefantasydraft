@@ -8,6 +8,14 @@ const History = () => {
     const { addAlert } = useAlert();
     const [leagueId, setLeagueId] = useState(sessionStorage.getItem("selectedLeagueID"));
     const [history, setHistory] = useState(null)
+    const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
 
     useEffect(() => {
         if (leagueId) {
@@ -35,7 +43,7 @@ const History = () => {
                     <div>
                         {history.map((item) => {
                             return <>
-                                <div style={{border:"1px solid",padding:"10px"}}>
+                                <div style={{border:"1px solid",padding:"10px 20px", borderRadius:"10px", marginBottom:"20px"}}>
                                 <p>Player In : {item.playerInID.common_name}</p>
                                 <p>Player Out : {item.playerOutID.common_name}</p>
                                 <p>Offer : {item.is_offer+""}</p>
@@ -43,6 +51,8 @@ const History = () => {
                                 <p>STATUS : {item.status}</p>
                                 <p>Team In : {item.teamInID?.team_name}</p>
                                 <p>Team Out : {item.teamOutID?.team_name}</p>
+                                <p>Time of transfer : {new Date(item.createdAt).toLocaleString('en-US', options)}</p>
+                                <p>Time last updated : {new Date(item.updatedAt).toLocaleString('en-US', options)}</p>
                                 </div>
                             </>
                         })}

@@ -22,11 +22,11 @@ export const POST = async (req, res) => {
                 });        
             }
             // Give back money in wallet
-            let team = await FantasyTeam.findOne({ _id: updatedTransfer.teamInID })
+            let team = await FantasyTeam.findOne({ _id: updatedTransfer.teamOutID })
             team.waiver_wallet = team.waiver_wallet + updatedTransfer.amount;
             await team.save();
 
-            team = await FantasyTeam.findOne({ _id: updatedTransfer.teamInID })
+            team = await FantasyTeam.findOne({ _id: updatedTransfer.teamOutID })
 
             return NextResponse.json({ error: false, data: updatedTransfer, team: team });
         }
