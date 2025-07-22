@@ -8,7 +8,7 @@ import axios from "axios";
 import SuperLeagueCreateForm from "./components/SuperLeagueCreateForm";
 import SuperLeagueDetail from "./components/SuperLeagueDetail";
 import SuperLeagueEditForm from "./components/SuperLeagueEditForm";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import { useAlert } from "@/components/AlertContext/AlertContext";
 
 const exo2 = Exo_2({
@@ -141,12 +141,15 @@ const SuperLeague = () => {
             const response = await axios.delete(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague?Id=${selectedSuperLeague?._id}`
             );
+            console.log("Delete response:", response);
 
             if (response.data && !response.data.error) {
                 addAlert("League deleted successfully.", "success");
                 console.log("League deleted successfully");
                 setShowDeletePopup(false);
-                router.push("/super-league");
+                handleBackToList();
+                setSelectedSuperLeague(null);
+                setInputSuperLeagueName("");
             } else {
                 addAlert(response.data.message || "Failed to delete league.", "error");
                 console.error("Error deleting league:", response.data.message);
@@ -164,17 +167,17 @@ const SuperLeague = () => {
         <div
             className={`min-h-[88vh] flex flex-col my-8 text-white px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-10 ${exo2.className}`}
         >
-            <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center space-x-4">
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-2 md:space-x-4">
                     {view !== "list" && (
                         <button
                             onClick={handleBackToList}
-                            className={`py-2 px-8 md:py-2 md:px-12 flex items-center rounded-full text-white font-bold fade-gradient hover:bg-[#e77d00] text-sm md:text-lg ${exo2.className}`}
+                            className={`flex items-center rounded-full text-white font-bold fade-gradient hover:bg-[#e77d00] transition py-2 px-5 sm:py-2 sm:px-7 md:py-2 md:px-8 text-xs sm:text-sm md:text-lg ${exo2.className}`}
                         >
                             BACK
                         </button>
                     )}
-                    <h1 className="text-4xl font-bold">
+                    <h1 className="text-2xl md:text-3xl xl:text-4xl font-bold">
                         {view === "detail"
                             ? "Super League"
                             : view === "create"
@@ -186,22 +189,21 @@ const SuperLeague = () => {
                 </div>
                 {view == "list" && !showEmptyView && superLeagues.length > 0 && (
                     <button
-                        className="fade-gradient px-3 sm:px-6 md:px-8 lg:px-8 py-2 sm:py-2 rounded-xl text-white font-bold text-base border-2 cursor-pointer bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00]"
-                        onClick={handleCreate}
+                        className={`fade-gradient px-4 py-2 sm:px-6 sm:py-2 md:px-8 xl:px-10 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl rounded-xl text-white font-bold border-2 cursor-pointer bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00] transition`} onClick={handleCreate}
                     >
                         + Create Super League
                     </button>
                 )}
+
                 {view == "detail" && (
                     <button
-                        className="bg-red-700 px-3 sm:px-6 md:px-8 lg:px-8 py-2 sm:py-2 rounded-xl text-white font-bold text-base cursor-pointer flex items-center hover:bg-red-800"
+                        className={`bg-red-700 px-4 py-2 sm:px-6 sm:py-2 md:px-8 xl:px-10 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl rounded-xl text-white font-bold cursor-pointer flex items-center hover:bg-red-800 transition`}
                         onClick={() => {
-                            console.log("Delete Super League clicked");
                             setShowDeletePopup(true);
                         }}
                     >
-                        <FaTrash className="inline mr-2" />
-                        Delete Super League
+                        <FaTrash className="inline mr-2" />Delete
+                        <span className="hidden sm:flex ml-2">Super League </span>
                     </button>
                 )}
             </div>
@@ -213,22 +215,21 @@ const SuperLeague = () => {
                 <>
                     {view === "list" &&
                         (showEmptyView ? (
-                            <div className="w-full relative custom-dash-spacing px-4 rounded-3xl shadow-lg flex flex-col items-center space-y-12 py-36 lg:py-16 xl:py-24 2xl:py-36">
-                                <div className="flex flex-col items-center justify-center">
+                            <div className="w-full relative custom-dash-spacing px-2 sm:px-4 md:px-8 rounded-3xl shadow-lg flex flex-col items-center space-y-8 sm:space-y-10 md:space-y-12 py-20 sm:py-24 md:py-32 lg:py-16 xl:py-24 2xl:py-36">
+                                <div className="flex flex-col items-center justify-center w-full max-w-md">
                                     <img
                                         src="/images/empty-super-league.png"
                                         alt="No super leagues"
-                                        className="w-40 mb-5"
+                                        className="w-28 sm:w-32 md:w-40 xl:w-52 mb-4 md:mb-5"
                                     />
-                                    <h2 className="text-2xl font-bold mb-2">
+                                    <h2 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl font-bold mb-1 sm:mb-2 text-center">
                                         No Super Leagues Yet
                                     </h2>
-                                    <p className="text-gray-300 mb-4">
-                                        Create a Super League to track multiple leagues in one
-                                        place.
+                                    <p className="text-gray-300 text-xs sm:text-sm md:text-base xl:text-lg mb-4 text-center px-4">
+                                        Create a Super League to track multiple leagues in one place.
                                     </p>
                                     <button
-                                        className="fade-gradient px-3 sm:px-6 md:px-8 lg:px-12 py-2 sm:py-3 rounded-xl text-white font-bold text-base border-2 cursor-pointer bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00]"
+                                        className="fade-gradient px-4 sm:px-8 md:px-10 xl:px-14 py-2 sm:py-2.5 md:py-3 rounded-xl text-white font-bold text-sm sm:text-base md:text-lg border-2 cursor-pointer bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00] transition-all"
                                         onClick={handleCreate}
                                     >
                                         + Create Super League
@@ -236,7 +237,7 @@ const SuperLeague = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                 {superLeagues.map((sl) => {
                                     // Fill with real leagues first, then add empty slots to make 6
                                     const leaguesArray = sl.leagues || [];
@@ -248,44 +249,44 @@ const SuperLeague = () => {
                                             onClick={() => handleCardClick(sl)}
                                             className="group"
                                         >
-                                            <div className="relative rounded-2xl bg-white/10 hover:scale-105 transition-transform flex flex-col items-center p-6 cursor-pointer min-h-[380px]">
+                                            <div className="relative rounded-2xl bg-white/10 hover:scale-105 transition-transform flex flex-col items-center p-4 cursor-pointer min-h-[260px] sm:min-h-[300px] md:min-h-[340px] xl:min-h-[380px] w-full">
                                                 <button onClick={(e) => {
                                                     e.stopPropagation(); // prevent click bubbling to card
                                                     handleEditClick(sl);
-                                                }} className="absolute top-4 border border-gray-700 right-4 text-white/50 hover:text-white rounded-xl p-2 z-10">
-                                                    <FaEdit className="text-lg" />
+                                                }} className="absolute top-3 right-3 md:top-4 md:right-4 border border-gray-700 text-white/50 hover:text-white rounded-xl p-2 z-10 text-base md:text-lg">
+                                                    <FaEdit />
                                                 </button>
-                                                <div className="w-20 h-20 mb-3">
+                                                <div className="w-16 h-16 sm:w-20 sm:h-20 xl:w-24 xl:h-24 mb-3">
                                                     <img
                                                         src={sl.image || "/images/default_team_logo.png"}
                                                         alt={sl.name}
                                                         className="w-full h-full rounded-full object-cover"
                                                     />
                                                 </div>
-                                                <div className="text-xl font-semibold">{sl.name}</div>
-                                                <div className="text-gray-300 text-sm mt-1">
+                                                <div className="text-lg sm:text-xl xl:text-2xl font-semibold text-center">{sl.name}</div>
+                                                <div className="text-gray-300 text-xs sm:text-sm mt-1 text-center">
                                                     {sl.leagues?.length || 0} league{sl.leagues?.length === 1 ? "" : "s"}
                                                 </div>
                                                 {/* Leagues 6-slot grid */}
-                                                <div className="grid grid-cols-2 gap-2 mt-4 w-full">
+                                                <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-4 w-full">
                                                     {/* Filled slots */}
                                                     {leaguesArray.map(lg => (
-                                                        <div key={lg._id} className="p-2 rounded-md flex items-center space-x-2 bg-black/40 min-h-[48px]">
+                                                        <div key={lg._id} className="p-2 rounded-md flex items-center space-x-2 bg-black/40 min-h-[32px] sm:min-h-[44px]">
                                                             <img
                                                                 src={lg.league_image_path || "/images/default_team_logo.png"}
                                                                 alt={lg.league_name}
-                                                                className="w-7 h-7 rounded-full object-cover"
+                                                                className="w-6 h-6 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full object-cover"
                                                             />
-                                                            <span className="text-sm truncate">{lg.league_name}</span>
+                                                            <span className="text-xs sm:text-sm xl:text-base truncate">{lg.league_name}</span>
                                                         </div>
                                                     ))}
                                                     {/* Empty slots */}
                                                     {emptySlots.map((_, idx) => (
                                                         <div
                                                             key={`empty-${idx}`}
-                                                            className="p-2 rounded-md flex items-center justify-center border-2 border-dashed border-gray-500 min-h-[48px] opacity-40"
+                                                            className="p-2 rounded-md flex items-center justify-center border-2 border-dashed border-gray-500 min-h-[32px] sm:min-h-[44px] opacity-40"
                                                         >
-                                                            <span className="text-xl">+</span>
+                                                            <FaPlus />
                                                         </div>
                                                     ))}
                                                 </div>

@@ -50,8 +50,8 @@ const PlayerModal = ({ player, onClose }) => {
         if (player?.points?.length > 0) {
             const pastGames = player.points.filter(gw => parseInt(gw.gameweek.name, 10) <= currentGW);
             const futureGames = player.points.filter(gw => parseInt(gw.gameweek.name, 10) > currentGW);
-            setHistory(pastGames);
-            setFixtures(futureGames);
+            setHistory(pastGames.sort((a, b) => parseInt(b.gameweek.name, 10) - parseInt(a.gameweek.name, 10)));
+            setFixtures(futureGames.sort((a, b) => parseInt(a.gameweek.name, 10) - parseInt(b.gameweek.name, 10)));
         }
     };
 
@@ -82,33 +82,33 @@ const PlayerModal = ({ player, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
-            <div className="bg-[#1C1C1C] w-[80%] p-6 rounded-lg shadow-lg text-white relative">
+            <div className="bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-md w-[90%] sm:w-[80%] p-4 sm:p-6 rounded-lg shadow-lg text-white relative">
 
                 {/* Close Button */}
-                <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-200 text-2xl font-bold">
+                <button onClick={onClose} className="absolute top-1 sm:top-3 right-3 text-gray-400 hover:text-gray-200 text-2xl font-bold">
                     &times;
                 </button>
 
                 {/* Player Header */}
-                <div className="flex items-center space-x-4 border-b pb-4">
-                    <img src={player.image_path} alt={player.name} className="w-24 h-24 rounded-full" />
+                <div className="flex items-center space-x-2 sm:space-x-4 border-b pb-4">
+                    <img src={player.image_path} alt={player.name} className="w-14 h-14 sm:w-24 sm:h-24" />
                     <div>
-                        <h2 className="text-2xl font-bold">{player.common_name || player.name}
-                            <span className="ml-3 bg-yellow-500 text-black text-sm px-3 py-0 rounded-lg">{player.position_name}</span>
+                        <h2 className="text-lg sm:text-2xl font-bold">{player.common_name || player.name}
+                            <span className="ml-3 bg-yellow-500 text-black text-xs sm:text-sm px-3 py-0 rounded-lg">{player.position_name}</span>
                         </h2>
-                        <p className="text-gray-400">{player.team_name}</p>
+                        <p className="text-gray-400 text-sm sm:text-base">{player.team_name}</p>
                     </div>
                 </div>
 
                 {/* Stats Tabs */}
-                <div className="flex space-x-4 my-4 border-b pb-2">
-                    <button onClick={() => setActiveTab('history')} className={`text-white font-bold py-2 px-4 ${activeTab === 'history' ? 'bg-[#FF8A00] rounded-md' : 'hover:text-white text-gray-400'}`}>History</button>
-                    <button onClick={() => setActiveTab('fixtures')} className={`text-white font-bold py-2 px-4 ${activeTab === 'fixtures' ? 'bg-[#FF8A00] rounded-md' : 'hover:text-white text-gray-400'}`}>Fixtures</button>
+                <div className="flex space-x-4 my-4 border-b pb-2 text-xs sm:text-base">
+                    <button onClick={() => setActiveTab('history')} className={`text-white font-bold py-1 sm:py-2 px-4 ${activeTab === 'history' ? 'bg-[#FF8A00] rounded-md' : 'hover:text-white text-gray-400'}`}>History</button>
+                    <button onClick={() => setActiveTab('fixtures')} className={`text-white font-bold py-1 sm:py-2 px-4 ${activeTab === 'fixtures' ? 'bg-[#FF8A00] rounded-md' : 'hover:text-white text-gray-400'}`}>Fixtures</button>
                 </div>
 
                 {/* Stats Table */}
                 <div className="h-[42vh] overflow-auto scrollbar">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-[10px] sm:text-sm">
                         <thead>
                             <tr className="bg-gray-800 text-center">
                                 <th className="p-2">GW</th>
@@ -133,7 +133,7 @@ const PlayerModal = ({ player, onClose }) => {
                                 return (
                                     <tr key={index} className="text-center border-b border-gray-700">
                                         <td className="p-2">{game.gameweek.name || '-'}</td>
-                                        <td className="p-2 flex justify-center items-center space-x-2">
+                                        <td className="p-2 flex justify-center items-center space-x-2 min-w-28 ">
                                             {matchDetails ? (
                                                 <div className="flex items-center space-x-2">
                                                     <img src={matchDetails.opponentTeam.image_path} className="w-8 h-8 rounded-full" alt="opponent" />
@@ -142,11 +142,11 @@ const PlayerModal = ({ player, onClose }) => {
                                                 </div>
                                             ) : 'Unknown'}
                                         </td>
-                                        <td className="p-2 justify-center items-center space-x-2">
+                                        <td className="p-2 justify-center items-center space-x-2 min-w-24">
                                             {matchDetails && activeTab === 'history' ? (
                                                 <div className="flex justify-center items-center space-x-2 relative">
                                                     <span>{matchDetails.playerScore} - {matchDetails.opponentScore}</span>
-                                                    <span className={`absolute right-0 h-6 w-6 flex items-center justify-center text-white text-xs px-2 py-1 rounded-full ${matchDetails.resultColor}`}>{matchDetails.resultLabel}</span>
+                                                    <span className={`absolute right-0 h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center text-white text-xs px-2 py-1 rounded-full ${matchDetails.resultColor}`}>{matchDetails.resultLabel}</span>
                                                 </div>
                                             ) : '-'}
                                         </td>

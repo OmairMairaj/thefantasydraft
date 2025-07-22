@@ -236,7 +236,7 @@ input:-ms-autofill {
 .scrollbar {
   scrollbar-width: thin;
   /* For Firefox */
-  scrollbar-color: #393939 transparent;
+  scrollbar-color: #15364d transparent;
   /* For Firefox */
   /* transform: translateX(7px); */
 }
