@@ -86,19 +86,19 @@ const Nav = () => {
 
   return (
     <nav
-      className={`max-h-[120px] flex justify-between items-center border-b border-white py-10 m-auto mx-4 sm:mx-8 md:mx-10 lg:mx-16 xl:mx-20  relative`}
+      className={`max-h-[120px] flex justify-between items-center border-b border-white py-2 lg:py-0 m-auto mx-4 sm:mx-8 md:mx-10 lg:mx-16 xl:mx-20  relative`}
     >
       <div className="flex space-x-1 items-center">
-        <Link href="/">
+        <Link href={user ? "/dashboard" : "/"}>
           <Image
             src="/images/logo.svg"
             width={100}
             height={100}
-            className="object-cover cursor-pointer w-16 md:w-20 lg:w-24 xl:w-28"
+            className="object-cover cursor-pointer w-16 sm:w-18 md:w-20 lg:w-24 xl:w-28"
             alt="The Fantasy Draft Logo"
           />
         </Link>
-        <h1 className={`md:hidden text-xl sm:text-2xl lg:text-4xl xl:text-6xl font-bold leading-tight ml-0 text-white italic ${exo2.className}`}>
+        <h1 className={`lg:hidden text-xl md:text-2xl font-bold leading-tight ml-0 text-white italic ${exo2.className}`}>
           THE <span className="text-[#FF8A00]">FANTASY</span> <br disabled />DRAFT
         </h1>
       </div>
@@ -106,64 +106,64 @@ const Nav = () => {
       {/* Nav Links */}
       {(user === "nothing" || user === null) ? (
         <div
-          className={`md:flex ${menuOpen ? "block" : "hidden"} md:space-x-6`}
+          className={`lg:flex ${menuOpen ? "block" : "hidden"} lg:space-x-6`}
         >
           <Link
             href="/"
-            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base xl:text-lg cursor-pointer ${exo2.className}`}
           >
             HOME
           </Link>
           <Link
             href="/how-to-play"
-            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base xl:text-lg cursor-pointer ${exo2.className}`}
           >
             HOW TO PLAY
           </Link>
           <Link
             href="/contact"
-            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base xl:text-lg cursor-pointer ${exo2.className}`}
           >
             CONTACT US
           </Link>
         </div>
       ) : (
         <div
-          className={`md:flex ${menuOpen ? "block" : "hidden"} md:space-x-6`}
+          className={`lg:flex ${menuOpen ? "block" : "hidden"} lg:space-x-6`}
         >
           <Link
             href="/dashboard"
-            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base xl:text-lg cursor-pointer ${exo2.className}`}
           >
             DASHBOARD
           </Link>
-          <Link
+          {/* <Link
             href="/how-to-play"
             className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
           >
             RULES
-          </Link>
+          </Link> */}
           <Link
             href="/fixtures"
-            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base xl:text-lg cursor-pointer ${exo2.className}`}
           >
             FIXTURES
           </Link>
           <Link
             href="/table"
-            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base xl:text-lg cursor-pointer ${exo2.className}`}
           >
             TABLE
           </Link>
           <Link
             href="/players"
-            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base xl:text-lg cursor-pointer ${exo2.className}`}
           >
             PLAYERS
           </Link>
           <Link
             href="/super-league"
-            className={`text-white hover:text-[#FF8A00] text-xs md:text-base lg:text-lg cursor-pointer ${exo2.className}`}
+            className={`text-white hover:text-[#FF8A00] text-xs md:text-base xl:text-lg cursor-pointer ${exo2.className}`}
           >
             SUPER LEAGUE
           </Link>
@@ -177,7 +177,7 @@ const Nav = () => {
             {pathname !== "/signup" && (
               <Link
                 href="/signup"
-                className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}
+                className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base xl:text-lg border-2 cursor-pointer ${exo2.className}`}
               >
                 SIGN UP
               </Link>
@@ -185,7 +185,7 @@ const Nav = () => {
             {pathname !== "/login" && (
               <Link
                 href="/login"
-                className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg border-2 cursor-pointer ${exo2.className}`}
+                className={`fade-gradient relative px-6 md:px-8 lg:px-12 py-2 rounded-full text-white text-center font-bold text-sm md:text-base xl:text-lg border-2 cursor-pointer ${exo2.className}`}
               >
                 LOGIN
               </Link>
@@ -206,7 +206,7 @@ const Nav = () => {
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
               <svg
-                className="w-12 h-12"
+                className="w-10 h-10"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -231,7 +231,7 @@ const Nav = () => {
                     "0px 4px 20px rgba(0, 0, 0, 0.6), 0px 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
               >
-                <div className="md:hidden border-b border-gray-600 py-2">
+                <div className="lg:hidden border-b border-gray-600 py-2">
                   <a
                     href="/"
                     className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
@@ -274,9 +274,9 @@ const Nav = () => {
       ) : (
         <div className="flex items-center space-x-4">
           {/* Notification Icon */}
-          <div className="relative flex justify-center items-center w-11 sm:w-14 h-11 sm:h-14 rounded-full border-2 border-transparent fade-gradient p-1 cursor-pointer">
+          <div className="relative flex justify-center items-center w-11 lg:w-[3.2rem] h-11 lg:h-[3.2rem] rounded-full border-2 border-transparent fade-gradient p-1 cursor-pointer">
             <div className="flex justify-center items-center w-full h-full rounded-full">
-              <FaBell className="text-white text-lg" />
+              <FaBell className="text-white text-lg lg:text-xl" />
             </div>
           </div>
 
@@ -286,18 +286,13 @@ const Nav = () => {
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="fade-gradient flex items-center space-x-4 py-2 px-2 rounded-full"
             >
-              {/* Avatar */}
-              {/* <div className="flex items-center bg-[#0C1922] rounded-full p-1">
-                                <Image
-                                    src="/path-to-avatar.jpg" // Replace with the path to the user's avatar
-                                    alt="User Avatar"
-                                    width={30}
-                                    height={30}
-                                    className="rounded-full"
-                                />
-                            </div> */}
-
-              <FaUserCircle className="text-2xl sm:text-4xl" />
+              {user && user.first_name ?
+                <div className={`flex justify-center items-center w-7 h-7 lg:w-8 lg:h-8 rounded-full ${dropdownOpen ? 'bg-transparent md:bg-[#B5B5B5]' : 'bg-[#B5B5B5]'}`}>
+                  <h2 className={`text-gray-900 text-base lg:text-xl flex justify-center items-center font-bold pr-[2px] ${exo2.className}`}>{user.first_name.charAt(0).toUpperCase()}</h2>
+                </div>
+                :
+                <FaUserCircle className="text-2xl lg:text-3xl" />
+              }
 
               {/* Username and Chevron */}
               <span className="hidden md:flex text-white ml-2">
@@ -316,7 +311,7 @@ const Nav = () => {
                     "0px 4px 20px rgba(0, 0, 0, 0.6), 0px 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
               >
-                <div className="md:hidden border-b border-gray-600 py-2">
+                <div className="lg:hidden border-b border-gray-600 py-2">
                   <a
                     href="/"
                     className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
@@ -345,28 +340,46 @@ const Nav = () => {
                     Account
                   </a>
                   <a
+                    href="/how-to-play"
+                    className="hidden lg:block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    How To Play
+                  </a>
+                  <a
+                    href="/contact"
+                    className="hidden lg:block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Contact Us
+                  </a>
+                  <a
                     href="/dashboard"
-                    className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                   >
                     Dashboard
                   </a>
                   <a
                     href="/fixtures"
-                    className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                   >
                     Fixtures
                   </a>
                   <a
                     href="/table"
-                    className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                   >
                     Table
                   </a>
                   <a
                     href="/players"
-                    className="block md:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                   >
                     Players
+                  </a>
+                  <a
+                    href="/super-league"
+                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Super League
                   </a>
                   <div
                     onClick={() => {
