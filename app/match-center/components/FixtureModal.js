@@ -73,6 +73,7 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                 console.log("Team Data", teamResponse.data.data);
                 setTeam(teamResponse.data.data);
                 setPlayers(teamResponse.data.data.players);
+                setPitchViewList(segregatePlayers(teamResponse.data.data.players));
             } else {
                 console.error("Error fetching team details: ", teamResponse.data.message);
                 addAlert(teamResponse.data.message, "error");
@@ -107,6 +108,7 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                 setTeam2(teamResponse.data.data);
                 setPlayers2(teamResponse.data.data.players);
                 console.log("Players Data", teamResponse.data.data.players);
+                setPitchViewList2(segregatePlayers(teamResponse.data.data.players));
             } else {
                 console.error("Error fetching team details: ", teamResponse.data.message);
                 addAlert(teamResponse.data.message, "error");
@@ -170,246 +172,430 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
         }, 0);
     };
 
+    const segregatePlayers = (players) => {
+        const positionCategories = ["Goalkeeper", "Defender", "Midfielder", "Attacker"];
+        const maxLimit = 5;
+        const result = {
+            lineup: {
+                Goalkeeper: [],
+                Defender: [],
+                Midfielder: [],
+                Attacker: [],
+            },
+            bench: [],
+        };
+
+        players.forEach((player) => {
+            const position = player.player.position_name;
+            const isInTeam = player.in_team;
+
+            if (!positionCategories.includes(position)) return;
+
+            if (isInTeam) {
+                if (result.lineup[position].length < maxLimit) {
+                    result.lineup[position].push(player);
+                } else {
+                    result.bench.push(player);
+                }
+            } else {
+                result.bench.push(player);
+            }
+        });
+        return result;
+    };
+
+    const positionIcon = (position) => {
+        const positionStyles = {
+            Attacker: { bg: 'bg-[#D3E4FE]', text: 'A' },
+            Midfielder: { bg: 'bg-[#D5FDE1]', text: 'M' },
+            Defender: { bg: 'bg-[#F8E1FF]', text: 'D' },
+            Goalkeeper: { bg: 'bg-[#FEF9B6]', text: 'G' },
+        };
+
+        const { bg, text } = positionStyles[position] || { bg: 'bg-gray-500', text: '?' };
+
+        return (
+            <div
+                className={`${bg} w-4 h-4 md:w-5 md:h-5 text-black font-bold flex items-center justify-center text-xs md:text-sm my-4 rounded-full `}
+            >
+                {text}
+            </div>
+        );
+    };
+
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
-            <div className="bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-sm w-[90%] h-[90vh] p-6 rounded-lg shadow-lg text-white relative">
+            <div className="bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-sm w-[90%] h-[90vh] max-w-[1440px] py-10 sm:py-8 lg:p-6 rounded-lg shadow-lg text-white relative overflow-hidden">
 
 
                 {/* Close Button */}
-                <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-200 text-2xl font-bold">
+                <button onClick={onClose} className="absolute px-2 top-3 right-3 text-gray-400 hover:text-gray-200 text-2xl font-bold">
                     &times;
                 </button>
 
                 {team && team2 ? (
-                    <div className='flex justify-between items-center'>
+                    <div className='flex flex-col lg:flex-row justify-between items-center overflow-y-auto h-[84vh] scrollbar gap-4'>
                         <div
-                            className="w-[45%] relative  p-4 rounded-xl ml-4"
+                            className="w-full lg:w-[45%] relative px-4 sm:px-8 lg:p-4 rounded-xl"
                         >
-
-                            <div className="rounded-lg flex items-center justify-between w-full ">
+                            <div className="flex items-center justify-between w-full ">
                                 {/* Team Stats */}
-                                <div className="flex items-center relative space-x-4">
+                                <div className="flex items-center relative space-x-2 sm:space-x-4">
                                     <div className="text-white flex items-center justify-center font-bold text-center overflow-hidden">
-                                        {team?.team_image_path ? (
-                                            <img src={team.team_image_path || "/images/default_team_logo.png"} alt="Team Logo" className="w-16 h-16 object-cover rounded-md" />
-                                        ) : (
-                                            <img src={'/images/default_team_logo.png'} alt="Team Logo" className="w-16 h-16 object-cover rounded-md" />
-                                        )}
+                                        <img src={team?.team_image_path ? team.team_image_path : "/images/default_team_logo.png"} alt="Team Logo" className="w-10 h-10 sm:w-14 sm:h-14 xl:w-16 xl:h-16 object-cover rounded-md" />
                                     </div>
                                     <div className='flex flex-col space-y-4 '>
                                         {/* Team Name */}
-                                        <div className={`mt-1 text-xl font-semibold text-[#FF8A00] ${exo2.className}`}>
+                                        <div className={`mt-1 text-base sm:text-lg xl:text-xl font-semibold text-[#FF8A00] ${exo2.className}`}>
                                             {team?.team_name || 'Your Team'}
                                         </div>
 
                                     </div>
-
                                 </div>
-                                <div className='flex items-center justify-between gap-4 mr-0'>
+                                <div className='flex items-center justify-between gap-4 mr-0 text-[10px] sm:text-xs xl:text-sm'>
                                     <div className='flex flex-col items-center justify-center space-y-1'>
-                                        <p className='text-sm'>GameWeek Points</p>
-                                        <p className='text-sm font-semibold'>{(leaguePoints) ? leaguePoints.team.teamPoints : 0}</p>
+                                        <p className='flex gap-1'><span className='hidden xl:block'>GameWeek</span><span className='block xl:hidden'>GW</span> Points</p>
+                                        <p className='font-semibold'>{(leaguePoints) ? leaguePoints.team.teamPoints : 0}</p>
                                     </div>
-                                    <div className='flex flex-col items-center justify-center space-y-1'>
+                                    {/* <div className='flex flex-col items-center justify-center space-y-1'>
                                         <p className='text-sm'>Captain Points</p>
                                         <p className='text-sm font-semibold'>{leaguePoints ? getCaptainGameweekPoints(players) : 0}</p>
-                                    </div>
+                                    </div> */}
                                     <div className='flex flex-col items-center justify-center space-y-1'>
-                                        <p className='text-sm'>Total Points</p>
-                                        <p className='text-sm font-semibold'>{(leaguePoints) ? leaguePoints.team.teamPoints : 0}</p>
+                                        <p className=''>Total Points</p>
+                                        <p className='font-semibold'>{(leaguePoints) ? leaguePoints.team.teamPoints : 0}</p>
                                     </div>
-
                                 </div>
-
-
                             </div>
-
-                            <div className="rounded-xl mt-4  overflow-hidden">
-                                <div className="relative w-full overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]">
-                                    <div className="overflow-x-auto h-[72vh] overflow-y-auto scrollbar">
-                                        <table className="w-full text-left text-white">
-                                            <thead className="bg-[#2f2f2f] sticky top-0 z-10">
-                                                <tr className="text-center">
-                                                    <th className="p-2 text-left pl-4">Player</th>
-                                                    {/* <th className="p-2">Role</th> */}
-                                                    <th className="p-2">Team</th>
-                                                    <th className="p-2">Position</th>
-                                                    <th className="p-2">Points</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {players.map((player) => {
-                                                    const gameweekPoints = player.player.points.find(
-                                                        (p) => p.gameweek._id === gameweek
-                                                    );
-                                                    console.log("Player Points: ", gameweekPoints);
-                                                    return (
-
-                                                        <tr key={player.player.id} onClick={() => handlePlayerClick(player)} className="border-b border-[#333333] text-center items-center justify-center cursor-pointer hover:scale-[1.01]">
-                                                            <td className="px-2 text-left truncate">
-                                                                <div className="flex items-center space-x-2">
-                                                                    {player.player.image_path && (
-                                                                        <img
-                                                                            src={player.player.image_path}
-                                                                            alt={player.player.team_name || 'Team Logo'}
-                                                                            className="w-10 h-10 my-2 rounded-lg"
-                                                                        />
-                                                                    )}
-                                                                    <div className="overflow-hidden">
-                                                                        <p className="font-bold truncate">{player.player.common_name}
-                                                                            {/* <span className='p-2'>
-                                                                                {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
-                                                                                {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                            </span> */}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            {/* <td className="p-2 text-center truncate">
-                                                        {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">Captain</span>}
-                                                        {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">Vice Captain</span>}
-                                                    </td> */}
-                                                            <td className="p-2 text-center truncate">
-                                                                <img src={player.player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
-                                                            </td>
-                                                            <td className="p-2 text-center truncate">
-                                                                {player.player.position_name}
-                                                            </td>
-                                                            <td className="p-2 text-center truncate">
-                                                                {gameweekPoints?.points ? gameweekPoints.points : 0}
+                            <div className="relative w-full overflow-hidden rounded-lg mt-4 border border-[#1d374a] bg-[#0C1922]">
+                                <div className="overflow-x-auto lg:h-[68vh] lg:overflow-y-auto lg:scrollbar">
+                                    <table className="w-full text-left text-white text-xs sm:text-sm xl:text-base">
+                                        <thead className="bg-[#1d374a] sticky top-0 z-10">
+                                            <tr className="text-center">
+                                                <th className="p-2 text-left pl-4">Player</th>
+                                                <th className="p-2">Team</th>
+                                                <th className="p-2">Points</th>
+                                                {/* <th className="p-2">Actions</th> */}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {/* Main positions */}
+                                            {["Goalkeeper", "Defender", "Midfielder", "Attacker"].map((pos) => (
+                                                pitchViewList.lineup[pos].length > 0 && (
+                                                    <React.Fragment key={pos}>
+                                                        {/* Section Heading */}
+                                                        <tr>
+                                                            <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                                {pos}
                                                             </td>
                                                         </tr>
-                                                    )
-                                                })}
-                                                {players.length === 0 && (
+                                                        {pitchViewList.lineup[pos].map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                    {/* Player Name + Image */}
+                                                                    <td className="px-2 text-left truncate max-w-36">
+                                                                        <div className="flex items-center space-x-2">
+                                                                            {player.player.image_path && (
+                                                                                <img
+                                                                                    src={player.player.image_path}
+                                                                                    alt={player.player.team_name || 'Team Logo'}
+                                                                                    className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
+                                                                                />
+                                                                            )}
+                                                                            <div className="overflow-hidden">
+                                                                                <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                            </div>
+                                                                            <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
+                                                                        </div>
+                                                                    </td>
+                                                                    {/* Team Logo */}
+                                                                    <td className="p-2 text-center truncate">
+                                                                        <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
+                                                                    </td>
+                                                                    <td className="p-2 text-center truncate">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </td>
+                                                                    {/* Controls */}
+                                                                    {/* <td className="p-2 text-center truncate">
+                                                                            <div className="flex justify-center items-center gap-2">
+                                                                                <button
+                                                                                    className="bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white"
+                                                                                    onClick={() => handleViewClick(player)}
+                                                                                    type="button"
+                                                                                >
+                                                                                    View
+                                                                                </button>
+                                                                                <button
+                                                                                    className={`${selectedPlayer === player ? "bg-[#0b151c] opacity-50 cursor-default hover:bg-[#0b151c] hover:text-white" : "bg-[#1d374a]"} border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white`}
+                                                                                    onClick={() => { setSelectedPlayer(player); handleSwitchClick(player) }}
+                                                                                    type="button"
+                                                                                    disabled={selectedPlayer && selectedPlayer.player._id === player.player._id}
+                                                                                >
+                                                                                    {selectedPlayer ? "Switch with" : "Switch"}
+                                                                                </button>
+                                                                            </div>
+                                                                        </td> */}
+                                                                </tr>
+                                                            )
+                                                        })}
+                                                    </React.Fragment>
+                                                )
+                                            ))}
+
+                                            {/* Substitutes */}
+                                            {pitchViewList.bench.length > 0 && (
+                                                <React.Fragment>
                                                     <tr>
-                                                        <td colSpan="4" className="text-center py-4 text-gray-400">
-                                                            No players found in Team.
+                                                        <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                            Substitutes
                                                         </td>
                                                     </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                    {pitchViewList.bench.map((player) => {
+                                                        const gameweekPoints = player.player.points.find(
+                                                            (p) => p.gameweek._id === gameweek
+                                                        );
+                                                        return (
+                                                            <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                {/* Player Name + Image */}
+                                                                {/* Player Name + Image */}
+                                                                <td className="px-2 text-left truncate max-w-36">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        {player.player.image_path && (
+                                                                            <img
+                                                                                src={player.player.image_path}
+                                                                                alt={player.player.common_name || 'Player Logo'}
+                                                                                className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
+                                                                            />
+                                                                        )}
+                                                                        <div className="overflow-hidden">
+                                                                            <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                        </div>
+                                                                        <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
+                                                                    </div>
+                                                                </td>
+                                                                {/* Team Logo */}
+                                                                <td className="p-2 text-center">
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
+                                                                </td>
+                                                                <td className="p-2 text-center truncate">
+                                                                    {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                </td>
+                                                                {/* Controls */}
+                                                                {/* <td className="p-2 text-center truncate">
+                                                                        <div className="flex justify-center items-center gap-2">
+                                                                            <button
+                                                                                className="bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white"
+                                                                                onClick={() => handleViewClick(player)}
+                                                                                type="button"
+                                                                            >
+                                                                                View
+                                                                            </button>
+                                                                            <button
+                                                                                className={`bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white`}
+                                                                                onClick={() => { setSelectedPlayer(player); handleSwitchClick(player) }}
+                                                                                type="button"
+                                                                                disabled={selectedPlayer && selectedPlayer.player._id === player.player._id}
+                                                                            >
+                                                                                {selectedPlayer ? "Switch with" : "Switch"}
+                                                                            </button>
+                                                                        </div>
+                                                                    </td> */}
+                                                            </tr>
+                                                        )
+                                                    })}
+                                                </React.Fragment>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
 
-                        <div className={`flex justify-center items-center relative ${exo2.className}`} style={{ height: '3rem', width: '2rem', fontSize: '2rem' }}>
-                            <span className="absolute text-[#FF8A00] font-bold" style={{ top: '-0.4rem', left: '0rem' }}>V</span>
-                            <span className="absolute text-[#FF8A00] font-bold" style={{ top: '0.4rem', left: '1rem' }}>S</span>
+                        <div className={`hidden lg:flex justify-center items-center w-[5%] h-12 xl:w-[5%] xl:h-12 text-2xl xl:text-3xl relative ${exo2.className}`}>
+                            <span className="absolute text-[#FF8A00] font-bold top-[-0%] xl:top-[-10%] left-[25%]">V</span>
+                            <span className="absolute text-[#FF8A00] font-bold top-[30%] xl:top-[20%] left-[45%] xl:left-[50%]">S</span>
                         </div>
 
                         <div
-                            className="w-[45%] relative  p-4 rounded-xl ml-4"
+                            className="w-full lg:w-[45%] relative px-4 sm:px-8 lg:p-4 rounded-xl pb-4"
                         >
-
-                            <div className="rounded-lg flex items-center justify-between w-full ">
+                            <div className="flex items-center justify-between w-full ">
                                 {/* Team Stats */}
-                                <div className="flex items-center w-1/3 relative space-x-4">
+                                <div className="flex items-center relative space-x-2 sm:space-x-4">
                                     <div className="text-white flex items-center justify-center font-bold text-center overflow-hidden">
-                                        {team2?.team_image_path ? (
-                                            <img src={team2.team_image_path || "/images/default_team_logo.png"} alt="Team Logo" className="w-16 h-16 object-cover rounded-md" />
-                                        ) : (
-                                            <img src={'/images/default_team_logo.png'} alt="Team Logo" className="w-16 h-16 object-cover rounded-md" />
-                                        )}
+                                        <img src={team2?.team_image_path ? team2.team_image_path : "/images/default_team_logo.png"} alt="Team Logo" className="w-10 h-10 sm:w-14 sm:h-14 xl:w-16 xl:h-16 object-cover rounded-md" />
                                     </div>
                                     <div className='flex flex-col space-y-4 '>
                                         {/* Team Name */}
-                                        <div className={`mt-1 text-xl font-semibold text-[#FF8A00] ${exo2.className}`}>
+                                        <div className={`mt-1 text-base sm:text-lg xl:text-xl font-semibold text-[#FF8A00] ${exo2.className}`}>
                                             {team2?.team_name || 'Your Team'}
                                         </div>
 
                                     </div>
-
                                 </div>
-                                <div className='flex items-center justify-between gap-4'>
+                                <div className='flex items-center justify-between gap-4 mr-0 text-[10px] sm:text-xs xl:text-sm'>
                                     <div className='flex flex-col items-center justify-center space-y-1'>
-                                        <p className='text-sm'>GameWeek Points</p>
-                                        <p className='text-sm font-semibold'>{(leaguePoints2) ? leaguePoints2.team.teamPoints : 0}</p>
+                                        <p className='flex gap-1'><span className='hidden xl:block'>GameWeek</span><span className='block xl:hidden'>GW</span> Points</p>
+                                        <p className='font-semibold'>{(leaguePoints2) ? leaguePoints2.team.teamPoints : 0}</p>
                                     </div>
-                                    <div className='flex flex-col items-center justify-center space-y-1'>
+                                    {/* <div className='flex flex-col items-center justify-center space-y-1'>
                                         <p className='text-sm'>Captain Points</p>
-                                        <p className='text-sm font-semibold'>{leaguePoints2 ? getCaptainGameweekPoints(players2, leaguePoints2) : 0}</p>
-                                    </div>
+                                        <p className='text-sm font-semibold'>{leaguePoints ? getCaptainGameweekPoints(players) : 0}</p>
+                                    </div> */}
                                     <div className='flex flex-col items-center justify-center space-y-1'>
-                                        <p className='text-sm'>Total Points</p>
-                                        <p className='text-sm font-semibold'>{(leaguePoints2) ? leaguePoints2.team.teamPoints : 0}</p>
+                                        <p className=''>Total Points</p>
+                                        <p className='font-semibold'>{(leaguePoints2) ? leaguePoints2.team.teamPoints : 0}</p>
                                     </div>
-
                                 </div>
-
-
                             </div>
 
-                            <div className="rounded-xl mt-4  overflow-hidden">
-                                <div className="relative w-full overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]">
-                                    <div className="overflow-x-auto h-[72vh] overflow-y-auto scrollbar">
-                                        <table className="w-full text-left text-white">
-                                            <thead className="bg-[#2f2f2f] sticky top-0 z-10">
-                                                <tr className="text-center">
-                                                    <th className="p-2 text-left pl-4">Player</th>
-                                                    {/* <th className="p-2">Role</th> */}
-                                                    <th className="p-2">Team</th>
-                                                    <th className="p-2">Position</th>
-                                                    <th className="p-2">Points</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {players2.map((player) => {
-                                                    const gameweekPoints = player.player.points.find(
-                                                        (p) => p.gameweek._id === gameweek
-                                                    );
-                                                    console.log("Player Points: ", gameweekPoints);
-                                                    return (
-
-                                                        <tr key={player.player.id} onClick={() => handlePlayerClick(player)} className="border-b border-[#333333] text-center items-center justify-center cursor-pointer hover:scale-[1.01]">
-                                                            <td className="px-2 text-left truncate">
-                                                                <div className="flex items-center space-x-2">
-                                                                    {player.player.image_path && (
-                                                                        <img
-                                                                            src={player.player.image_path}
-                                                                            alt={player.player.team_name || 'Team Logo'}
-                                                                            className="w-10 h-10 my-2 rounded-lg"
-                                                                        />
-                                                                    )}
-                                                                    <div className="overflow-hidden">
-                                                                        <p className="font-bold truncate">{player.player.common_name}
-                                                                            {/* <span className='p-2'>
-                                                                                {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
-                                                                                {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                            </span> */}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            {/* <td className="p-2 text-center truncate">
-                                                        {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">Captain</span>}
-                                                        {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">Vice Captain</span>}
-                                                    </td> */}
-                                                            <td className="p-2 text-center truncate">
-                                                                <img src={player.player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
-                                                            </td>
-                                                            <td className="p-2 text-center truncate">
-                                                                {player.player.position_name}
-                                                            </td>
-                                                            <td className="p-2 text-center truncate">
-                                                                {gameweekPoints?.points ? gameweekPoints.points : 0}
+                            <div className="relative w-full overflow-hidden rounded-lg mt-4 border border-[#1d374a] bg-[#0C1922]">
+                                <div className="overflow-x-auto lg:h-[68vh] lg:overflow-y-auto lg:scrollbar">
+                                    <table className="w-full text-left text-white text-xs sm:text-sm xl:text-base">
+                                        <thead className="bg-[#1d374a] sticky top-0 z-10">
+                                            <tr className="text-center">
+                                                <th className="p-2 text-left pl-4">Player</th>
+                                                <th className="p-2">Team</th>
+                                                <th className="p-2">Points</th>
+                                                {/* <th className="p-2">Actions</th> */}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {/* Main positions */}
+                                            {["Goalkeeper", "Defender", "Midfielder", "Attacker"].map((pos) => (
+                                                pitchViewList2.lineup[pos].length > 0 && (
+                                                    <React.Fragment key={pos}>
+                                                        {/* Section Heading */}
+                                                        <tr>
+                                                            <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                                {pos}
                                                             </td>
                                                         </tr>
-                                                    )
-                                                })}
-                                                {players.length === 0 && (
+                                                        {pitchViewList2.lineup[pos].map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                    {/* Player Name + Image */}
+                                                                    <td className="px-2 text-left truncate max-w-28 sm:max-w-none">
+                                                                        <div className="flex items-center space-x-2">
+                                                                            {player.player.image_path && (
+                                                                                <img
+                                                                                    src={player.player.image_path}
+                                                                                    alt={player.player.team_name || 'Team Logo'}
+                                                                                    className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
+                                                                                />
+                                                                            )}
+                                                                            <div className="overflow-hidden">
+                                                                                <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                            </div>
+                                                                            <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
+                                                                        </div>
+                                                                    </td>
+                                                                    {/* Team Logo */}
+                                                                    <td className="p-2 text-center truncate">
+                                                                        <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
+                                                                    </td>
+                                                                    <td className="p-2 text-center truncate">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </td>
+                                                                    {/* Controls */}
+                                                                    {/* <td className="p-2 text-center truncate">
+                                                                            <div className="flex justify-center items-center gap-2">
+                                                                                <button
+                                                                                    className="bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white"
+                                                                                    onClick={() => handleViewClick(player)}
+                                                                                    type="button"
+                                                                                >
+                                                                                    View
+                                                                                </button>
+                                                                                <button
+                                                                                    className={`${selectedPlayer === player ? "bg-[#0b151c] opacity-50 cursor-default hover:bg-[#0b151c] hover:text-white" : "bg-[#1d374a]"} border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white`}
+                                                                                    onClick={() => { setSelectedPlayer(player); handleSwitchClick(player) }}
+                                                                                    type="button"
+                                                                                    disabled={selectedPlayer && selectedPlayer.player._id === player.player._id}
+                                                                                >
+                                                                                    {selectedPlayer ? "Switch with" : "Switch"}
+                                                                                </button>
+                                                                            </div>
+                                                                        </td> */}
+                                                                </tr>
+                                                            )
+                                                        })}
+                                                    </React.Fragment>
+                                                )
+                                            ))}
+
+                                            {/* Substitutes */}
+                                            {pitchViewList2.bench.length > 0 && (
+                                                <React.Fragment>
                                                     <tr>
-                                                        <td colSpan="4" className="text-center py-4 text-gray-400">
-                                                            No players found in Team.
+                                                        <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                            Substitutes
                                                         </td>
                                                     </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                    {pitchViewList2.bench.map((player) => {
+                                                        const gameweekPoints = player.player.points.find(
+                                                            (p) => p.gameweek._id === gameweek
+                                                        );
+                                                        return (
+                                                            <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                {/* Player Name + Image */}
+                                                                {/* Player Name + Image */}
+                                                                <td className="px-2 text-left truncate max-w-28 sm:max-w-none">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        {player.player.image_path && (
+                                                                            <img
+                                                                                src={player.player.image_path}
+                                                                                alt={player.player.common_name || 'Player Logo'}
+                                                                                className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
+                                                                            />
+                                                                        )}
+                                                                        <div className="overflow-hidden">
+                                                                            <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                        </div>
+                                                                        <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
+                                                                    </div>
+                                                                </td>
+                                                                {/* Team Logo */}
+                                                                <td className="p-2 text-center">
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
+                                                                </td>
+                                                                <td className="p-2 text-center truncate">
+                                                                    {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                </td>
+                                                                {/* Controls */}
+                                                                {/* <td className="p-2 text-center truncate">
+                                                                        <div className="flex justify-center items-center gap-2">
+                                                                            <button
+                                                                                className="bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white"
+                                                                                onClick={() => handleViewClick(player)}
+                                                                                type="button"
+                                                                            >
+                                                                                View
+                                                                            </button>
+                                                                            <button
+                                                                                className={`bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white`}
+                                                                                onClick={() => { setSelectedPlayer(player); handleSwitchClick(player) }}
+                                                                                type="button"
+                                                                                disabled={selectedPlayer && selectedPlayer.player._id === player.player._id}
+                                                                            >
+                                                                                {selectedPlayer ? "Switch with" : "Switch"}
+                                                                            </button>
+                                                                        </div>
+                                                                    </td> */}
+                                                            </tr>
+                                                        )
+                                                    })}
+                                                </React.Fragment>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>

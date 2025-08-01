@@ -88,7 +88,7 @@ const PlayerModal = ({ player, onClose }) => {
             <div className="bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-md w-[90%] xl:w-[80%] max-w-[1280px] p-4 xl:p-6 rounded-lg shadow-lg text-white relative">
 
                 {/* Close Button */}
-                <button onClick={onClose} className="absolute top-1 sm:top-3 right-3 text-gray-400 hover:text-gray-200 text-2xl font-bold">
+                <button onClick={onClose} className="absolute top-1 sm:top-3 right-3 px-2 text-gray-400 hover:text-gray-200 text-2xl font-bold">
                     &times;
                 </button>
 

@@ -8,6 +8,7 @@ import Slider from "react-slick"; // For carousel functionality
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaImage, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useAlert } from "@/components/AlertContext/AlertContext";
 
 const exo2 = Exo_2({
   weight: ["700", "800"],
@@ -52,6 +53,7 @@ const CreateTeam = ({ onNext, onBack }) => {
   const [selectedGround, setSelectedGround] = useState(
     savedData.selectedGround || "/images/stadium1.png"
   );
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     if (leagueID) {
@@ -103,6 +105,10 @@ const CreateTeam = ({ onNext, onBack }) => {
 
   const handleSubmit = () => {
     // Store data to session storage
+    if (!teamName || !groundName || !selectedGround) {
+      addAlert("Please fill in all fields before proceeding.", "error");
+      return;
+    }
     sessionStorage.setItem(
       "joinLeagueTeamData",
       JSON.stringify({ teamName, teamLogo, groundName, selectedGround })

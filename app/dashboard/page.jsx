@@ -300,26 +300,26 @@ const Dashboard = () => {
           <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
         </div>
       ) : showEmptyView ? (
-        <div className={`w-full relative custom-dash-spacing px-4 rounded-3xl shadow-lg flex flex-col items-center ${selectedLeague && !showEmptyView ? 'space-y-4 sm:space-y-8 py-10 sm:py-16' : 'space-y-12 py-36 lg:py-16 xl:py-24 2xl:py-36'}`}>
+        <div className={`w-full relative custom-dash-spacing px-4 rounded-3xl shadow-lg flex flex-col items-center ${selectedLeague && !showEmptyView ? 'space-y-4 sm:space-y-8 py-10 sm:py-16' : 'space-y-8 py-24 lg:py-16 xl:py-24 2xl:py-36'}`}>
           <div className="flex items-center space-x-2 sm:space-x-4 ">
             <FaExclamationCircle className="text-3xl md:text-4xl lg:text-3xl xl:text-4xl text-[#FF8A00]" />
-            <h2 className={`text-xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-4xl font-bold ${exo2.className}`}>CREATE OR JOIN A LEAGUE</h2>
+            <h2 className={`text-xl sm:text-2xl md:text-2xl lg:text-3xl xl:text-4xl font-bold ${exo2.className}`}>CREATE OR JOIN A LEAGUE</h2>
           </div>
-          <p className="text-center text-sm sm:text-lg md:text-lg lg:text-base max-w-3xl">
+          <p className="text-center text-sm lg:text-base max-w-sm sm:max-w-2xl px-0 sm:px-12">
             {`${selectedLeague && !showEmptyView ? 'You can create a new league or join another existing one!'
               : 'Welcome to the ultimate fantasy sports platform. You can create a new league or join an existing one. Take your fantasy experience to the next level!'}`}
           </p>
-          <div className="flex flex-row space-x-4 justify-center md:space-x-8 w-full md:w-auto">
-            <Link href="/create-league-process" className={`fade-gradient px-3 sm:px-6 md:px-8 lg:px-12 py-2 sm:py-3 rounded-full text-white font-bold text-sm md:text-base lg:text-base border-2 cursor-pointer ${exo2.className} bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00]`}>
+          <div className="flex flex-row space-x-4 justify-center lg:space-x-8 w-full lg:w-auto">
+            <Link href="/create-league-process" className={`fade-gradient px-3 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-full text-white font-bold text-sm lg:text-base border-2 cursor-pointer ${exo2.className} bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00]`}>
               CREATE A LEAGUE
             </Link>
-            <Link href="/join-league-process" className={`fade-gradient px-3 sm:px-6 md:px-8 lg:px-12 py-2 sm:py-3 rounded-full text-white font-bold text-sm md:text-base lg:text-base border-2 cursor-pointer ${exo2.className} bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00]`}>
+            <Link href="/join-league-process" className={`fade-gradient px-3 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-full text-white font-bold text-sm lg:text-base border-2 cursor-pointer ${exo2.className} bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00]`}>
               JOIN A LEAGUE
             </Link>
           </div>
 
 
-          <div className="absolute right-0 bottom-0">
+          {/* <div className="absolute right-0 bottom-0">
             {!showEmptyView && (
               <button className="p-2 sm:p-4 text-sm sm:text-base text-[#efefef]" onClick={() => setShowEmptyView(true)}>
                 Show Empty View
@@ -340,7 +340,7 @@ const Dashboard = () => {
                 Hide Unpaid
               </button>
             )}
-          </div>
+          </div> */}
         </div>
       ) : (
         <>
@@ -352,7 +352,7 @@ const Dashboard = () => {
                     <div className="w-full flex flex-col lg:flex-row lg:items-end lg:justify-between fade-gradient-no-hover cursor-default px-4 md:px-6 py-4 rounded-xl shadow-md mb-6">
                       <div className="flex flex-row items-center space-x-4 md:space-x-4 space-y-2 md:space-y-0 mb-3 sm:mb-0">
                         <img
-                          src={selectedLeague.league_image_path}
+                          src={selectedLeague.league_image_path ? selectedLeague.league_image_path : "/images/default_team_logo.png"}
                           alt="League Logo"
                           className="w-16 h-16 object-cover rounded-lg sm:w-20 sm:h-20 md:w-24 md:h-24"
                         />
@@ -402,7 +402,7 @@ const Dashboard = () => {
                               onClick={() => setDropdownOpen(!dropdownOpen)}
                               className="w-full bg-[#070E13] border border-[#484848] rounded-lg px-2 sm:px-4 lg:px-3 py-1 sm:py-2 lg:py-2 text-left text-sm lg:text-sm xl:text-base flex justify-between items-center"
                             >
-                              <span>
+                              <span className="truncate">
                                 {selectedLeague ? selectedLeague.league_name : "Select League"}
                               </span>
                               <FaChevronDown />
@@ -464,11 +464,11 @@ const Dashboard = () => {
                                 <img
                                   src={team && team.team_image_path ? team.team_image_path : "/images/default_team_logo.png"}
                                   alt="Team Logo"
-                                  className="w-20 h-20 sm:w-20 sm:h-20 md:w-20 md:h-20 lg:w-20 lg:h-20 xl:w-20 xl:h-20 object-cover rounded-md mr-4 lg:mr-2 xl:mr-3"
+                                  className="w-20 h-20 sm:w-20 sm:h-20 md:w-20 md:h-20 lg:w-20 lg:h-20 xl:w-20 xl:h-20 object-cover rounded-md mr-2 lg:mr-2 xl:mr-3"
                                 />
                                 <div>
                                   <div className="flex flex-col gap-1 justify-center">
-                                    <h3 className={`text-3xl md:text-3xl lg:text-3xl xl:text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>{team ? team.team_name : 'Team Name'}</h3>
+                                    <h3 className={`text-2xl md:text-3xl lg:text-3xl xl:text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>{team ? team.team_name : 'Team Name'}</h3>
                                     {selectedLeague.league_configuration.format === "Classic" &&
                                       <p className="text-sm md:text-base lg:text-sm xl:text-base text-gray-300">Manage your squad and climb the leaderboard!</p>
                                     }
@@ -669,7 +669,7 @@ const Dashboard = () => {
                 </div>
 
 
-                <div className="absolute right-0 bottom-0">
+                {/* <div className="absolute right-0 bottom-0">
                   {!showEmptyView && (
                     <button className="p-2 sm:p-4 text-sm sm:text-base text-[#efefef]" onClick={() => setShowEmptyView(true)}>
                       Show Empty View
@@ -690,7 +690,7 @@ const Dashboard = () => {
                       Hide Unpaid
                     </button>
                   )}
-                </div>
+                </div> */}
               </div>
             </>
           )}

@@ -68,6 +68,8 @@ const Drafting = () => {
                     setLeagueID(leagueIDFromURL);
                 } else {
                     console.error("League ID not found in URL");
+                    router.push("/dashboard");
+                    addAlert("League ID not found in URL", "error");
                 }
             }
         }
@@ -94,6 +96,7 @@ const Drafting = () => {
                 const isUserPartOfLeague = draft.teams.some(
                     (team) => team.user_email === user.email
                 );
+                console.log(`Is user part of league: ${isUserPartOfLeague}`);
                 if (!isUserPartOfLeague) {
                     // Redirect the user to the dashboard if they are not part of the league
                     addAlert("You are not a part of this league.", "error");
@@ -104,8 +107,10 @@ const Drafting = () => {
                 // Check if the current user is the creator of the league
                 if (draft.creator === user.email) {
                     setIsCreator(true);
+                    console.log("User is the creator of the league");
                 } else {
                     setIsCreator(false);
+                    console.log("User is not the creator of the league");
                 }
 
                 if (draft?.state === 'Scheduled') {
@@ -289,22 +294,19 @@ const Drafting = () => {
         setSearch(value);
     }
 
-    const filteredPlayers = players
-        .filter((player) =>
-            // Filter players by name or common_name
-            player.name.toLowerCase().includes(search.toLowerCase()) ||
-            player.common_name?.toLowerCase().includes(search.toLowerCase()) ||
-            player.team_name?.toLowerCase().includes(search.toLowerCase())
-        )
-        .filter((player) =>
-            // Filter by position if filter is set
-            !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
-        )
-        .sort((a, b) => {
-            if (sort === 'name') return a.name.localeCompare(b.name);
-            if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
-            return 0;
-        });
+    const filteredPlayers = players.filter((player) =>
+        // Filter players by name or common_name
+        player.name.toLowerCase().includes(search.toLowerCase()) ||
+        player.common_name?.toLowerCase().includes(search.toLowerCase()) ||
+        player.team_name?.toLowerCase().includes(search.toLowerCase())
+    ).filter((player) =>
+        // Filter by position if filter is set
+        !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
+    ).sort((a, b) => {
+        if (sort === 'name') return a.name.localeCompare(b.name);
+        if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
+        return 0;
+    });
 
 
     // const simulatedOrder = Array.from({ length: 20 }, (_, i) => `user${i + 1}@example.com`);

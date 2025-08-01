@@ -64,6 +64,10 @@ const TeamPage = () => {
                 const storedLeagueID = sessionStorage.getItem("selectedLeagueID");
                 if (storedLeagueID) {
                     setLeagueId(storedLeagueID); // Temporarily set league with just ID
+                } else {
+                    // If no league ID is found, redirect to dashboard
+                    router.push("/dashboard");
+                    addAlert("No league selected. Please select a league from the dashboard.", "error");
                 }
             }
         }
@@ -476,11 +480,7 @@ const TeamPage = () => {
                             {/* Team Stats */}
                             <div className="flex items-center w-full space-x-4 px-2 sm:px-0 pb-10 sm:pb-8 md:pb-4">
                                 <div className="cols-span-2 text-white rounded-md flex items-center justify-center font-bold text-center overflow-hidden">
-                                    {team?.team_image_path ? (
-                                        <img src={team.team_image_path} alt="Team Logo" className="w-16 h-16 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-24 xl:h-24 object-cover " />
-                                    ) : (
-                                        <img src={'/images/placeholder.png'} alt="Team Logo" className="p-7 w-16 h-16 md:w-20 md:h-20 xl:w-24 xl:h-24 object-cover border border-gray-600 rounded-md" />
-                                    )}
+                                    <img src={team.team_image_path ? team.team_image_path : "/images/default_team_logo.png"} alt="Team Logo" className="w-16 h-16 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-24 xl:h-24 object-cover " />
                                 </div>
                                 {/* Team Name */}
                                 <div className={`mt-1 text-2xl md:text-3xl font-semibold text-[#FF8A00] ${exo2.className}`}>
@@ -488,23 +488,25 @@ const TeamPage = () => {
                                 </div>
                             </div>
 
-                            <div className="absolute right-0 bottom-0 w-max px-2 sm:px-0" >
-                                {/* <h3 className={`text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>Team</h3> */}
-                                <div className="flex items-center rounded-lg overflow-hidden text-xs sm:text-sm xl:text-base">
-                                    <button
-                                        className={`${view === 'List' ? 'bg-[#ff8800b7]' : 'bg-[#1d374a]'} text-white px-5 py-1`}
-                                        onClick={() => setView('List')}
-                                    >
-                                        List View
-                                    </button>
-                                    <button
-                                        className={`${view === 'Pitch' ? 'bg-[#ff8800b7]' : 'bg-[#1d374a]'} text-white px-5 py-1`}
-                                        onClick={() => setView('Pitch')}
-                                    >
-                                        Pitch View
-                                    </button>
+                            {selectedLeague?.draftID?.state === "Ended" &&
+                                <div className="absolute right-0 bottom-0 w-max px-2 sm:px-0" >
+                                    {/* <h3 className={`text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>Team</h3> */}
+                                    <div className="flex items-center rounded-lg overflow-hidden text-xs sm:text-sm xl:text-base">
+                                        <button
+                                            className={`${view === 'List' ? 'bg-[#ff8800b7]' : 'bg-[#1d374a]'} text-white px-5 py-1`}
+                                            onClick={() => setView('List')}
+                                        >
+                                            List View
+                                        </button>
+                                        <button
+                                            className={`${view === 'Pitch' ? 'bg-[#ff8800b7]' : 'bg-[#1d374a]'} text-white px-5 py-1`}
+                                            onClick={() => setView('Pitch')}
+                                        >
+                                            Pitch View
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            }
                         </div>
 
                         <div className="bg-[#0C1922] rounded-xl mt-3 md:mt-6">
@@ -659,7 +661,7 @@ const TeamPage = () => {
                                         </div>
                                     </div>
                                     {selectedLeague?.draftID?.state !== "Ended" && (
-                                        <div className='ribbon-2 text-3xl text-[#ff7A00] text-center'>
+                                        <div className='ribbon-2 text-base xl:text-xl text-[#ff7A00] text-center'>
                                             Drafting not completed yet.
                                         </div>
                                     )}
@@ -673,7 +675,7 @@ const TeamPage = () => {
                                                 <tr className="text-center">
                                                     <th className="p-2 text-left pl-4">Player</th>
                                                     <th className="p-2">Team</th>
-                                                    <th className="p-2">Position</th>
+                                                    <th className="p-2">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>

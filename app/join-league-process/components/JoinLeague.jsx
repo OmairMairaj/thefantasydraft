@@ -125,14 +125,12 @@ const JoinLeague = ({ onNext }) => {
             <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:justify-between">
               <div className="flex items-center space-x-4">
                 <div className="relative w-24 h-24 md:w-32 md:h-32 overflow-hidden rounded-lg">
-                  {leagueDetails.league_image_path ? (
-                    <Image
-                      src={leagueDetails.league_image_path}
-                      alt="League Logo"
-                      fill
-                      className="object-cover object-center"
-                    />
-                  ) : null}
+                  <Image
+                    src={leagueDetails.league_image_path ? leagueDetails.league_image_path : "/images/default_team_logo.png"}
+                    alt="League Logo"
+                    fill
+                    className="object-cover object-center"
+                  />
                 </div>
                 <div className="flex flex-col">
                   <h2

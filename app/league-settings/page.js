@@ -404,17 +404,13 @@ const LeagueSettings = () => {
                         }
                     </div>
                     <div className='flex flex-col md:flex-row gap-4 xl:gap-12 w-full md:items-center justify-between p-0 xl:p-6 mt-4 '>
-                        <div className={`w-28 h-28 xl:w-40 xl:h-40 xl:w-40 xl:h-40 relative rounded-lg ${isEditing && 'border border-[#333333]'}`}>
-                            {leagueData.league_image_path ? (
-                                <Image
-                                    src={leagueData.league_image_path}
-                                    alt='League Logo'
-                                    layout='fill'
-                                    className='rounded-md object-cover '
-                                />
-                            ) : (
-                                <div className='w-full h-full flex items-center justify-center bg-gray-700 text-gray-400 rounded-full'>No Image</div>
-                            )}
+                        <div className={`w-28 h-28 xl:w-40 xl:h-40 relative rounded-lg ${isEditing && 'border border-[#333333]'}`}>
+                            <Image
+                                src={leagueData.league_image_path ? leagueData.league_image_path : "/images/default_team_logo.png"}
+                                alt='League Logo'
+                                layout='fill'
+                                className='rounded-md object-cover '
+                            />
                             {/* Edit Icon - Shown Only in Editing Mode */}
                             {isEditing && (
                                 <>
@@ -512,7 +508,7 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={leagueData.points_configuration?.[gameweek]?.[key] || ''}
+                                        value={leagueData.points_configuration?.[gameweek]?.[key] || 0}
                                         onChange={(e) => {
                                             const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
                                             updatedPointsConfig[gameweek] = { // Modify the first object in the array
@@ -544,7 +540,7 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={leagueData.points_configuration?.[gameweek]?.[key] || ''}
+                                        value={leagueData.points_configuration?.[gameweek]?.[key] || 0}
                                         onChange={(e) => {
                                             const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
                                             updatedPointsConfig[gameweek] = { // Modify the first object in the array
@@ -576,7 +572,7 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={leagueData.points_configuration?.[gameweek]?.[key] || ''}
+                                        value={leagueData.points_configuration?.[gameweek]?.[key] || 0}
                                         onChange={(e) => {
                                             const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
                                             updatedPointsConfig[gameweek] = { // Modify the first object in the array
@@ -608,7 +604,7 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={leagueData.points_configuration?.[gameweek]?.[key] || ''}
+                                        value={leagueData.points_configuration?.[gameweek]?.[key] || 0}
                                         onChange={(e) => {
                                             const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
                                             updatedPointsConfig[gameweek] = { // Modify the first object in the array
