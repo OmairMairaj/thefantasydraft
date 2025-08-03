@@ -408,7 +408,7 @@ const LeagueSettings = () => {
                             <Image
                                 src={leagueData.league_image_path ? leagueData.league_image_path : "/images/default_team_logo.png"}
                                 alt='League Logo'
-                                layout='fill'
+                                // layout='fill'
                                 className='rounded-md object-cover '
                             />
                             {/* Edit Icon - Shown Only in Editing Mode */}

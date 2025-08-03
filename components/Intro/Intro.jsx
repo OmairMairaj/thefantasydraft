@@ -30,7 +30,7 @@ export default function Intro() {
                         Welcome to Fantasy Football Drafting
                     </h2>
                     <p className="text-base sm:text-lg md:text-xl mb-4">
-                        Our platform allows you to experience fantasy football in a whole new way. Draft unique squads and compete head-to-head with friends or players around the world. Build your team, make strategic decisions, and enjoy the most exhilarating fantasy football experience. With innovative features and real-time performance tracking, you'll always stay in control.
+                        Our platform allows you to experience fantasy football in a whole new way. Draft unique squads and compete head-to-head with friends in real time. Build your team, make strategic decisions, and enjoy the most exhilarating fantasy football experience. With innovative features and real-time performance tracking, you'll always stay in control.
                     </p>
                     <p className="text-base sm:text-lg md:text-xl mb-6">
                         Join the community today and become the true champion of fantasy football!

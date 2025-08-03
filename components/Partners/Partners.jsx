@@ -35,7 +35,7 @@ const Partners = () => {
                                 alt={partner.name}
                                 width={120}
                                 height={120}
-                                layout="fixed"
+                                // layout="fixed"
                                 className="object-contain h-[80px] w-[120px]"
                             />
                         </div>

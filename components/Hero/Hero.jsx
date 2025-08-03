@@ -35,7 +35,7 @@ const Hero = () => {
                     <Image
                         src={bannerImage}
                         alt="Fantasy Football Players"
-                        layout="responsive"
+                        // layout="responsive"
                         width={1000}
                         height={1000}
                         className="z-10 object-cover"

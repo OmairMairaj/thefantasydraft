@@ -10,9 +10,9 @@ export default function Home() {
     <div className="px-6 md:px-10 lg:px-16 xl:px-20 ">
       <Hero />
       <Intro />
-      <Partners />
       <PlayByPlay />
       <UpcomingGames />
+      <Partners />
     </div>
   );
 }
