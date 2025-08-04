@@ -133,6 +133,15 @@ const LoginContent = () => {
               "Login"
             )}
           </button>
+          <p className="mt-4 text-sm md:text-base text-gray-400">
+            Don't have an account?{" "}
+            <a
+              href="/signup"
+              className="text-orange-500 hover:underline"
+            >
+              Sign Up
+            </a>
+          </p>
         </form>
       </div>
     </div>

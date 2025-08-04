@@ -232,7 +232,7 @@ const Dashboard = () => {
       const nextGW = (parseInt(gameweek, 10) + 1).toString();
 
       // Find fixture where user's team is involved
-      const nextFixture = fixtures.find(
+      const nextFixture = fixtures?.find(
         (fixture) => fixture.gameweek === nextGW &&
           fixture.teams.some(t => t._id === team._id)
       );
@@ -256,8 +256,8 @@ const Dashboard = () => {
       console.log("Classic Table (classicData): ", classicData);
 
       // Match center: filter current gameweek fixtures
-      const currentWeekFixtures = fixtures.filter(f => f.gameweek === gameweek);
-      setCurrentFixtures(currentWeekFixtures.slice(0, 3)); // top 3 fixtures
+      const currentWeekFixtures = fixtures?.filter(f => f.gameweek === gameweek);
+      setCurrentFixtures(currentWeekFixtures?.slice(0, 3)); // top 3 fixtures
       console.log("Current Fixtures (currentFixtures): ", currentWeekFixtures);
     }
   }, [team, gameweek, selectedLeague]);
@@ -577,6 +577,12 @@ const Dashboard = () => {
 
                           {/* Transfers Card */}
                           <Link href={'/transfers'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative justify-between bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
+                            onClick={(e) => {
+                              if (selectedLeague.draftID.state !== "Ended") {
+                                e.preventDefault();
+                                addAlert("Transfer option not available yet. Please complete the drafting process.", "info");
+                              }
+                            }}
                             style={{
                               backgroundImage: "url('/images/transfersimage.png')",
                             }}>
@@ -594,7 +600,13 @@ const Dashboard = () => {
                           </Link>
 
                           {/* Match Center Card */}
-                          <Link href={'/match-center'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col justify-between bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
+                          <Link href={'/match-center'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col ${selectedLeague.draftID.state === "Ended" ? 'justify-between' : ''} bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
+                            onClick={(e) => {
+                              if (selectedLeague.draftID.state !== "Ended") {
+                                e.preventDefault();
+                                addAlert("No fixtures available yet. Please complete the drafting process.", "info");
+                              }
+                            }}
                             style={{
                               backgroundImage: "url('/images/gameweekimage.png')",
                             }}>
@@ -605,24 +617,28 @@ const Dashboard = () => {
                               }
                             </div>
                             {selectedLeague.league_configuration.format === "Head to Head" ?
-                              <ul className="w-full text-white space-y-1 h-32 md:h-[75%]">
-                                {currentFixtures && currentFixtures?.slice(0, 3).map((fixture, idx) => (
-                                  <li key={idx} className="flex items-center justify-between py-1 rounded-md shadow-md">
-                                    <div className="flex items-center w-1/2">
-                                      <img src={fixture.teams[0]?.team_image_path || "/images/default_team_logo.png"} alt="First Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
-                                      <span className="text-sm md:text-base lg:text-sm xl:text-base ml-4 lg:ml-1 xl:ml-2">{fixture.teams[0]?.team_name || "Team 1"}</span>
-                                    </div>
-                                    <span className="text-[#FF8A00] text-base md:text-xl mx-2">v/s</span>
-                                    <div className="flex items-center justify-end w-1/2">
-                                      <span className="text-sm md:text-base lg:text-sm xl:text-base mr-4 lg:mr-1 xl:mr-2">{fixture.teams[1]?.team_name || "Team 2"}</span>
-                                      <img src={fixture.teams[1]?.team_image_path || "/images/default_team_logo.png"} alt="Second Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
+                              currentFixtures && currentFixtures.length > 0 ?
+                                <>
+                                  <ul className="w-full text-white space-y-1 h-32 md:h-[75%]">
+                                    {currentFixtures?.slice(0, 3).map((fixture, idx) => (
+                                      <li key={idx} className="flex items-center justify-between py-1 rounded-md shadow-md">
+                                        <div className="flex items-center w-1/2">
+                                          <img src={fixture.teams[0]?.team_image_path || "/images/default_team_logo.png"} alt="First Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+                                          <span className="text-sm md:text-base lg:text-sm xl:text-base ml-4 lg:ml-1 xl:ml-2">{fixture.teams[0]?.team_name || "Team 1"}</span>
+                                        </div>
+                                        <span className="text-[#FF8A00] text-base md:text-xl mx-2">v/s</span>
+                                        <div className="flex items-center justify-end w-1/2">
+                                          <span className="text-sm md:text-base lg:text-sm xl:text-base mr-4 lg:mr-1 xl:mr-2">{fixture.teams[1]?.team_name || "Team 2"}</span>
+                                          <img src={fixture.teams[1]?.team_image_path || "/images/default_team_logo.png"} alt="Second Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </>
+                                :
+                                <p className="lg:mt-2 text-sm md:text-base lg:text-sm xl:text-base">No Fixtures yet because Drafting is not completed</p>
                               :
-                              <></>
-                            }
+                              null}
                           </Link>
 
                           {/* Achievements Card */}

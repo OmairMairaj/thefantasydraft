@@ -349,60 +349,68 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                     </div>
                 </div>
             )} */}
-            <div className='flex justify-between mb-4'>
+            <div className='flex flex-col sm:flex-row justify-between mb-4'>
                 <div className='flex items-center gap-4'>
                     <button
-                        className={`fade-gradient px-6 py-2 rounded-2xl transition duration-300 ${exo2.className}`}
+                        className={`hidden sm:flex items-center justify-center fade-gradient w-20 xl:w-28 px-4 py-2 bg-gray-300 rounded-xl text-sm xl:text-base ${exo2.className}`}
                         onClick={onBack}
                     >
                         Back
                     </button>
                     <div className='flex flex-col gap-0'>
-                        <h1 className={`text-4xl font-bold ${exo2.className}`}>Draft Settings</h1>
+                        <h1 className={`text-2xl xl:text-3xl font-bold ${exo2.className}`}>Draft Settings</h1>
                         {isCreator && (
-                            <p className={`text-sm text-gray-400 items-center mr-3 ${exo2.className}`}> *Editing and removing teams is only available until the draft starts</p>
+                            <p className={`text-[10px] sm:text-xs lg:text-sm text-gray-400 items-center mr-3 ${exo2.className}`}> *Editing and removing teams is only available until the draft starts</p>
                         )}
 
                     </div>
                 </div>
-                {isCreator && (
-                    <div className="flex justify-end items-center">
-                        {draftData?.state === "Scheduled" || draftData?.state === "Manual" ?
-                            isEditing ? (
-                                <button
-                                    className="fade-gradient px-12 py-2 rounded-3xl "
-                                    onClick={handleSaveClick}
-                                >
-                                    Save
-                                </button>
-                            ) : (
-                                <button
-                                    className="fade-gradient px-12 py-2 rounded-3xl "
-                                    onClick={handleEditClick}
-                                >
-                                    Edit
-                                </button>
-                            )
-                            : null
-                        }
+                <div className='flex justify-between mt-2 sm:mt-0'>
+                    <button
+                        className={`flex sm:hidden items-center justify-center fade-gradient w-20 xl:w-28 px-4 py-2 bg-gray-300 rounded-xl text-sm xl:text-base ${exo2.className}`}
+                        onClick={onBack}
+                    >
+                        Back
+                    </button>
+                    {isCreator && (
+                        <div className="flex justify-end items-center">
+                            {draftData?.state === "Scheduled" || draftData?.state === "Manual" ?
+                                isEditing ? (
+                                    <button
+                                        className={`fade-gradient w-20 xl:w-28 px-4 py-2 bg-gray-300 rounded-xl flex items-center justify-center text-sm xl:text-base ${exo2.className}`}
+                                        onClick={handleSaveClick}
+                                    >
+                                        Save
+                                    </button>
+                                ) : (
+                                    <button
+                                        className={`fade-gradient w-20 xl:w-28 px-4 py-2 bg-gray-300 rounded-xl flex items-center justify-center text-sm xl:text-base ${exo2.className}`}
+                                        onClick={handleEditClick}
+                                    >
+                                        Edit
+                                    </button>
+                                )
+                                : null
+                            }
 
-                    </div>
-                )}
+                        </div>
+                    )}
+                </div>
             </div>
-            <div className="grid grid-cols-12 gap-6">
+            <div className="grid grid-cols-12 gap-2 lg:gap-4">
                 {/* League Information */}
-                <div className={`col-span-6 bg-[#1c1c1c] rounded-lg p-6 shadow-lg ${exo2.className}`}>
-                    <h2 className='text-xl font-bold text-[#FF8A00] mb-4'>League Information</h2>
+                <div className={`col-span-12 lg:col-span-6 bg-[#0c1922] rounded-lg py-6 px-4 sm:px-6 shadow-lg ${exo2.className}`}>
+                    <h2 className='text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4'>League Information</h2>
                     <div className='grid grid-cols-6 gap-4 '>
-                        <div className='col-span-2'>
+                        <div className='col-span-6 sm:col-span-2 flex items-center justify-center sm:justify-start'>
                             {/* <div className='>Logo:</div> */}
                             <img
-                                src={draftData?.leagueID?.league_image_path}
+                                src={draftData?.leagueID?.league_image_path ? draftData?.leagueID?.league_image_path : "/images/default_team_logo.png"}
                                 alt="League Logo"
-                                className="w-16 h-16 object-cover rounded-lg sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32"
+                                className="w-28 h-28 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-28 lg:h-28 xl:w-32 xl:h-32 object-cover rounded-lg"
                             />
                         </div>
-                        <div className='col-span-4 space-y-1'>
+                        <div className='col-span-6 sm:col-span-4 space-y-1 text-sm xl:text-base'>
                             <div className='grid grid-cols-3'>
                                 <div className='flex items-center'>Name:</div>
                                 <div className='col-span-2 text-left p-1 flex items-center'> {draftData?.leagueID?.league_name || "Unknown"}</div>
@@ -415,30 +423,30 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                                 <div className='flex items-center'>Max Teams:</div>
                                 <div className='col-span-2 text-left p-1 flex items-center'> {draftData?.leagueID?.max_teams || "--"}</div>
                             </div>
-                            <div className='grid grid-cols-3'>
+                            <div className='grid grid-cols-3 truncate'>
                                 <div className='flex items-center'>Creator:</div>
-                                <div className='col-span-2 text-left p-1 flex items-center'> {draftData?.creator || "Unknown"}</div>
+                                <div className='col-span-2 text-left p-1 flex items-center text-ellipsis'> {draftData?.creator || "Unknown"}</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Draft Settings */}
-                <div className={`col-span-6 bg-[#1c1c1c] rounded-lg space-y-1 p-6 shadow-lg ${exo2.className}`}>
-                    <h2 className='text-xl font-bold text-[#FF8A00] mb-4'>Draft Settings</h2>
-                    <div className='grid grid-cols-5'>
-                        <div className='col-span-3 flex items-center'>Type:</div>
-                        <div className='col-span-2 text-left p-1 flex items-center'> {draftData?.type || "----"}</div>
+                <div className={`col-span-12 sm:col-span-6 bg-[#0c1922] rounded-lg space-y-1 py-6 px-4 sm:px-6 shadow-lg text-sm xl:text-base ${exo2.className}`}>
+                    <h2 className='text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4'>Draft Settings</h2>
+                    <div className='grid grid-cols-2 lg:grid-cols-5'>
+                        <div className='lg:col-span-3 flex items-center'>Type:</div>
+                        <div className='lg:col-span-2 text-left py-1 px-2 flex items-center'> {draftData?.type || "----"}</div>
                     </div>
-                    <div className="grid grid-cols-5 ">
-                        <div className="col-span-3 flex items-center">State:</div>
+                    <div className="grid grid-cols-2 lg:grid-cols-5 ">
+                        <div className="lg:col-span-3 flex items-center">State:</div>
                         {isEditing
                             && (draftData?.state === "Scheduled" || draftData?.state === "Manual")
                             ?
                             (
-                                <div className="col-span-2 text-left flex items-center">
+                                <div className="lg:col-span-2 text-left flex items-center">
                                     <select
-                                        className="p-1 bg-[#2f2f2f] text-white rounded-lg w-full"
+                                        className="py-1 px-2 bg-[#1D374A] text-white rounded-md w-full focus:outline-[#FF8A00] focus:ring-2 focus:ring-[#FF8A00] focus-visible:outline-none"
                                         value={editData?.state || ""}
                                         onChange={(e) => {
                                             handleInputChange("state", e.target.value);
@@ -453,22 +461,22 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                                     </select>
                                 </div>
                             ) : (
-                                <div className="col-span-2 text-left p-1 flex items-center">
+                                <div className="lg:col-span-2 text-left py-1 px-2 flex items-center">
                                     {draftData?.state || "Unknown"}
                                 </div>
                             )
                         }
                     </div>
-                    <div className="grid grid-cols-5">
-                        <div className="col-span-3 flex items-center">Start Time:</div>
+                    <div className="grid grid-cols-2 lg:grid-cols-5">
+                        <div className="lg:col-span-3 flex items-center">Start Time:</div>
                         {isEditing
                             && editData?.state === "Scheduled"
                             ?
                             (
-                                <div className="col-span-2 text-left flex items-center">
+                                <div className="lg:col-span-2 text-left flex items-center">
                                     <input
                                         type="datetime-local"
-                                        className="p-1 bg-[#2f2f2f] text-white rounded-lg w-full"
+                                        className="py-1 px-2 bg-[#1D374A] text-white rounded-md w-full focus:outline-[#FF8A00] focus:ring-2 focus:ring-[#FF8A00] focus-visible:outline-none"
                                         value={
                                             editData?.start_date
                                                 ? new Date(new Date(editData.start_date).getTime() - new Date().getTimezoneOffset() * 60000)
@@ -481,32 +489,32 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                                     />
                                 </div>
                             ) : editData?.state === "Manual" ? (
-                                <div className="col-span-2 text-left p-1 flex items-center">
+                                <div className="lg:col-span-2 text-left py-1 px-2 flex items-center">
                                     Not Applicable
                                 </div>
                             ) : (
-                                <div className="col-span-2 text-left p-1 flex items-center">
+                                <div className="lg:col-span-2 text-left py-1 px-2 flex items-center">
                                     {draftData?.start_date ? new Date(draftData.start_date).toLocaleString() : "None"}
                                 </div>
                             )
                         }
                     </div>
-                    <div className='grid grid-cols-5 '>
-                        <div className='col-span-3 flex items-center'>Seconds per Pick:</div>
+                    <div className='grid grid-cols-2 lg:grid-cols-5'>
+                        <div className='lg:col-span-3 flex items-center'>Seconds per Pick:</div>
                         {isEditing ?
                             (
-                                <div className="col-span-2 text-left flex items-center">
+                                <div className="lg:col-span-2 text-left flex items-center">
                                     <input
                                         type="number"
                                         min="30"
                                         step="15"
-                                        className="p-1 bg-[#2f2f2f] text-white rounded-lg w-full"
+                                        className="py-1 px-2 bg-[#1D374A] text-white rounded-md w-full focus:outline-[#FF8A00] focus:ring-2 focus:ring-[#FF8A00] focus-visible:outline-none"
                                         value={editData?.time_per_pick || ""}
                                         onChange={(e) => handleInputChange("time_per_pick", parseInt(e.target.value, 10))}
                                     />
                                 </div>
                             ) : (
-                                <div className="col-span-2 text-left p-1 flex items-center">
+                                <div className="lg:col-span-2 text-left py-1 px-2 flex items-center">
                                     {draftData?.time_per_pick ? `${draftData.time_per_pick}s` : "--"}
                                 </div>
                             )
@@ -515,11 +523,11 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 </div>
 
                 {/* Team Configurations */}
-                <div className={`col-span-4 bg-[#1c1c1c] rounded-lg space-y-1 p-6 shadow-lg ${exo2.className}`}>
-                    <h2 className='text-xl font-bold text-[#FF8A00] mb-4'>Team Configurations</h2>
+                <div className={`col-span-12 sm:col-span-6 lg:col-span-4 bg-[#0c1922] rounded-lg space-y-1 py-6 px-4 sm:px-6 shadow-lg text-sm xl:text-base ${exo2.className}`}>
+                    <h2 className='text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4'>Team Configurations</h2>
                     {["max_players_per_club", "squad_players", "lineup_players", "bench_players"].map((field, index) => (
-                        <div key={index} className="grid grid-cols-3 gap-4">
-                            <div className="col-span-2 capitalize">
+                        <div key={index} className="grid grid-cols-2 lg:grid-cols-3 gap-4 ">
+                            <div className="lg:col-span-2 capitalize">
                                 {field.replace(/_/g, " ")}:
                             </div>
                             {isEditing ? (
@@ -527,7 +535,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                                     <input
                                         type="number"
                                         min="0"
-                                        className="p-1 bg-[#2f2f2f] text-white rounded-lg w-full text-center"
+                                        className="p-1 bg-[#1D374A] text-white rounded-md w-full text-center"
                                         value={editData?.[field] || ""}
                                         onChange={(e) => handleInputChange(field, parseInt(e.target.value, 10))}
                                     />
@@ -543,11 +551,11 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 </div>
 
                 {/* Squad Configurations */}
-                <div className={`col-span-4 bg-[#1c1c1c] rounded-lg space-y-1 p-6 shadow-lg ${exo2.className}`}>
-                    <h2 className='text-xl font-bold text-[#FF8A00] mb-4'>Squad Configuration</h2>
+                <div className={`col-span-12 sm:col-span-6 lg:col-span-4 bg-[#0c1922] rounded-lg space-y-1 py-6 px-4 sm:px-6 shadow-lg text-sm xl:text-base ${exo2.className}`}>
+                    <h2 className='text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4'>Squad Configuration</h2>
                     {["goalkeepers", "defenders", "midfielders", "attackers"].map((field, index) => (
-                        <div key={index} className="grid grid-cols-3 gap-4">
-                            <div className="col-span-2 capitalize">
+                        <div key={index} className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="lg:col-span-2 capitalize">
                                 {field}:
                             </div>
                             {isEditing ? (
@@ -555,7 +563,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                                     <input
                                         type="number"
                                         min="0"
-                                        className="p-1 bg-[#2f2f2f] text-white rounded-lg w-full text-center"
+                                        className="p-1 bg-[#1D374A] text-white rounded-md w-full text-center"
                                         value={editData?.squad_configurations?.[field] || ""}
                                         onChange={(e) =>
                                             setEditData((prev) => ({
@@ -579,8 +587,8 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                 </div>
 
                 {/* Lineup Configurations */}
-                <div className={`col-span-4 bg-[#1c1c1c] rounded-lg space-y-1 p-6 shadow-lg ${exo2.className}`}>
-                    <h2 className="text-xl font-bold text-[#FF8A00] mb-4">Lineup Configuration</h2>
+                <div className={`col-span-12 sm:col-span-6 lg:col-span-4 bg-[#0c1922] rounded-lg space-y-1 py-6 px-4 sm:px-6 shadow-lg text-sm xl:text-base ${exo2.className}`}>
+                    <h2 className="text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4">Lineup Configuration</h2>
                     {["goalkeepers", "defenders", "midfielders", "attackers"].map((field, index) => {
                         // Define min and max for each field
                         const fieldConstraints = {
@@ -593,15 +601,15 @@ const DraftSettings = ({ draftID, user, onBack }) => {
                         const { min, max } = fieldConstraints[field];
 
                         return (
-                            <div key={index} className="grid grid-cols-3 gap-4">
-                                <div className="col-span-2 capitalize">{field}:</div>
+                            <div key={index} className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="lg:col-span-2 capitalize">{field}:</div>
                                 {isEditing ? (
                                     <div className="text-center flex justify-center items-center">
                                         <input
                                             type="number"
                                             min={min}
                                             max={max}
-                                            className="p-1 bg-[#2f2f2f] text-white rounded-lg w-full text-center"
+                                            className="p-1 bg-[#1D374A] text-white rounded-md w-full text-center"
                                             value={editData?.lineup_configurations?.[field] || ""}
                                             onChange={(e) => {
                                                 const value = parseInt(e.target.value, 10);

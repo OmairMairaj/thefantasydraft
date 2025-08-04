@@ -173,7 +173,7 @@ const Nav = () => {
       {/* Conditional Elements: Signup/Login OR User Dropdown for Dashboard */}
       {(user === "nothing" || user === null) ? (
         <div className="flex  p-1">
-          <div className="hidden space-x-2 md:flex">
+          <div className="hidden space-x-2 lg:flex">
             {pathname !== "/signup" && (
               <Link
                 href="/signup"
@@ -200,7 +200,7 @@ const Nav = () => {
           </div>
 
           {/* Notification Icon */}
-          <div ref={dropdownRef} className="relative md:hidden">
+          <div ref={dropdownRef} className="relative lg:hidden">
             <button
               className="text-white focus:outline-none flex items-center hover:text-[#FF8A00]"
               onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -274,11 +274,11 @@ const Nav = () => {
       ) : (
         <div className="flex items-center space-x-4">
           {/* Notification Icon */}
-          <div className="relative flex justify-center items-center w-11 lg:w-[3.2rem] h-11 lg:h-[3.2rem] rounded-full border-2 border-transparent fade-gradient p-1 cursor-pointer">
+          {/* <div className="relative flex justify-center items-center w-11 lg:w-[3.2rem] h-11 lg:h-[3.2rem] rounded-full border-2 border-transparent fade-gradient p-1 cursor-pointer">
             <div className="flex justify-center items-center w-full h-full rounded-full">
               <FaBell className="text-white text-lg lg:text-xl" />
             </div>
-          </div>
+          </div> */}
 
           {/* User Avatar and Dropdown */}
           <div ref={dropdownRef} className="relative">
@@ -311,7 +311,7 @@ const Nav = () => {
                     "0px 4px 20px rgba(0, 0, 0, 0.6), 0px 2px 8px rgba(0, 0, 0, 0.2)",
                 }}
               >
-                <div className="lg:hidden border-b border-gray-600 py-2">
+                <div className="block border-b border-gray-600 py-2">
                   <a
                     href="/"
                     className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
@@ -332,7 +332,40 @@ const Nav = () => {
                     Contact Us
                   </a>
                 </div>
-                <div className=" py-2">
+                <div className=" py-2 block lg:hidden border-b border-gray-600">
+                  <a
+                    href="/dashboard"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Dashboard
+                  </a>
+                  <a
+                    href="/fixtures"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Fixtures
+                  </a>
+                  <a
+                    href="/table"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Table
+                  </a>
+                  <a
+                    href="/players"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Players
+                  </a>
+                  <a
+                    href="/super-league"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                  >
+                    Super League
+                  </a>
+
+                </div>
+                <div className="py-2">
                   <a
                     href="/profile"
                     className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
@@ -340,46 +373,10 @@ const Nav = () => {
                     Account
                   </a>
                   <a
-                    href="/how-to-play"
-                    className="hidden lg:block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
+                    href="/achievements"
+                    className="block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
                   >
-                    How To Play
-                  </a>
-                  <a
-                    href="/contact"
-                    className="hidden lg:block px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                  >
-                    Contact Us
-                  </a>
-                  <a
-                    href="/dashboard"
-                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                  >
-                    Dashboard
-                  </a>
-                  <a
-                    href="/fixtures"
-                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                  >
-                    Fixtures
-                  </a>
-                  <a
-                    href="/table"
-                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                  >
-                    Table
-                  </a>
-                  <a
-                    href="/players"
-                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                  >
-                    Players
-                  </a>
-                  <a
-                    href="/super-league"
-                    className="block lg:hidden px-4 py-2 hover:bg-[#FF8A00A3] rounded-lg"
-                  >
-                    Super League
+                    Achievements
                   </a>
                   <div
                     onClick={() => {

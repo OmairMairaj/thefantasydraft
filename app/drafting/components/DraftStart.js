@@ -12,7 +12,7 @@ import { useAlert } from '@/components/AlertContext/AlertContext';
 import { useRef } from "react";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Modal from '@/components/Modal/Modal';
-import { FaArrowRightLong } from 'react-icons/fa6';
+import { FaArrowRightLong, FaRegCircleXmark } from 'react-icons/fa6';
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],
@@ -364,6 +364,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                     else addAlert("Player successfully AUTO Picked!", "success");
                 } else {
                     console.error("2 : Failed to pick player:", response.data.message);
+                    addAlert(response.data.message, 'error');
                 }
             });
         } catch (error) {
@@ -451,17 +452,36 @@ const DraftStart = ({ draftID, user, onSettings }) => {
         return Array.from({ length: Math.max(0, required - chosenCount) }).map((_, index) => (
             <div
                 key={`skeleton-${index}`}
-                className="flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] bg-[#33333388]"
+                className="relative w-1/4 flex flex-col py-2 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]"
             >
-                <div className="w-12 h-12 rounded-lg bg-gray-600 animate-pulse mt-2" />
+                <div className="w-12 h-12 rounded-lg bg-gray-600 animate-pulse xl:mt-2" />
                 <p className="text-sm mt-2 w-full bg-gray-700 h-4 animate-pulse" />
             </div>
         ));
     };
 
+    //  const renderSkeletons = (required, chosenCount) => {
+    //     if (chosenCount >= required) return null;
+    //     return Array.from({ length: Math.max(0, required - chosenCount) }).map((_, index) => (
+    //         <div
+    //             key={`skeleton-${index}`}
+    //             className="relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+    //         >
+    //             <div className="w-20 h-20 rounded-lg bg-gray-600 animate-pulse mt-2" />
+    //             <p className="text-sm mt-6 w-full bg-gray-700 h-4 animate-pulse" />
+    //         </div>
+    //     ));
+    // };
+
 
     const handleSearch = (value) => {
         setSearch(value);
+    }
+
+    const handleClear = () => {
+        setSearch('');
+        setTeamFilter('');
+        setFilter('');
     }
 
     const filteredPlayers = players
@@ -526,14 +546,14 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <div className="flex flex-col text-white">
-                {loading && !draftData ? (
+                {loading && !draftData & !autoPickList && !players ? (
                     <div className="w-full min-h-[70vh] flex items-center justify-center">
                         <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
                     </div>
                 ) : (
                     <>
                         <div className="flex justify-between items-center mb-4">
-                            <h1 className={`text-4xl font-bold ${exo2.className}`}>Drafting</h1>
+                            <h1 className={`text-2xl xl:text-3xl font-bold ${exo2.className}`}>Drafting</h1>
                             <div className="flex items-center gap-4">
                                 {/* {isCreator && draftData?.state !== "In Process" && draftData?.state !== "Ended" && (
                                     <button onClick={() => handleNavigation('draft-start')} className="bg-[#FF8A00] py-2 px-6  text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
@@ -541,80 +561,78 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                         <span>Start Draft</span>
                                     </button>
                                 )} */}
-                                <button onClick={onSettings} className="bg-[#333333] py-2 px-6  text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
+                                <button onClick={onSettings} className="fade-gradient py-1 xl:py-2 px-6 my-1 rounded-full flex items-center space-x-2">
                                     <FaCog />
                                     <span>Draft Settings</span>
                                 </button>
                             </div>
                         </div>
                         {/* Drafting Info Section */}
-                        <div className="flex justify-between mb-4">
-                            <div className="flex flex-col space-y-4 w-1/3 pr-4 border-r border-[#404040]">
-                                <div className="bg-[#333333] px-4 py-4 rounded-lg text-center">
+                        <div className="flex flex-col lg:flex-row justify-between mb-4">
+                            <div className="flex space-x-0 sm:space-x-4 lg:space-x-0 flex-col sm:flex-row lg:flex-col space-y-2 sm:space-y-0 lg:space-y-2 w-full lg:w-1/3 lg:pr-4 lg:border-r lg:border-[#404040]">
+                                <div className="bg-[#1D374A] px-4 py-5 rounded-lg text-center text-xs md:text-sm xl:text-base w-full sm:w-1/2 lg:w-full flex items-center justify-center">
                                     {draftData?.turn &&
                                         currentTurnTeam && (
-                                            <p className="text-lg">
+                                            <p className='text-white w-full'>
                                                 {`${currentTurnTeam.user_email === user.email ? 'Its Your Turn' : `It's Team ${currentTurnTeam?.team.team_name}'s Turn`}`}
                                             </p>
                                         )}
                                     {draftData?.state === 'Ended' && (
-                                        <p className="text-lg">The draft has ended.</p>
+                                        <p className='text-white w-full'>The draft has ended.</p>
                                     )}
                                     {draftData?.state === 'Manual' || draftData?.state === "Scheduled" && (
-                                        <p className="text-lg">The draft is yet to be started by League admin.</p>
+                                        <p className='text-white w-full'>The draft is yet to be started by League admin.</p>
                                     )}
                                 </div>
 
-                                <div className="bg-[#333333] px-8 py-4 rounded-lg text-center">
+                                <div className="bg-[#1D374A] px-4 py-4 rounded-lg text-center flex lg:flex-col items-center justify-center space-x-4 lg:space-x-0 w-full sm:w-1/2 lg:w-full">
 
                                     {draftData?.state === 'In Process' && (
                                         <>
-                                            <p className="text-2xl">Time Remainings</p>
-                                            <p className="text-5xl text-white mt-2"> {formatTime(timeRemaining)}</p>
+                                            <p className="text-sm md:text-base lg:text-lg xl:text-xl">Time Remainings</p>
+                                            <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white lg:mt-2"> {formatTime(timeRemaining)}</p>
                                         </>
                                     )}
                                     {draftData?.state === 'Ended' && (
                                         <>
-                                            <p className="text-2xl">Draft Status</p>
-                                            <p className="text-5xl text-white mt-2">{draftData?.state}</p>
+                                            <p className="text-sm md:text-base lg:text-lg xl:text-xl">Draft Status</p>
+                                            <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white lg:mt-2">{draftData?.state}</p>
                                         </>
                                     )}
                                     {draftData?.state === 'Manual' || draftData?.state === "Scheduled" && (
                                         <>
-                                            <p className="text-2xl">Time Remainings</p>
-                                            <p className="text-5xl text-white mt-2"> {`- - : - -`}</p>
+                                            <p className="text-sm md:text-base lg:text-lg xl:text-xl">Time Remainings</p>
+                                            <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white lg:mt-2"> {`- - : - -`}</p>
                                         </>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="flex flex-col space-y-2 w-2/3 pl-4">
-                                <div className='flex'>
-                                    <div className={`flex text-xl items-center ${exo2.className}`}>Draft Order:<span className='text-base ml-2 text-gray-400'>{`(Round ${draftData?.draft_round} order)`}</span></div>
+                            <div className="flex flex-col space-y-2 w-full lg:w-2/3 mt-4 lg:mt-0 lg:pl-4">
+                                <div className='flex justify-between'>
+                                    <div className={`flex text-base sm:text-lg xl:text-xl items-center ${exo2.className}`}>Draft Order:<span className='text-xs sm:text-sm xl:text-base ml-2 text-gray-400'>{`(Round ${draftData?.draft_round} order)`}</span></div>
 
                                 </div>
                                 <div ref={turnContainerRef} className="overflow-x-auto pb-2 scrollbar">
-                                    <div className="flex min-w-max">
+                                    <div className="flex  min-w-max">
                                         {draftData?.order.map((email, index) => {
                                             // Find the team corresponding to the current email in the order
                                             const teamData = draftData?.teams.find((team) => team.user_email === email);
                                             return (
                                                 <div className='flex items-center'>
-                                                    <div key={index} data-turn={email} className={`bg-[#1C1C1C] flex flex-col items-center justify-center text-center h-[160px] w-[200px] rounded-lg ${email === draftData?.turn ? 'border-2 border-[#FF8A00] shadow-lg' : ''
+                                                    <div key={index} data-turn={email} className={`bg-[#1D374A] flex flex-col items-center justify-center text-center h-28 w-32 sm:h-32 sm:w-40 lg:h-36 lg:w-44 xl:h-36 xl:w-48 rounded-lg text-xs lg:text-sm ${email === draftData?.turn ? 'border-2 border-[#FF8A00] shadow-lg' : ''
                                                         }`}>
                                                         {teamData ? (
                                                             <>
-                                                                <p className="text-sm text-[#FF8A00] mb-2">{`Turn ${index + 1}`}</p>
+                                                                <p className="text-[#FF8A00] font-semibold mb-1">{`Turn ${index + 1}`}</p>
                                                                 {/* Show the team logo */}
-                                                                {teamData.team?.team_image_path && (
-                                                                    <img
-                                                                        src={teamData.team.team_image_path}
-                                                                        alt={teamData.team.team_name}
-                                                                        className="w-14 h-14 rounded-lg mb-2"
-                                                                    />
-                                                                )}
+                                                                <img
+                                                                    src={teamData.team?.team_image_path ? teamData.team.team_image_path : "/images/default_team_logo.png"}
+                                                                    alt={teamData.team.team_name}
+                                                                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-lg mb-1"
+                                                                />
                                                                 {/* Show the team name */}
-                                                                <p className="text-sm">{teamData.team?.team_name || "Unnamed Team"}</p>
+                                                                <p className="text-white">{teamData.team?.team_name || "Unnamed Team"}</p>
                                                                 {draftData && isCreator && email === draftData.turn ?
                                                                     <button disabled={isPicking} onClick={() => { autoPickCall(email) }} className={`${isPicking ? "bg-[#3c3c3c]" : "bg-[#ff8800d6] hover:bg-[#ff8800]"} px-4 my-1 rounded-lg shadow-lg  `}>Force Pick</button>
                                                                     : null
@@ -624,43 +642,43 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                             <p>No Team Found</p>
                                                         )}
                                                     </div>
-                                                    <div className='flex text-lg mx-1 text-gray-400'><FaChevronRight /></div>
+                                                    <div className={`${index === draftData.order.length - 1 ? 'hidden' : 'flex'} text-lg mx-1 text-gray-400`}><FaChevronRight /></div>
                                                 </div>
                                             );
                                         })}
                                     </div>
                                 </div>
-                                <p className='text-sm text-gray-400'>* After every round draft order will be reversed.</p>
+                                <p className='text-xs lg:text-sm text-gray-400'>* After every round draft order will be reversed.</p>
                             </div>
                         </div>
 
                         {/* Main Draft Section */}
-                        <div className="grid grid-cols-8 gap-4 ">
+                        <div className="grid grid-cols-8 gap-2 ">
                             {/* Players Section */}
-                            <div className="col-span-3 bg-[#1C1C1C] rounded-xl p-6 h-full ">
-                                <div className='flex justify-between'>
-                                    <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>
+                            <div className="col-span-8 lg:col-span-3 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full ">
+                                <div className='flex flex-col justify-between'>
+                                    <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-1`}>
                                         Players
                                     </h3>
                                     {/* Search, Filter, and Sort */}
-                                    <div className="flex gap-2 mb-4 w-9/12">
-                                        <div className='flex items-center gap-2 w-3/12'>
+                                    <div className="flex flex-wrap gap-1 xl:gap-2 mb-2 text-xs xl:text-sm">
+                                        <div className='flex items-center gap-2 w-[32%] sm:w-2/12'>
                                             {/* <p className="text-gray-400 text-sm">Sort:</p> */}
                                             <select
                                                 value={sort}
                                                 onChange={(e) => setSort(e.target.value)}
-                                                className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                                className="p-1 rounded-md bg-[#1D374A] text-white w-full focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                             >
                                                 <option value="name">Name</option>
                                                 <option value="rating">Rating</option>
                                             </select>
                                         </div>
-                                        <div className='flex items-center gap-2 w-4/12'>
-                                            {/* <p className="text-gray-400 text-sm">Filter:</p> */}
+                                        <div className='flex items-center gap-2 w-[32%] sm:w-3/12'>
+                                            {/* <p className="text-gray-400">Filter:</p> */}
                                             <select
                                                 value={filter}
                                                 onChange={(e) => setFilter(e.target.value)}
-                                                className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                                className="p-1 rounded-md bg-[#1D374A] text-white w-full focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                             >
                                                 <option value="">Position</option>
                                                 <option value="attacker">Attacker</option>
@@ -669,12 +687,12 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                 <option value="goalkeeper">Goalkeeper</option>
                                             </select>
                                         </div>
-                                        <div className='flex items-center gap-2 w-4/12'>
-                                            {/* <p className="text-gray-400 text-sm">Filter:</p> */}
+                                        <div className='flex items-center gap-2 w-[32%] sm:w-3/12'>
+                                            {/* <p className="text-gray-400">Filter:</p> */}
                                             <select
                                                 value={teamFilter}
                                                 onChange={(e) => setTeamFilter(e.target.value)}
-                                                className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                                className="p-1 rounded-md bg-[#1D374A] text-white w-full focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                             >
                                                 <option value="">Team</option>
                                                 {teams ? teams.map((item) => <>
@@ -682,54 +700,59 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                 </>) : null}
                                             </select>
                                         </div>
-                                        <div className='flex items-center gap-2 w-5/12 '>
+                                        <div className='flex items-center gap-2 w-[70%] sm:w-3/12 '>
                                             <input
                                                 type="text"
                                                 placeholder="Search ..."
                                                 value={search}
                                                 onChange={(e) => handleSearch(e.target.value)}
-                                                className="p-1 rounded-lg bg-[#333333] text-white text-sm w-full"
+                                                className="p-1 rounded-md bg-[#1D374A] text-white w-full focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                             />
                                         </div>
+                                        {filter || search || teamFilter ?
+                                            <button className='flex w-[28%] sm:w-1/12 lg:w-auto items-center justify-center bg-[#314553] text-white p-1 rounded-full hover:bg-[#FF8A00] transition-colors' onClick={() => handleClear()}><FaRegCircleXmark /><span className='pl-1 block sm:hidden'> Clear</span>
+                                            </button>
+                                            : <div className='w-auto'></div>
+                                        }
                                     </div>
                                 </div>
                                 {/* Table */}
-                                <div className="relative w-full h-[655px] overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]">
+                                <div className="relative w-full h-[450px] sm:h-[650px] overflow-hidden rounded-lg border border-[#1D374A]">
                                     {/* Scrollable Wrapper */}
-                                    <div className="overflow-x-auto overflow-y-auto h-[655px] scrollbar">
-                                        <table className="table-auto w-full text-left text-white">
+                                    <div className="overflow-x-auto overflow-y-auto h-[450px] sm:h-[650px] scrollbar">
+                                        <table className="table-auto w-full text-left text-white text-xs xl:text-sm">
                                             {/* Table Header */}
-                                            <thead className="bg-[#2f2f2f] sticky top-0 z-10 text-sm">
+                                            <thead className="bg-[#1D374A] sticky top-0 z-10">
                                                 <tr className="text-center">
-                                                    <th className="p-2 max-w-[100px]">Name</th>
+                                                    <th className="p-2 max-w-[100px] text-left pl-4">Name</th>
                                                     <th className="p-2"></th>
                                                     <th className="p-2">Rating</th>
                                                     <th className="p-2 sticky right-0 z-20">Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className='text-sm'>
+                                            <tbody className=''>
                                                 {filteredPlayers.map((player) => (
-                                                    <tr key={player.id} className="border-b border-[#333333] text-center items-center justify-center">
+                                                    <tr key={player.id} className="border-b border-[#1D374A] text-center items-center justify-center">
                                                         <td className="p-2 max-w-[100px] text-left truncate">
                                                             <div className="flex items-center space-x-2">
                                                                 {player.image_path && (
                                                                     <img
                                                                         src={player.image_path}
                                                                         alt={player.team_name || "Team Logo"}
-                                                                        className="w-10 h-10 rounded-lg"
+                                                                        className="w-8 h-8 xl:w-10 xl:h-10 rounded-lg"
                                                                     />
                                                                 )}
                                                                 <div className="overflow-hidden">
                                                                     <p className="font-bold truncate">{player.common_name}</p>
-                                                                    <p className="text-xs text-gray-400 truncate">{player.team_name}</p>
+                                                                    <p className="text-[10px] xl:text-xs text-gray-400 truncate">{player.team_name}</p>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         <td className='h-full flex justify-center items-center' style={{ verticalAlign: "middle" }}>{positionIcon(player.position_name)}</td>
                                                         <td className="p-2">{player.rating}</td>
-                                                        <td className="p-2 sticky right-0 bg-[#1C1C1C]">
+                                                        <td className="p-0 sticky right-0">
                                                             <button
-                                                                className={`${draftData?.turn !== user.email || loadingSelect || isPicking ? 'bg-[#454545] cursor-not-allowed' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
+                                                                className={`${draftData?.turn !== user.email || loadingSelect || isPicking ? 'bg-[#1D374A] cursor-not-allowed' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
                                                                 onClick={() => {
                                                                     setLoadingSelect(true);
                                                                     handlePick(player)
@@ -748,53 +771,53 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                             </div>
 
                             {/* Auto Pick List Section */}
-                            <div className="col-span-2 bg-[#1C1C1C] rounded-xl p-6 h-full">
+                            <div className="col-span-8 sm:col-span-3 md:col-span-4 lg:col-span-2 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full">
                                 <div className='flex justify-between'>
-                                    <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>
+                                    <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-2`}>
                                         Auto Pick List
                                     </h3>
                                     {/* <button className={`save-button ${hasUnsavedChanges ? "enabled bg-[#FF8A00] hover:bg-[#e77d00]" : "disabled bg-[#4e4e4e]"} text-white px-3 py-1 mb-4 rounded-lg `} disabled={!hasUnsavedChanges} onClick={() => { saveAutoPickList() }}>Save Changes</button> */}
                                 </div>
                                 {autoPickList ?
                                     autoPickList.length > 0 ?
-                                        <div className="relative w-full h-[655px] overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]">
+                                        <div className="relative w-full h-[310px] sm:h-[570px] lg:h-[685px] overflow-hidden rounded-lg border border-[#1D374A]">
                                             {/* Scrollable Wrapper */}
-                                            <div className="overflow-x-auto overflow-y-auto h-[655px] scrollbar scroll-m-28">
-                                                <table className="table-auto w-full text-left text-white">
+                                            <div className="overflow-x-auto overflow-y-auto h-[310px] sm:h-[570px] lg:h-[685px] scrollbar scroll-m-28">
+                                                <table className="table-auto w-full text-left text-white text-xs xl:text-sm">
                                                     {/* Table Header */}
-                                                    <thead className="bg-[#2f2f2f] sticky top-0 z-10">
-                                                        <tr className="text-center text-sm">
+                                                    <thead className="bg-[#1D374A] sticky top-0 z-10">
+                                                        <tr className="text-center">
                                                             {/* <th className="p-2 w-10"></th> */}
                                                             <th className="p-2 max-w-[100px] text-left pl-4">Name</th>
                                                             <th className="p-2"></th>
                                                             <th className="p-2 sticky right-0 z-20"></th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody className="text-sm">
+                                                    <tbody className="">
                                                         {autoPickList.map((player, index) => (
-                                                            <tr className={`${draftData.players_selected.includes(player._id) ? 'opacity-50' : ''} border-b border-[#333333] text-center items-center justify-center`} >
+                                                            <tr className={`${draftData.players_selected.includes(player._id) ? 'opacity-50' : ''} border-b border-[#1D374A] text-center items-center justify-center`} >
                                                                 <td className="p-2 max-w-[100px] text-left truncate">
                                                                     <div className="flex items-center space-x-2">
                                                                         {player.image_path && (
                                                                             <img
                                                                                 src={player.image_path}
                                                                                 alt={player.team_name || "Team Logo"}
-                                                                                className="w-10 h-10 rounded-lg"
+                                                                                className="w-8 h-8 xl:w-10 xl:h-10 rounded-lg"
                                                                             />
                                                                         )}
                                                                         <div className="overflow-hidden">
                                                                             <p className="font-bold truncate">{player.common_name}</p>
-                                                                            <p className="text-xs text-gray-400 truncate">{player.team_name}</p>
+                                                                            <p className="text-[10px] xl:text-xs text-gray-400 truncate">{player.team_name}</p>
                                                                         </div>
                                                                     </div>
                                                                 </td>
                                                                 <td className="h-full flex justify-center items-center">
                                                                     {positionIcon(player.position_name)}
                                                                 </td>
-                                                                <td className="p-2 sticky right-0 bg-[#1C1C1C]">
+                                                                <td className="p-2 sticky right-0">
                                                                     <button
                                                                         disabled={draftData?.turn !== user.email || loadingSelect || isPicking}
-                                                                        className={`${draftData?.turn !== user.email || loadingSelect || isPicking || draftData.players_selected.includes(player._id) ? 'bg-[#3c3c3c]' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-3 py-1 rounded-lg `}
+                                                                        className={`${draftData?.turn !== user.email || loadingSelect || isPicking || draftData.players_selected.includes(player._id) ? 'bg-[#1D374A]' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-3 py-1 rounded-lg `}
                                                                         onClick={() => { setLoadingSelect(true); handlePick(player); }}
                                                                     >
                                                                         <FaChevronRight />
@@ -807,31 +830,31 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                             </div>
                                         </div>
                                         : (
-                                            <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2">
-                                                <div className="text-gray-400 text-center">No players selected for auto pick.</div>
+                                            <div className="h-[95%] overflow-auto flex flex-col justify-center space-y-2 rounded-lg border border-[#1D374A]">
+                                                <div className="text-xs xl:text-sm text-gray-400 text-center">No players selected for auto pick.</div>
                                             </div>
                                         )
                                     : (
-                                        <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2">
-                                            <div className="text-gray-400 text-center">Fetching auto pick list...</div>
+                                        <div className="h-[95%] overflow-auto flex flex-col justify-center space-y-2 rounded-lg border border-[#1D374A]">
+                                            <div className="text-xs xl:text-sm text-gray-400 text-center">Fetching auto pick list...</div>
                                         </div>
                                     )
                                 }
                             </div>
 
                             {/* Chosen Players Section */}
-                            <div className="col-span-3 bg-[#1C1C1C] rounded-xl p-6 h-full ">
+                            <div className="col-span-8 sm:col-span-5 md:col-span-4 lg:col-span-3 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full ">
                                 <div className="flex justify-between">
-                                    <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>Picks</h3>
-                                    <div className="flex items-center rounded-lg overflow-hidden mb-4">
+                                    <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-2`}>Picks</h3>
+                                    <div className="flex items-center rounded-lg overflow-hidden mb-2 text-xs xl:text-sm">
                                         <button
-                                            className={`${view === 'List' ? 'bg-[#ff8800b7]' : 'bg-[#2c2c2c]'} text-white px-5 py-1`}
+                                            className={`${view === 'List' ? 'bg-[#ff8800b7]' : 'bg-[#1D374A]'} text-white px-5 py-1`}
                                             onClick={() => handleViewChange('List')}
                                         >
                                             List View
                                         </button>
                                         <button
-                                            className={`${view === 'Pitch' ? 'bg-[#ff8800b7]' : 'bg-[#2c2c2c]'} text-white px-5 py-1`}
+                                            className={`${view === 'Pitch' ? 'bg-[#ff8800b7]' : 'bg-[#1D374A]'} text-white px-5 py-1`}
                                             onClick={() => handleViewChange('Pitch')}
                                         >
                                             Pitch View
@@ -841,20 +864,20 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                 {chosenPlayers && pitchViewList ? (
                                     chosenPlayers.length > 0 ? (
                                         view === 'List' ? (
-                                            <div className="relative w-full h-[655px] overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]">
-                                                <div className="overflow-x-auto overflow-y-auto h-[655px] scrollbar">
-                                                    <table className="table-auto w-full text-left text-white">
-                                                        <thead className="bg-[#2f2f2f] sticky top-0 z-10">
-                                                            <tr className="text-center text-sm">
+                                            <div className="relative w-full h-[570px] lg:h-[685px] overflow-hidden rounded-lg border border-[#1D374A]">
+                                                <div className="overflow-x-auto overflow-y-auto h-[570px] lg:h-[685px] scrollbar">
+                                                    <table className="table-auto w-full text-left text-white text-xs xl:text-sm">
+                                                        <thead className="bg-[#1D374A] sticky top-0 z-10">
+                                                            <tr className="text-center">
                                                                 <th className="p-2 max-w-[100px] text-left pl-4">Name</th>
                                                                 <th className="p-2"></th>
                                                             </tr>
                                                         </thead>
-                                                        <tbody className="text-sm">
+                                                        <tbody className="">
                                                             {chosenPlayers.map((player) => (
                                                                 <tr
                                                                     key={player.player.id}
-                                                                    className="border-b border-[#333333] text-center items-center justify-center"
+                                                                    className="border-b border-[#1D374A] text-center items-center justify-center"
                                                                 >
                                                                     <td className="p-2 max-w-[100px] text-left truncate">
                                                                         <div className="flex items-center space-x-2">
@@ -862,14 +885,14 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                                 <img
                                                                                     src={player.player.image_path}
                                                                                     alt={player.player.team_name || 'Team Logo'}
-                                                                                    className="w-10 h-10 rounded-lg"
+                                                                                    className="w-8 h-8 xl:w-10 xl:h-10 rounded-lg"
                                                                                 />
                                                                             )}
                                                                             <div className="overflow-hidden">
                                                                                 <p className="font-bold truncate">
                                                                                     {player.player.common_name}
                                                                                 </p>
-                                                                                <p className="text-xs text-gray-400 truncate">
+                                                                                <p className="text-[10px] xl:text-xs text-gray-400 truncate">
                                                                                     {player.player.team_name}
                                                                                 </p>
                                                                             </div>
@@ -886,14 +909,14 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                             </div>
                                         ) : (
                                             <div className='flex flex-col gap-1'>
-                                                <div className="py-6 px-4 text-white rounded-lg border border-[#333333] bg-[#1C1C1C] pitch-view">
-                                                    <div className="flex flex-col gap-6">
+                                                <div className="py-6 px-2 xl:px-4 text-white rounded-lg border border-[#1D374A] bg-[#0c1922] pitch-view">
+                                                    <div className="flex flex-col gap-4 xl:gap-6 text-xs">
                                                         {/* Goalkeepers */}
-                                                        <div className="flex justify-center items-center gap-4">
+                                                        <div className="flex justify-center items-center gap-2 xl:gap-4">
                                                             {pitchViewList.lineup.Goalkeeper.map((player) => (
                                                                 <div
                                                                     key={player.player.id}
-                                                                    className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                    className="relative flex flex-col py-2 items-center w-1/4 text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]"
                                                                 >
                                                                     <div className="absolute top-1 right-1 w-6 h-6">
                                                                         <img
@@ -905,9 +928,9 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                     <img
                                                                         src={player.player.image_path}
                                                                         alt={player.player.team_name || 'Player'}
-                                                                        className="w-12 h-12 rounded-lg mt-2"
+                                                                        className="w-10 h-10 xl:w-12 xl:h-12 rounded-lg mt-2"
                                                                     />
-                                                                    <p className="text-sm mt-2 truncate w-full" title={player.player.common_name}>
+                                                                    <p className="mt-2 truncate w-full" title={player.player.common_name}>
                                                                         {player.player.common_name}
                                                                     </p>
                                                                 </div>
@@ -915,11 +938,11 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                             {renderSkeletons(1, pitchViewList.lineup.Goalkeeper.length)}
                                                         </div>
                                                         {/* Defenders */}
-                                                        <div className="flex justify-center items-center gap-4">
+                                                        <div className="flex justify-center items-center gap-2 xl:gap-4">
                                                             {pitchViewList.lineup.Defender.map((player) => (
                                                                 <div
                                                                     key={player.player.id}
-                                                                    className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                    className="relative flex flex-col py-2 items-center w-1/4 text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]"
                                                                 >
                                                                     <div className="absolute top-1 right-1 w-6 h-6">
                                                                         <img
@@ -931,21 +954,21 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                     <img
                                                                         src={player.player.image_path}
                                                                         alt={player.player.team_name || 'Player'}
-                                                                        className="w-12 h-12 rounded-lg mt-2"
+                                                                        className="w-10 h-10 xl:w-12 xl:h-12 rounded-lg mt-2"
                                                                     />
-                                                                    <p className="text-sm mt-2 truncate w-full" title={player.player.common_name}>
+                                                                    <p className="mt-2 truncate w-full" title={player.player.common_name}>
                                                                         {player.player.common_name}
                                                                     </p>
                                                                 </div>
                                                             ))}
-                                                            {renderSkeletons(3, pitchViewList.lineup.Defender.length)}
+                                                            {renderSkeletons(4, pitchViewList.lineup.Defender.length)}
                                                         </div>
                                                         {/* Midfielders */}
-                                                        <div className="flex justify-center items-center gap-4">
+                                                        <div className="flex justify-center items-center gap-2 xl:gap-4">
                                                             {pitchViewList.lineup.Midfielder.map((player) => (
                                                                 <div
                                                                     key={player.player.id}
-                                                                    className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                    className="relative flex flex-col py-2 items-center w-1/4 text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]"
                                                                 >
                                                                     <div className="absolute top-1 right-1 w-6 h-6">
                                                                         <img
@@ -957,21 +980,21 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                     <img
                                                                         src={player.player.image_path}
                                                                         alt={player.player.team_name || 'Player'}
-                                                                        className="w-12 h-12 rounded-lg mt-2"
+                                                                        className="w-10 h-10 xl:w-12 xl:h-12 rounded-lg mt-2"
                                                                     />
-                                                                    <p className="text-sm mt-2 truncate w-full" title={player.player.common_name}>
+                                                                    <p className="mt-2 truncate w-full" title={player.player.common_name}>
                                                                         {player.player.common_name}
                                                                     </p>
                                                                 </div>
                                                             ))}
-                                                            {renderSkeletons(3, pitchViewList.lineup.Midfielder.length)}
+                                                            {renderSkeletons(4, pitchViewList.lineup.Midfielder.length)}
                                                         </div>
                                                         {/* Attackers */}
-                                                        <div className="flex justify-center items-center gap-4">
+                                                        <div className="flex justify-center items-center gap-2 xl:gap-4">
                                                             {pitchViewList.lineup.Attacker.map((player) => (
                                                                 <div
                                                                     key={player.player.id}
-                                                                    className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                    className="relative flex flex-col py-2 items-center w-1/4 text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]"
                                                                 >
                                                                     <div className="absolute top-1 right-1 w-6 h-6">
                                                                         <img
@@ -983,9 +1006,9 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                     <img
                                                                         src={player.player.image_path}
                                                                         alt={player.player.team_name || 'Player'}
-                                                                        className="w-12 h-12 rounded-lg mt-2"
+                                                                        className="w-10 h-10 xl:w-12 xl:h-12 rounded-lg mt-2"
                                                                     />
-                                                                    <p className="text-sm mt-2 truncate w-full" title={player.player.common_name}>
+                                                                    <p className="mt-2 truncate w-full" title={player.player.common_name}>
                                                                         {player.player.common_name}
                                                                     </p>
                                                                 </div>
@@ -996,12 +1019,12 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                 </div>
 
                                                 {/* Substitute Players */}
-                                                <div className='w-full py-1 px-4 bg-[#131313] rounded-lg'>
-                                                    <div className="flex justify-center items-center gap-4">
+                                                <div className='w-full py-1 px-4 bg-[#071117] rounded-lg'>
+                                                    <div className="flex justify-center items-center gap-2 xl:gap-4">
                                                         {pitchViewList.bench.map((player) => (
                                                             <div
                                                                 key={player.player.id}
-                                                                className="relative flex flex-col py-2 items-center w-[20%] max-w-[20%] text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388]"
+                                                                className="relative flex flex-col py-2 items-center w-1/4 text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]"
                                                             >
                                                                 <div className="absolute top-1 right-1 w-6 h-6">
                                                                     <img
@@ -1013,9 +1036,9 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                 <img
                                                                     src={player.player.image_path}
                                                                     alt={player.player.team_name || 'Player'}
-                                                                    className="w-12 h-12 rounded-lg mt-2"
+                                                                    className="w-10 h-10 xl:w-12 xl:h-12 rounded-lg mt-2"
                                                                 />
-                                                                <p className="text-sm mt-2 truncate w-full" title={player.player.common_name}>
+                                                                <p className="mt-2 truncate w-full" title={player.player.common_name}>
                                                                     {player.player.common_name}
                                                                 </p>
                                                             </div>

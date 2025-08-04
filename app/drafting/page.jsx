@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Suspense } from "react";
 import { Exo_2 } from 'next/font/google';
-import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink, FaRegCopy } from 'react-icons/fa';
+import { FaBell, FaCog, FaDraft2Digital, FaPlay, FaLink, FaRegCopy, FaTrash } from 'react-icons/fa';
 import { LuGrip } from "react-icons/lu";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
@@ -13,9 +13,10 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Modal from '@/components/Modal/Modal';
 import DraftSettings from './components/Settings';
 import DraftStart from './components/DraftStart';
+import { FaCircleXmark, FaRegCircleXmark } from 'react-icons/fa6';
 
 const exo2 = Exo_2({
-    weight: ['400', '500', '700', '800'],
+    weight: ['400', '500', '600', '700', '800'],
     style: ['italic'],
     subsets: ['latin'],
 });
@@ -41,6 +42,7 @@ const Drafting = () => {
     const { addAlert } = useAlert();
     const [previousView, setPreviousView] = useState(null);
     const [currentView, setCurrentView] = useState('drafting');
+    const [filteredPlayers, setFilteredPlayers] = useState([]);
 
     useEffect(() => {
         // Check if window is defined to ensure we are on the client side
@@ -294,19 +296,30 @@ const Drafting = () => {
         setSearch(value);
     }
 
-    const filteredPlayers = players.filter((player) =>
-        // Filter players by name or common_name
-        player.name.toLowerCase().includes(search.toLowerCase()) ||
-        player.common_name?.toLowerCase().includes(search.toLowerCase()) ||
-        player.team_name?.toLowerCase().includes(search.toLowerCase())
-    ).filter((player) =>
-        // Filter by position if filter is set
-        !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
-    ).sort((a, b) => {
-        if (sort === 'name') return a.name.localeCompare(b.name);
-        if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
-        return 0;
-    });
+    const handleClear = () => {
+        setSearch('');
+        setFilter('');
+    }
+
+    useEffect(() => {
+        const filterPlayers = players.filter((player) =>
+            // Filter players by name or common_name
+            player.name.toLowerCase().includes(search.toLowerCase()) ||
+            player.common_name?.toLowerCase().includes(search.toLowerCase()) ||
+            player.team_name?.toLowerCase().includes(search.toLowerCase())
+        ).filter((player) =>
+            // Filter by position if filter is set
+            !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
+        ).sort((a, b) => {
+            if (sort === 'name') return a.name.localeCompare(b.name);
+            if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
+            return 0;
+        });
+
+        setFilteredPlayers(filterPlayers)
+    }, [players, filter, sort, search])
+
+
 
 
     // const simulatedOrder = Array.from({ length: 20 }, (_, i) => `user${i + 1}@example.com`);
@@ -320,7 +333,7 @@ const Drafting = () => {
 
     const positionIcon = (position) => {
         const positionStyles = {
-            Attacker: { bg: 'bg-[#D3E4FE]', text: 'F' },
+            Attacker: { bg: 'bg-[#D3E4FE]', text: 'A' },
             Midfielder: { bg: 'bg-[#D5FDE1]', text: 'M' },
             Defender: { bg: 'bg-[#F8E1FF]', text: 'D' },
             Goalkeeper: { bg: 'bg-[#FEF9B6]', text: 'G' },
@@ -330,7 +343,7 @@ const Drafting = () => {
 
         return (
             <div
-                className={`${bg} w-7 h-7 text-black flex items-center justify-center text-sm my-4 rounded-full `}
+                className={`${bg} w-4 h-4 md:w-5 md:h-5 xl:w-6 xl:h-6 text-black font-bold flex items-center justify-center text-xs md:text-sm my-4 rounded-full `}
             >
                 {text}
             </div>
@@ -340,14 +353,14 @@ const Drafting = () => {
     useEffect(() => {
         // Add or remove the "no-scroll" class to the body element based on modal state
         if (isModalOpen) {
-            document.body.classList.add('no-scroll');
+            document.body.style.overflow = 'hidden';
         } else {
-            document.body.classList.remove('no-scroll');
+            document.body.style.overflow = 'auto';
         }
 
         // Cleanup when the component is unmounted
         return () => {
-            document.body.classList.remove('no-scroll');
+            document.body.style.overflow = 'auto';
         };
     }, [isModalOpen]);
 
@@ -410,8 +423,8 @@ const Drafting = () => {
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <div className="min-h-[88vh] flex flex-col my-8 text-white px-6 md:px-10 lg:px-16 xl:px-20 pb-10">
-                {loading || !draftData || !players || !autoPickList ? (
+            <div className="min-h-[88vh] flex flex-col my-8 text-white px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-10">
+                {loading || !draftData || !players || !autoPickList || !filteredPlayers ? (
                     <div className="w-full min-h-[70vh] flex items-center justify-center">
                         <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
                     </div>
@@ -421,17 +434,17 @@ const Drafting = () => {
                             <>
                                 {/* Admin Section */}
                                 {isCreator ? (
-                                    <div className="bg-[#1C1C1C] w-full rounded-xl shadow-lg p-6 mb-8 flex justify-between align-bottom relative">
-                                        <div className="flex flex-col space-y-2 w-2/3">
-                                            <h2 className={`text-4xl font-bold ${exo2.className}`}>Admin</h2>
-                                            <p className="text-gray-400">Actions only available to Admin.</p>
+                                    <div className="bg-[#0C1922] w-full rounded-xl shadow-lg p-4 md:p-6 mb-4 flex flex-col lg:flex-row justify-between align-bottom relative">
+                                        <div className="flex flex-col md:space-y-2 w-2/3">
+                                            <h2 className={`text-2xl xl:text-3xl font-bold ${exo2.className}`}>Admin</h2>
+                                            <p className="text-gray-400 text-sm xl:text-base">Actions only available to Admin.</p>
                                             {/* Invite Section */}
                                             {(draftData?.state !== 'Ended' && draftData?.state !== 'In Process') && (
-                                                <div className="flex space-x-4 mb-8 items-center">
-                                                    <div className='text-white mr-1'>Invite Code:</div>
-                                                    <div className="relative w-1/2">
+                                                <div className="absolute lg:static right-4 md:right-6 top-2 md:top-4 flex space-x-2 mb-8 items-center text-xs md:text-sm xl:text-base">
+                                                    <div className='text-white mr-1 hidden sm:flex'><span className='mr-1 hidden lg:block'>Invite</span> Code:</div>
+                                                    <div className="relative lg:w-1/3 min-w-24 sm:min-w-32">
                                                         <div
-                                                            className="bg-[#303030] px-4 py-2 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
+                                                            className="bg-[#1D374A] px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-white focus:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                                         >{draftData?.leagueID?.invite_code}
                                                         </div>
                                                         <button
@@ -441,11 +454,11 @@ const Drafting = () => {
                                                             }}
                                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-[#FF8A00] transition"
                                                         >
-                                                            <FaRegCopy className="text-lg" />
+                                                            <FaRegCopy />
                                                         </button>
                                                     </div>
                                                     <button
-                                                        className="fade-gradient py-2 px-6 rounded-full flex items-center space-x-2"
+                                                        className="fade-gradient py-2 px-2 sm:px-6 rounded-full flex items-center space-x-2"
                                                         onClick={() => {
                                                             let inviteCode
                                                             if (draftData && draftData.leagueID && draftData.leagueID.invite_code) {
@@ -465,24 +478,24 @@ const Drafting = () => {
                                                         }}
                                                     >
                                                         <FaLink />
-                                                        <span>Copy Invite Link</span>
+                                                        <span className='mr-1 hidden lg:block'>Copy Invite</span><span className='hidden sm:block'>Link</span>
                                                     </button>
                                                 </div>
                                             )}
                                         </div>
 
-                                        <div className="flex space-x-4 absolute bottom-0 right-0 mb-6 px-6">
+                                        <div className="flex space-x-2 xl:space-x-4 lg:absolute bottom-0 right-0 lg:mb-6 px-0 lg:px-6 mt-2 lg:mt-0 text-xs sm:text-sm md:text-base">
                                             {(
                                                 draftData?.state === "Manual" ||
                                                 (draftData?.state === "Scheduled" && timeRemaining === 0) ||
                                                 draftData?.state === "In Process"
                                             ) && (
-                                                    <button onClick={handleStart} className="bg-[#FF8A00] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#FF9A00]">
+                                                    <button onClick={handleStart} className="fade-gradient py-1 xl:py-2 px-6 rounded-full flex items-center space-x-2">
                                                         <FaPlay />
                                                         <span>Start Draft</span>
                                                     </button>
                                                 )}
-                                            <button onClick={() => handleNavigation('settings')} className="bg-[#333333] py-2 px-6 text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
+                                            <button onClick={() => handleNavigation('settings')} className="bg-[#ff8a00] text-black py-1 xl:py-2 px-6 my-1 rounded-full flex items-center space-x-2 hover:scale-105 transition-all hover:text-white ease-in-out">
                                                 <FaCog />
                                                 <span>Draft Settings</span>
                                             </button>
@@ -491,9 +504,9 @@ const Drafting = () => {
                                 )
                                     :
                                     (
-                                        <div className='flex justify-between'>
-                                            <h1 className={`text-4xl font-bold ${exo2.className} mb-4`}>Pre-Draft Page</h1>
-                                            <div className="flex space-x-4 mb-4">
+                                        <div className='flex justify-between text-xs sm:text-sm md:text-base'>
+                                            <h1 className={`text-xl md:text-2xl xl:text-3xl font-bold ${exo2.className} mb-2`}>Pre-Draft Page</h1>
+                                            <div className="flex space-x-4 mb-2">
                                                 {/* {(
                                                     draftData?.state === "Manual" ||
                                                     (draftData?.state === "Scheduled" && timeRemaining === 0) ||
@@ -504,7 +517,7 @@ const Drafting = () => {
                                                             <span>Start Draft</span>
                                                         </button>
                                                     )} */}
-                                                <button onClick={() => handleNavigation('settings')} className="bg-[#333333] py-2 px-6  text-lg rounded-full flex items-center space-x-2 hover:bg-[#444444]">
+                                                <button onClick={() => handleNavigation('settings')} className="fade-gradient py-1 xl:py-2 px-6 my-1 rounded-full flex items-center space-x-2">
                                                     <FaCog />
                                                     <span>Draft Settings</span>
                                                 </button>
@@ -519,14 +532,14 @@ const Drafting = () => {
                         ) : (
                             <> */}
                                 {/* Drafting Info Section */}
-                                <div className="flex justify-between mb-8">
-                                    <div className="flex flex-col space-y-4 w-1/3 pr-4 border-r border-[#404040]">
-                                        <div className="bg-[#333333] px-4 py-4 rounded-lg text-center">
+                                <div className="flex flex-col lg:flex-row justify-between mb-4">
+                                    <div className="flex space-x-0 sm:space-x-4 lg:space-x-0 flex-col sm:flex-row lg:flex-col space-y-2 sm:space-y-0 lg:space-y-2 w-full lg:w-1/3 lg:pr-4 lg:border-r lg:border-[#404040]">
+                                        <div className="bg-[#1D374A] px-4 py-4 rounded-lg text-center text-xs md:text-sm xl:text-base w-full sm:w-1/2 lg:w-full flex items-center justify-center ">
                                             {draftData?.state === 'Manual' && (
-                                                <p className="text-base">The draft is set to manual and will be started by the admin.</p>
+                                                <p className='text-white w-full'>The draft is set to manual and will be started by the admin.</p>
                                             )}
                                             {draftData?.state === 'Scheduled' && (
-                                                <p className="text-base">
+                                                <p className='text-white w-full'>
                                                     The draft is scheduled and will start on <br />
                                                     {new Date(draftData?.start_date).toLocaleString(undefined, {
                                                         weekday: 'long', // Show full day name (e.g., Monday)
@@ -541,50 +554,50 @@ const Drafting = () => {
                                                 </p>
                                             )}
                                             {draftData?.state === 'In Process' && (
-                                                <p className="text-lg">The draft is currently in progress.</p>
+                                                <p className='text-white'>The draft is currently in progress.</p>
                                             )}
                                             {draftData?.state === 'Ended' && (
-                                                <p className="text-lg">The draft has ended.</p>
+                                                <p className='text-white'>The draft has ended.</p>
                                             )}
                                         </div>
 
-                                        <div className="bg-[#333333] px-8 py-4 rounded-lg text-center">
+                                        <div className="bg-[#1D374A] px-4 py-4 rounded-lg text-center flex lg:flex-col items-center justify-center space-x-4 lg:space-x-0 w-full sm:w-1/2 lg:w-full">
                                             {draftData?.state === 'Manual' && (
                                                 <>
-                                                    <p className="text-2xl">Draft Type</p>
-                                                    <p className="text-5xl text-white mt-2">Manual</p>
+                                                    <p className="text-sm md:text-base lg:text-lg xl:text-xl">Draft Type:</p>
+                                                    <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white lg:mt-2">Manual</p>
                                                 </>
                                             )}
                                             {draftData?.state === 'Scheduled' && (
                                                 <>
-                                                    <p className="text-2xl">Time Remaining</p>
-                                                    <p className="text-5xl text-white mt-2">{formatTime(timeRemaining)}</p>
+                                                    <p className="text-sm md:text-base lg:text-lg xl:text-xl">Time Remaining:</p>
+                                                    <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white lg:mt-2">{formatTime(timeRemaining)}</p>
                                                 </>
                                             )}
                                             {draftData?.state === 'In Process' && (
                                                 <>
-                                                    <p className="text-2xl">Draft Status</p>
-                                                    <p className="text-5xl text-white mt-2">{draftData?.state}</p>
+                                                    <p className="text-sm md:text-base lg:text-lg xl:text-xl">Draft Status:</p>
+                                                    <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white lg:mt-2">{draftData?.state}</p>
                                                 </>
                                             )}
                                             {draftData?.state === 'Ended' && (
                                                 <>
-                                                    <p className="text-2xl">Draft Status</p>
-                                                    <p className="text-5xl text-white mt-2">{draftData?.state}</p>
+                                                    <p className="text-sm md:text-base lg:text-lg xl:text-xl">Draft Status:</p>
+                                                    <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white lg:mt-2">{draftData?.state}</p>
                                                 </>
                                             )}
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col space-y-2 w-2/3 pl-4">
+                                    <div className="flex flex-col space-y-2 w-full lg:w-2/3 mt-4 lg:mt-0 lg:pl-4">
                                         <div className='flex justify-between'>
-                                            <div className={`flex text-xl items-center ${exo2.className}`}>Draft Order:<span className='text-base ml-2 text-gray-400'>{`(Round 1 order)`}</span></div>
+                                            <div className={`flex text-base sm:text-lg xl:text-xl items-center ${exo2.className}`}>Draft Order:<span className='text-xs sm:text-sm xl:text-base ml-2 text-gray-400'>{`(Round 1 order)`}</span></div>
                                             {isCreator && (draftData?.state !== 'Ended' && draftData?.state !== 'In Process') && (
-                                                <button className="fade-gradient text-white px-6 py-1 rounded-full" onClick={() => setIsModalOpen(true)}>Change Order</button>
+                                                <button className="fade-gradient text-white px-6 py-1 rounded-full text-xs sm:text-sm xl:text-base" onClick={() => setIsModalOpen(true)}>Change Order</button>
                                             )}
                                         </div>
                                         <div className="overflow-x-auto pb-2 scrollbar">
-                                            <div className="flex gap-4 min-w-max">
+                                            <div className="flex gap-2 min-w-max">
                                                 {draftData?.order.map((email, index) => {
                                                     // Find the team corresponding to the current email in the order
                                                     const teamData = draftData?.teams.find((team) => team.user_email === email);
@@ -592,21 +605,19 @@ const Drafting = () => {
                                                     return (
                                                         <div
                                                             key={index}
-                                                            className="bg-[#1C1C1C] flex flex-col items-center justify-center text-center h-[140px] w-[200px] rounded-lg hover:bg-[#444444]"
+                                                            className="bg-[#1D374A] flex flex-col items-center justify-center text-center h-24 w-32 sm:h-28 sm:w-40 lg:h-32 lg:w-44 xl:h-36 xl:w-48 rounded-lg text-xs lg:text-sm"
                                                         >
                                                             {teamData ? (
                                                                 <>
-                                                                    <p className="text-sm text-[#FF8A00] mb-2">{`Turn ${index + 1}`}</p>
+                                                                    <p className="text-[#FF8A00] font-semibold mb-1">{`Turn ${index + 1}`}</p>
                                                                     {/* Show the team logo */}
-                                                                    {teamData.team?.team_image_path && (
-                                                                        <img
-                                                                            src={teamData.team.team_image_path}
-                                                                            alt={teamData.team.team_name}
-                                                                            className="w-14 h-14 rounded-lg mb-2"
-                                                                        />
-                                                                    )}
+                                                                    <img
+                                                                        src={teamData.team?.team_image_path ? teamData.team.team_image_path : "/images/default_team_logo.png"}
+                                                                        alt={teamData.team.team_name}
+                                                                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-lg mb-1"
+                                                                    />
                                                                     {/* Show the team name */}
-                                                                    <p className="text-sm">{teamData.team.team_name || "Unnamed Team"}</p>
+                                                                    <p className="text-white">{teamData.team.team_name || "Unnamed Team"}</p>
                                                                 </>
                                                             ) : (
                                                                 <p>No Team Found</p>
@@ -617,36 +628,47 @@ const Drafting = () => {
                                                 })}
                                             </div>
                                         </div>
-                                        <p className='text-sm text-gray-400'>* After every round draft order will be reversed.</p>
+                                        <p className='text-xs lg:text-sm text-gray-400'>* After every round draft order will be reversed.</p>
                                     </div>
 
 
                                 </div>
 
                                 {/* Main Draft Section */}
-                                <div className="grid grid-cols-5 gap-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-4">
                                     {/* Players Section */}
-                                    <div className="col-span-3 bg-[#1C1C1C] rounded-3xl p-6 h-[500px] ">
-                                        <div className='flex justify-between'>
-                                            <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-2`}>
+                                    <div className="lg:col-span-3 bg-[#0c1922] rounded-2xl py-6 px-4 xl:px-6 h-[540px] lg:h-[500px] ">
+                                        <div className='flex flex-col lg:flex-row justify-between'>
+                                            <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-2`}>
                                                 Players
                                             </h3>
                                             {/* Search, Filter, and Sort */}
-                                            <div className="flex gap-2 mb-2">
+                                            <div className="flex gap-1 xl:gap-2 mb-2 items-center text-xs xl:text-sm">
+                                                {filter || search ?
+                                                    <button className='hidden lg:flex items-center justify-center bg-[#314553] text-white px-2 py-0 h-6 rounded-full text-[10px] xl:text-xs hover:bg-[#FF8A00] transition-colors' onClick={() => handleClear()}>Clear <span className='pl-1'><FaRegCircleXmark /></span>
+                                                    </button>
+                                                    : null
+                                                }
                                                 <select
                                                     value={sort}
                                                     onChange={(e) => setSort(e.target.value)}
-                                                    className="p-2 rounded-lg bg-[#333333] text-white text-sm"
+                                                    className="p-1 xl:p-2 w-[25%] lg:w-auto rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                                 >
-                                                    <option value="name">Sort by Name</option>
-                                                    <option value="rating">Sort by Rating</option>
+                                                    <option value="name">
+                                                        {window.innerWidth < 640 || (window.innerWidth > 768 && window.innerWidth < 1024) ? "Name" : "Sort by Name"}
+                                                    </option>
+                                                    <option value="rating">
+                                                        {window.innerWidth < 640 || (window.innerWidth > 768 && window.innerWidth < 1024) ? "Rating" : "Sort by Rating"}
+                                                    </option>
                                                 </select>
                                                 <select
                                                     value={filter}
                                                     onChange={(e) => setFilter(e.target.value)}
-                                                    className="p-2 rounded-lg bg-[#333333] text-white text-sm"
+                                                    className="p-1 xl:p-2 w-[25%] lg:w-auto rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                                 >
-                                                    <option value="">Filter by Position</option>
+                                                    <option className="hidden" value="">
+                                                        {window.innerWidth < 640 || (window.innerWidth > 768 && window.innerWidth < 1024) ? "Postion" : "Filter by Position"}
+                                                    </option>
                                                     <option value="attacker">Attacker</option>
                                                     <option value="midfielder">Midfielder</option>
                                                     <option value="defender">Defender</option>
@@ -657,54 +679,67 @@ const Drafting = () => {
                                                     placeholder="Search players..."
                                                     value={search}
                                                     onChange={(e) => handleSearch(e.target.value)}
-                                                    className="p-2 rounded-lg bg-[#333333] text-white text-sm"
+                                                    className="p-1 xl:p-2 w-[40%] lg:w-auto rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                                 />
+                                                {filter || search ?
+                                                    <button className='flex lg:hidden w-[8%] lg:w-auto items-center justify-center bg-[#314553] text-white p-1 h-6 rounded-full text-sm hover:bg-[#FF8A00] transition-colors' onClick={() => handleClear()}><FaRegCircleXmark />
+                                                    </button>
+                                                    : null
+                                                }
                                             </div>
                                         </div>
                                         {/* Table */}
-                                        <div className="relative w-full max-h-[420px] overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]">
+                                        <div className="relative w-full max-h-[420px] overflow-hidden rounded-lg border border-[#1D374A]">
                                             {/* Scrollable Wrapper */}
                                             <div className="overflow-x-auto overflow-y-auto max-h-[420px] scrollbar">
-                                                <table className="table-auto w-full text-left text-white">
+                                                <table className="table-auto w-full text-left text-white text-xs xl:text-sm">
                                                     {/* Table Header */}
-                                                    <thead className="bg-[#2f2f2f] sticky top-0 z-10">
+                                                    <thead className="bg-[#1D374A] sticky top-0 z-10">
                                                         <tr className="text-center">
-                                                            <th className="p-2 max-w-[100px]">Name</th>
-                                                            <th className="p-2">Position</th>
-                                                            <th className="p-2">Rating</th>
-                                                            <th className="p-2">Actions</th>
+                                                            <th className="p-2 text-left pl-4 max-w-[100px]">Name</th>
+                                                            <th className="lg:p-2"></th>
+                                                            <th className="lg:p-2">Rating</th>
+                                                            <th className="lg:p-2">Actions</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody className='text-sm'>
-                                                        {filteredPlayers.map((player) => (
-                                                            <tr key={player.id} className="border-b border-[#333333] text-center items-center justify-center">
-                                                                <td className="p-2 max-w-[100px] text-left truncate">
-                                                                    <div className="flex items-center space-x-2">
-                                                                        {player.image_path && (
-                                                                            <img
-                                                                                src={player.image_path}
-                                                                                alt={player.team_name || "Team Logo"}
-                                                                                className="w-10 h-10 rounded-lg"
-                                                                            />
-                                                                        )}
-                                                                        <div className="overflow-hidden">
-                                                                            <p className="font-bold truncate">{player.common_name}</p>
-                                                                            <p className="text-xs text-gray-400 truncate">{player.team_name}</p>
+                                                    <tbody className=''>
+                                                        {filteredPlayers ?
+                                                            filteredPlayers.map((player) => (
+                                                                <tr key={player.id} className="border-b border-[#1D374A] text-center items-center justify-center">
+                                                                    <td className="p-2 min-w-24 max-w-[100px] text-left truncate">
+                                                                        <div className="flex items-center space-x-2">
+                                                                            {player.image_path && (
+                                                                                <img
+                                                                                    src={player.image_path}
+                                                                                    alt={player.team_name || "Team Logo"}
+                                                                                    className="w-10 h-10 rounded-lg"
+                                                                                />
+                                                                            )}
+                                                                            <div className="overflow-hidden">
+                                                                                <p className="font-bold truncate">{player.common_name}</p>
+                                                                                <p className="text-xs text-gray-400 truncate">{player.team_name}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                </td>
-                                                                <td className='h-full flex justify-center items-center' style={{ verticalAlign: "middle" }}>{positionIcon(player.position_name)}</td>
-                                                                <td className="p-2">{player.rating}</td>
-                                                                <td className="p-2">
-                                                                    <button
-                                                                        className="bg-[#FF8A00] text-white px-6 py-1 rounded-lg hover:bg-[#e77d00]"
-                                                                        onClick={() => handlePick(player)}
-                                                                    >
-                                                                        Pick
-                                                                    </button>
+                                                                    </td>
+                                                                    <td className='lg:px-2 h-full flex justify-center items-center' style={{ verticalAlign: "middle" }}>{positionIcon(player.position_name)}</td>
+                                                                    <td className="lg:p-2">{player.rating}</td>
+                                                                    <td className="lg:p-2">
+                                                                        <button
+                                                                            className="bg-[#1D374A] text-white px-4 lg:px-6 py-1 rounded-lg hover:bg-[#ff8a00]"
+                                                                            onClick={() => handlePick(player)}
+                                                                        >
+                                                                            Pick
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            ))
+                                                            :
+                                                            <tr>
+                                                                <td colSpan="4" className="text-center text-gray-400 p-4">
+                                                                    "Loading players..."
                                                                 </td>
                                                             </tr>
-                                                        ))}
+                                                        }
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -715,12 +750,12 @@ const Drafting = () => {
                                     </div>
 
                                     {/* Auto Pick List Section */}
-                                    <div className="col-span-2 bg-[#1C1C1C] rounded-3xl p-6 h-[500px]">
-                                        <div className='flex justify-between'>
-                                            <h3 className={`text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-4`}>
+                                    <div className="lg:col-span-2 bg-[#0c1922] rounded-2xl py-6 px-4 xl:px-6 h-[540px] lg:h-[500px] text-xs xl:text-sm">
+                                        <div className='flex md:flex-col lg:flex-row items-end justify-between'>
+                                            <h3 className={`text-xl xl:text-2xl md:w-full lg:w-auto font-bold text-left text-[#FF8A00] ${exo2.className} mb-2`}>
                                                 Auto Pick List
                                             </h3>
-                                            <button className={`save-button ${hasUnsavedChanges ? "enabled bg-[#FF8A00] hover:bg-[#e77d00]" : "disabled bg-[#4e4e4e]"} text-white px-3 py-1 mb-4 rounded-lg `} disabled={!hasUnsavedChanges} onClick={() => { saveAutoPickList() }}>Save Changes</button>
+                                            <button className={`w-auto md:w-28 lg:w-auto text-xs xl:text-sm ${hasUnsavedChanges ? "enabled bg-[#FF8A00] text-black hover:bg-[#e77d00]" : "disabled bg-[#1D374A] text-white"}  px-3 py-1 mb-3 rounded-lg `} disabled={!hasUnsavedChanges} onClick={() => { saveAutoPickList() }}>Save Changes</button>
                                         </div>
                                         {autoPickList ?
                                             autoPickList.length > 0 ?
@@ -730,21 +765,21 @@ const Drafting = () => {
                                                             <div
                                                                 {...provided.droppableProps}
                                                                 ref={provided.innerRef}
-                                                                className="relative w-full max-h-[420px] overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]"
+                                                                className="relative w-full max-h-[420px] overflow-hidden rounded-lg border border-[#1D374A]"
                                                             >
                                                                 {/* Scrollable Wrapper */}
                                                                 <div className="overflow-x-auto overflow-y-auto max-h-[420px] scrollbar">
-                                                                    <table className="table-auto w-full text-left text-white">
+                                                                    <table className="table-auto w-full text-left text-white ">
                                                                         {/* Table Header */}
-                                                                        <thead className="bg-[#2f2f2f] sticky top-0 z-10">
+                                                                        <thead className="bg-[#1D374A] sticky top-0 z-10">
                                                                             <tr className="text-center">
-                                                                                {/* <th className="p-2 w-10"></th> */}
-                                                                                <th className="p-2 max-w-[100px]">Name</th>
-                                                                                <th className="p-2">Position</th>
-                                                                                <th className="p-2 sticky right-0 z-20">Actions</th>
+                                                                                <th className="p-2"></th>
+                                                                                <th className="p-2 max-w-[100px] text-left pl-4">Name</th>
+                                                                                <th className="lg:p-2"></th>
+                                                                                <th className="lg:p-2 sticky right-0 z-20">Actions</th>
                                                                             </tr>
                                                                         </thead>
-                                                                        <tbody className="text-sm">
+                                                                        <tbody className="">
                                                                             {autoPickList.map((player, index) => (
                                                                                 <Draggable
                                                                                     key={player.id} // Keep the key as is
@@ -756,7 +791,7 @@ const Drafting = () => {
                                                                                             ref={provided.innerRef}
                                                                                             {...provided.draggableProps}
                                                                                             {...provided.dragHandleProps}
-                                                                                            className={`border-b border-[#333333] text-center items-center justify-center ${snapshot.isDragging ? 'table' : ''
+                                                                                            className={`border-b border-[#1D374A] text-center items-center justify-center ${snapshot.isDragging ? 'table' : ''
                                                                                                 }`}
                                                                                             style={{
                                                                                                 ...provided.draggableProps.style, // Ensures the library's drag styles are applied
@@ -765,11 +800,11 @@ const Drafting = () => {
                                                                                         >
                                                                                             {/* Drag Handle Icon */}
                                                                                             {/* {!snapshot.isDragging ? */}
-                                                                                            {/* <td className="p-2 w-10 flex justify-center items-center">
-                                                                                    <span className="cursor-move text-gray-400 hover:text-gray-300">
-                                                                                        <LuGrip />
-                                                                                    </span>
-                                                                                </td> */}
+                                                                                            <td className="p-2 flex justify-center items-center">
+                                                                                                <span className="cursor-move text-gray-400 hover:text-gray-300">
+                                                                                                    <LuGrip />
+                                                                                                </span>
+                                                                                            </td>
                                                                                             {/* : */}
                                                                                             {/* <></>} */}
                                                                                             <td className="p-2 max-w-[100px] text-left truncate">
@@ -790,12 +825,12 @@ const Drafting = () => {
                                                                                             <td className="h-full flex justify-center items-center">
                                                                                                 {positionIcon(player.position_name)}
                                                                                             </td>
-                                                                                            <td className="p-2 sticky right-0 bg-[#1C1C1C]">
+                                                                                            <td className="lg:p-2 sticky right-0">
                                                                                                 <button
-                                                                                                    className="bg-[#FF8A00] text-white px-3 py-1 rounded-lg hover:bg-[#e77d00]"
+                                                                                                    className="bg-[#1D374A] text-white px-3 py-2 lg:py-1 rounded-lg hover:bg-[#ff8a00]"
                                                                                                     onClick={() => removeFromPickList(player)}
                                                                                                 >
-                                                                                                    Remove
+                                                                                                    {window.innerWidth < 1024 ? <FaTrash /> : 'Remove'}
                                                                                                 </button>
                                                                                             </td>
                                                                                         </tr>
@@ -811,12 +846,12 @@ const Drafting = () => {
                                                     </Droppable>
                                                 </DragDropContext>
                                                 : (
-                                                    <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2">
+                                                    <div className="h-[85%] overflow-auto flex flex-col border border-[#1D374A] rounded-xl justify-center space-y-2">
                                                         <div className="text-gray-400 text-center">No players selected for auto pick.</div>
                                                     </div>
                                                 )
                                             : (
-                                                <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2">
+                                                <div className="h-[85%] overflow-auto flex flex-col border border-[#1D374A] rounded-xl justify-center space-y-2">
                                                     <div className="text-gray-400 text-center">Fetching auto pick list...</div>
                                                 </div>
                                             )
@@ -829,7 +864,7 @@ const Drafting = () => {
                                 {isModalOpen && (
                                     <Modal onClose={() => setIsModalOpen(false)} title="Change Draft Order">
                                         {/* Modal Body */}
-                                        <div className="flex flex-col max-h-[600px]">
+                                        <div className="flex flex-col max-h-[600px] bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-sm">
                                             <div className="flex-1 overflow-y-auto max-h-[90%] scrollbar">
                                                 <DragDropContext onDragEnd={handleOrderDragEnd}>
                                                     <Droppable droppableId="draftOrder">
@@ -855,16 +890,16 @@ const Drafting = () => {
                                                                                     ref={provided.innerRef}
                                                                                     {...provided.draggableProps}
                                                                                     {...provided.dragHandleProps}
-                                                                                    className={`p-4 bg-[#333333] rounded-lg flex items-center space-x-4 ${snapshot.isDragging ? 'shadow-lg' : ''
+                                                                                    className={`p-2 lg:p-4 bg-[#1D374A] rounded-lg flex items-center text-sm sm:text-base xl:text-lg space-x-4 ${snapshot.isDragging ? 'shadow-lg' : ''
                                                                                         }`}
                                                                                 >
-                                                                                    <span className="cursor-move text-gray-400 hover:text-gray-300">
+                                                                                    <span className="px-2 flex items-center justify-center font-sans not-italic text-xl cursor-move text-gray-400 hover:text-gray-300">
                                                                                         &#x2630;
                                                                                     </span>
                                                                                     <img
                                                                                         src={
                                                                                             teamData?.team?.team_image_path ||
-                                                                                            'https://via.placeholder.com/100'
+                                                                                            '/images/default_team_logo.png'
                                                                                         }
                                                                                         alt={
                                                                                             teamData?.team?.team_name ||
@@ -889,15 +924,15 @@ const Drafting = () => {
                                             </div>
 
                                             {/* Buttons */}
-                                            <div className="flex justify-end space-x-4 mt-4">
+                                            <div className="flex justify-end space-x-2 sm:space-x-4 mt-4 text-sm sm:text-base">
                                                 <button
-                                                    className="bg-[#4e4e4e] text-white px-6 py-2 rounded-lg"
+                                                    className="bg-[#ff8a00] text-black px-6 lg:px-10 py-1 lg:py-2 rounded-full hover:scale-105 transition-all ease-in-out hover:text-white"
                                                     onClick={() => setIsModalOpen(false)}
                                                 >
                                                     Cancel
                                                 </button>
                                                 <button
-                                                    className="bg-[#FF8A00] text-white px-6 py-2 rounded-lg"
+                                                    className="fade-gradient text-white px-6 lg:px-10 py-1 lg:py-2 rounded-full"
                                                     onClick={handleOrderSaveChanges}
                                                 >
                                                     Save Changes

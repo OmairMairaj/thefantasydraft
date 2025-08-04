@@ -13,7 +13,7 @@ const exo2 = Exo_2({
     subsets: ['latin'],
 });
 
-const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick }) => {
+const FixtureModal = ({ fixture, gameweek, leagueData, onClose, handlePlayerClick }) => {
     const [leaguePoints, setLeaguePoints] = useState(null);
     const [team, setTeam] = useState(null);
     const [players, setPlayers] = useState([]);
@@ -22,7 +22,7 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
     const [players2, setPlayers2] = useState([]);
     const { addAlert } = useAlert();
     const [pitchView, setPitchView] = useState(true); // Toggle between Pitch and List views
-    const [leagueData, setLeagueData] = useState(null);
+    // const [leagueData, setLeagueData] = useState(null);
     const [leagueTable, setLeagueTable] = useState([]);
     const [fixtures, setFixtures] = useState([]);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -60,10 +60,10 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
 
     useEffect(() => {
         fetchTeamDetails(fixture[0]);
-        fetchLeagueTeamPoints(leagueId, fixture[0], gameweek);
+        fetchLeagueTeamPoints(leagueData._id, fixture[0], gameweek);
 
         fetchTeamDetails2(fixture[1]);
-        fetchLeagueTeamPoints2(leagueId, fixture[1], gameweek);
+        fetchLeagueTeamPoints2(leagueData._id, fixture[1], gameweek);
     }, []);
 
     const fetchTeamDetails = async (teamId) => {
@@ -204,6 +204,19 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
         return result;
     };
 
+    const renderSkeletons = (required, chosenCount) => {
+        if (chosenCount >= required) return null;
+        return Array.from({ length: Math.max(0, required - chosenCount) }).map((_, index) => (
+            <div
+                key={`skeleton-${index}`}
+                className="relative w-1/5 flex flex-col py-6 lg:py-6 xl:py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]"
+            >
+                <div className="w-10 h-10 sm:w-16 sm:h-16 xl:w-20 xl:h-20 rounded-lg bg-gray-600 animate-pulse mt-2" />
+                <p className="text-sm mt-4 sm:mt-5 xl:mt-6 w-full bg-gray-700 h-4 animate-pulse" />
+            </div>
+        ));
+    };
+
     const positionIcon = (position) => {
         const positionStyles = {
             Attacker: { bg: 'bg-[#D3E4FE]', text: 'A' },
@@ -268,59 +281,225 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                                     </div>
                                 </div>
                             </div>
+                            {leagueData?.draftID?.state === "Ended" &&
+                                <div className="flex justify-end my-2" >
+                                    {/* <h3 className={`text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>Team</h3> */}
+                                    <div className="flex items-center rounded-lg overflow-hidden text-xs xl:text-sm">
+                                        <button
+                                            className={`${view === 'List' ? 'bg-[#ff8800b7]' : 'bg-[#1d374a]'} text-white px-5 py-1`}
+                                            onClick={() => setView('List')}
+                                        >
+                                            List View
+                                        </button>
+                                        <button
+                                            className={`${view === 'Pitch' ? 'bg-[#ff8800b7]' : 'bg-[#1d374a]'} text-white px-5 py-1`}
+                                            onClick={() => setView('Pitch')}
+                                        >
+                                            Pitch View
+                                        </button>
+                                    </div>
+                                </div>
+                            }
                             <div className="relative w-full overflow-hidden rounded-lg mt-4 border border-[#1d374a] bg-[#0C1922]">
-                                <div className="overflow-x-auto lg:h-[68vh] lg:overflow-y-auto lg:scrollbar">
-                                    <table className="w-full text-left text-white text-xs sm:text-sm xl:text-base">
-                                        <thead className="bg-[#1d374a] sticky top-0 z-10">
-                                            <tr className="text-center">
-                                                <th className="p-2 text-left pl-4">Player</th>
-                                                <th className="p-2">Team</th>
-                                                <th className="p-2">Points</th>
-                                                {/* <th className="p-2">Actions</th> */}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* Main positions */}
-                                            {["Goalkeeper", "Defender", "Midfielder", "Attacker"].map((pos) => (
-                                                pitchViewList.lineup[pos].length > 0 && (
-                                                    <React.Fragment key={pos}>
-                                                        {/* Section Heading */}
-                                                        <tr>
-                                                            <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
-                                                                {pos}
-                                                            </td>
-                                                        </tr>
-                                                        {pitchViewList.lineup[pos].map((player) => {
+                                {view === 'Pitch' ? (
+                                    <div className="relative overflow-y-auto h-[68vh] scrollbar">
+                                        <div className={`flex flex-col gap-2 ${leagueData?.draftID?.state !== "Ended" ? 'blur-sm' : ''}`}>
+                                            {/* Pitch layout */}
+                                            <div className="py-6 px-0 sm:px-4 text-white rounded-lg border border-[#1d374a] bg-[#0c1922] pitch-view">
+                                                <div className="flex flex-col gap-4">
+                                                    {/* Goalkeeper */}
+                                                    <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                        {pitchViewList.lineup.Goalkeeper.map((player) => {
                                                             const gameweekPoints = player.player.points.find(
                                                                 (p) => p.gameweek._id === gameweek
                                                             );
                                                             return (
-                                                                <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
-                                                                    {/* Player Name + Image */}
-                                                                    <td className="px-2 text-left truncate max-w-36">
-                                                                        <div className="flex items-center space-x-2">
-                                                                            {player.player.image_path && (
-                                                                                <img
-                                                                                    src={player.player.image_path}
-                                                                                    alt={player.player.team_name || 'Team Logo'}
-                                                                                    className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
-                                                                                />
-                                                                            )}
-                                                                            <div className="overflow-hidden">
-                                                                                <p className="font-bold truncate">{player.player.common_name}</p>
-                                                                            </div>
-                                                                            <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
-                                                                        </div>
-                                                                    </td>
-                                                                    {/* Team Logo */}
-                                                                    <td className="p-2 text-center truncate">
-                                                                        <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
-                                                                    </td>
-                                                                    <td className="p-2 text-center truncate">
+                                                                <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                    <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                    <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                        {player.player.common_name}
+                                                                    </p>
+                                                                    <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {player.player.position_name}
+                                                                    </p>
+                                                                    <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
                                                                         {gameweekPoints?.points ? gameweekPoints.points : 0}
-                                                                    </td>
-                                                                    {/* Controls */}
-                                                                    {/* <td className="p-2 text-center truncate">
+                                                                    </p>
+
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {renderSkeletons(1, pitchViewList.lineup.Goalkeeper.length)}
+                                                    </div>
+
+                                                    {/* Defenders */}
+                                                    <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                        {pitchViewList.lineup.Defender.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                    <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                    <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                        {player.player.common_name}
+                                                                    </p>
+                                                                    <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {player.player.position_name}
+                                                                    </p>
+                                                                    <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </p>
+
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {renderSkeletons(3, pitchViewList.lineup.Defender.length)}
+                                                    </div>
+
+                                                    {/* Midfielders */}
+                                                    <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                        {pitchViewList.lineup.Midfielder.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                    <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                    <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                        {player.player.common_name}
+                                                                    </p>
+                                                                    <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {player.player.position_name}
+                                                                    </p>
+                                                                    <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </p>
+
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {renderSkeletons(3, pitchViewList.lineup.Midfielder.length)}
+                                                    </div>
+
+                                                    {/* Attackers */}
+                                                    <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                        {pitchViewList.lineup.Attacker.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                    <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                    <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                        {player.player.common_name}
+                                                                    </p>
+                                                                    <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {player.player.position_name}
+                                                                    </p>
+                                                                    <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </p>
+
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {renderSkeletons(2, pitchViewList.lineup.Attacker.length)}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Substitute Players */}
+                                            <div className='w-full flex flex-col py-3 px-4 bg-[#071117] rounded-lg'>
+                                                <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                    {pitchViewList.bench.map((player) => {
+                                                        const gameweekPoints = player.player.points.find(
+                                                            (p) => p.gameweek._id === gameweek
+                                                        );
+                                                        return (
+                                                            <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                    {player.player.common_name}
+                                                                </p>
+                                                                <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                    {player.player.position_name}
+                                                                </p>
+                                                                <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                    {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                </p>
+
+                                                            </div>
+                                                        )
+                                                    })}
+                                                    {renderSkeletons(4, pitchViewList.bench.length)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {leagueData?.draftID?.state !== "Ended" && (
+                                            <div className='ribbon-2 text-base xl:text-xl text-[#ff7A00] text-center'>
+                                                Drafting not completed yet.
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto lg:h-[68vh] lg:overflow-y-auto lg:scrollbar">
+                                        <table className="w-full text-left text-white text-xs sm:text-sm xl:text-base">
+                                            <thead className="bg-[#1d374a] sticky top-0 z-10">
+                                                <tr className="text-center">
+                                                    <th className="p-2 text-left pl-4">Player</th>
+                                                    <th className="p-2">Team</th>
+                                                    <th className="p-2">Points</th>
+                                                    {/* <th className="p-2">Actions</th> */}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {/* Main positions */}
+                                                {["Goalkeeper", "Defender", "Midfielder", "Attacker"].map((pos) => (
+                                                    pitchViewList.lineup[pos].length > 0 && (
+                                                        <React.Fragment key={pos}>
+                                                            {/* Section Heading */}
+                                                            <tr>
+                                                                <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                                    {pos}
+                                                                </td>
+                                                            </tr>
+                                                            {pitchViewList.lineup[pos].map((player) => {
+                                                                const gameweekPoints = player.player.points.find(
+                                                                    (p) => p.gameweek._id === gameweek
+                                                                );
+                                                                return (
+                                                                    <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                        {/* Player Name + Image */}
+                                                                        <td className="px-2 text-left truncate max-w-36">
+                                                                            <div className="flex items-center space-x-2">
+                                                                                {player.player.image_path && (
+                                                                                    <img
+                                                                                        src={player.player.image_path}
+                                                                                        alt={player.player.team_name || 'Team Logo'}
+                                                                                        className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
+                                                                                    />
+                                                                                )}
+                                                                                <div className="overflow-hidden">
+                                                                                    <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                                </div>
+                                                                                <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
+                                                                            </div>
+                                                                        </td>
+                                                                        {/* Team Logo */}
+                                                                        <td className="p-2 text-center truncate">
+                                                                            <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
+                                                                        </td>
+                                                                        <td className="p-2 text-center truncate">
+                                                                            {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                        </td>
+                                                                        {/* Controls */}
+                                                                        {/* <td className="p-2 text-center truncate">
                                                                             <div className="flex justify-center items-center gap-2">
                                                                                 <button
                                                                                     className="bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white"
@@ -339,53 +518,53 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                                                                                 </button>
                                                                             </div>
                                                                         </td> */}
-                                                                </tr>
-                                                            )
-                                                        })}
-                                                    </React.Fragment>
-                                                )
-                                            ))}
+                                                                    </tr>
+                                                                )
+                                                            })}
+                                                        </React.Fragment>
+                                                    )
+                                                ))}
 
-                                            {/* Substitutes */}
-                                            {pitchViewList.bench.length > 0 && (
-                                                <React.Fragment>
-                                                    <tr>
-                                                        <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
-                                                            Substitutes
-                                                        </td>
-                                                    </tr>
-                                                    {pitchViewList.bench.map((player) => {
-                                                        const gameweekPoints = player.player.points.find(
-                                                            (p) => p.gameweek._id === gameweek
-                                                        );
-                                                        return (
-                                                            <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
-                                                                {/* Player Name + Image */}
-                                                                {/* Player Name + Image */}
-                                                                <td className="px-2 text-left truncate max-w-36">
-                                                                    <div className="flex items-center space-x-2">
-                                                                        {player.player.image_path && (
-                                                                            <img
-                                                                                src={player.player.image_path}
-                                                                                alt={player.player.common_name || 'Player Logo'}
-                                                                                className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
-                                                                            />
-                                                                        )}
-                                                                        <div className="overflow-hidden">
-                                                                            <p className="font-bold truncate">{player.player.common_name}</p>
+                                                {/* Substitutes */}
+                                                {pitchViewList.bench.length > 0 && (
+                                                    <React.Fragment>
+                                                        <tr>
+                                                            <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                                Substitutes
+                                                            </td>
+                                                        </tr>
+                                                        {pitchViewList.bench.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                    {/* Player Name + Image */}
+                                                                    {/* Player Name + Image */}
+                                                                    <td className="px-2 text-left truncate max-w-36">
+                                                                        <div className="flex items-center space-x-2">
+                                                                            {player.player.image_path && (
+                                                                                <img
+                                                                                    src={player.player.image_path}
+                                                                                    alt={player.player.common_name || 'Player Logo'}
+                                                                                    className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
+                                                                                />
+                                                                            )}
+                                                                            <div className="overflow-hidden">
+                                                                                <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                            </div>
+                                                                            <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
                                                                         </div>
-                                                                        <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
-                                                                    </div>
-                                                                </td>
-                                                                {/* Team Logo */}
-                                                                <td className="p-2 text-center">
-                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
-                                                                </td>
-                                                                <td className="p-2 text-center truncate">
-                                                                    {gameweekPoints?.points ? gameweekPoints.points : 0}
-                                                                </td>
-                                                                {/* Controls */}
-                                                                {/* <td className="p-2 text-center truncate">
+                                                                    </td>
+                                                                    {/* Team Logo */}
+                                                                    <td className="p-2 text-center">
+                                                                        <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
+                                                                    </td>
+                                                                    <td className="p-2 text-center truncate">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </td>
+                                                                    {/* Controls */}
+                                                                    {/* <td className="p-2 text-center truncate">
                                                                         <div className="flex justify-center items-center gap-2">
                                                                             <button
                                                                                 className="bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white"
@@ -404,14 +583,15 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                                                                             </button>
                                                                         </div>
                                                                     </td> */}
-                                                            </tr>
-                                                        )
-                                                    })}
-                                                </React.Fragment>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                                </tr>
+                                                            )
+                                                        })}
+                                                    </React.Fragment>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -452,60 +632,226 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                                     </div>
                                 </div>
                             </div>
+                            {leagueData?.draftID?.state === "Ended" &&
+                                <div className="flex justify-end my-2" >
+                                    {/* <h3 className={`text-3xl font-bold text-[#FF8A00] ${exo2.className}`}>Team</h3> */}
+                                    <div className="flex items-center rounded-lg overflow-hidden text-xs xl:text-sm">
+                                        <button
+                                            className={`${view === 'List' ? 'bg-[#ff8800b7]' : 'bg-[#1d374a]'} text-white px-5 py-1`}
+                                            onClick={() => setView('List')}
+                                        >
+                                            List View
+                                        </button>
+                                        <button
+                                            className={`${view === 'Pitch' ? 'bg-[#ff8800b7]' : 'bg-[#1d374a]'} text-white px-5 py-1`}
+                                            onClick={() => setView('Pitch')}
+                                        >
+                                            Pitch View
+                                        </button>
+                                    </div>
+                                </div>
+                            }
 
                             <div className="relative w-full overflow-hidden rounded-lg mt-4 border border-[#1d374a] bg-[#0C1922]">
-                                <div className="overflow-x-auto lg:h-[68vh] lg:overflow-y-auto lg:scrollbar">
-                                    <table className="w-full text-left text-white text-xs sm:text-sm xl:text-base">
-                                        <thead className="bg-[#1d374a] sticky top-0 z-10">
-                                            <tr className="text-center">
-                                                <th className="p-2 text-left pl-4">Player</th>
-                                                <th className="p-2">Team</th>
-                                                <th className="p-2">Points</th>
-                                                {/* <th className="p-2">Actions</th> */}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* Main positions */}
-                                            {["Goalkeeper", "Defender", "Midfielder", "Attacker"].map((pos) => (
-                                                pitchViewList2.lineup[pos].length > 0 && (
-                                                    <React.Fragment key={pos}>
-                                                        {/* Section Heading */}
-                                                        <tr>
-                                                            <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
-                                                                {pos}
-                                                            </td>
-                                                        </tr>
-                                                        {pitchViewList2.lineup[pos].map((player) => {
+                                {view === 'Pitch' ? (
+                                    <div className="relative overflow-y-auto h-[68vh] scrollbar">
+                                        <div className={`flex flex-col gap-2 ${leagueData?.draftID?.state !== "Ended" ? 'blur-sm' : ''}`}>
+                                            {/* Pitch layout */}
+                                            <div className="py-6 px-0 sm:px-4 text-white rounded-lg border border-[#1d374a] bg-[#0c1922] pitch-view">
+                                                <div className="flex flex-col gap-4">
+                                                    {/* Goalkeeper */}
+                                                    <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                        {pitchViewList2.lineup.Goalkeeper.map((player) => {
                                                             const gameweekPoints = player.player.points.find(
                                                                 (p) => p.gameweek._id === gameweek
                                                             );
                                                             return (
-                                                                <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
-                                                                    {/* Player Name + Image */}
-                                                                    <td className="px-2 text-left truncate max-w-28 sm:max-w-none">
-                                                                        <div className="flex items-center space-x-2">
-                                                                            {player.player.image_path && (
-                                                                                <img
-                                                                                    src={player.player.image_path}
-                                                                                    alt={player.player.team_name || 'Team Logo'}
-                                                                                    className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
-                                                                                />
-                                                                            )}
-                                                                            <div className="overflow-hidden">
-                                                                                <p className="font-bold truncate">{player.player.common_name}</p>
-                                                                            </div>
-                                                                            <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
-                                                                        </div>
-                                                                    </td>
-                                                                    {/* Team Logo */}
-                                                                    <td className="p-2 text-center truncate">
-                                                                        <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
-                                                                    </td>
-                                                                    <td className="p-2 text-center truncate">
+                                                                <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                    <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                    <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                        {player.player.common_name}
+                                                                    </p>
+                                                                    <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {player.player.position_name}
+                                                                    </p>
+                                                                    <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
                                                                         {gameweekPoints?.points ? gameweekPoints.points : 0}
-                                                                    </td>
-                                                                    {/* Controls */}
-                                                                    {/* <td className="p-2 text-center truncate">
+                                                                    </p>
+
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {renderSkeletons(1, pitchViewList2.lineup.Goalkeeper.length)}
+                                                    </div>
+
+                                                    {/* Defenders */}
+                                                    <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                        {pitchViewList2.lineup.Defender.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                    <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                    <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                        {player.player.common_name}
+                                                                    </p>
+                                                                    <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {player.player.position_name}
+                                                                    </p>
+                                                                    <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </p>
+
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {renderSkeletons(3, pitchViewList2.lineup.Defender.length)}
+                                                    </div>
+
+                                                    {/* Midfielders */}
+                                                    <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                        {pitchViewList2.lineup.Midfielder.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                    <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                    <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                        {player.player.common_name}
+                                                                    </p>
+                                                                    <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {player.player.position_name}
+                                                                    </p>
+                                                                    <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </p>
+
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {renderSkeletons(3, pitchViewList2.lineup.Midfielder.length)}
+                                                    </div>
+
+                                                    {/* Attackers */}
+                                                    <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                        {pitchViewList2.lineup.Attacker.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                    <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                    <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                        {player.player.common_name}
+                                                                    </p>
+                                                                    <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {player.player.position_name}
+                                                                    </p>
+                                                                    <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </p>
+
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {renderSkeletons(2, pitchViewList2.lineup.Attacker.length)}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Substitute Players */}
+                                            <div className='w-full flex flex-col py-3 px-4 bg-[#071117] rounded-lg'>
+                                                <div className="flex justify-center items-center gap-1 sm:gap-4">
+                                                    {pitchViewList2.bench.map((player) => {
+                                                        const gameweekPoints = player.player.points.find(
+                                                            (p) => p.gameweek._id === gameweek
+                                                        );
+                                                        return (
+                                                            <div key={player.player._id} className={` relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#1d374a] shadow-sm shadow-black bg-[#0c192280]`} onClick={() => handlePlayerClick(player)} >
+                                                                <img src={player.player.image_path} alt={player.player.name} className="w-10 sm:w-16 xl:w-16 rounded-lg" />
+                                                                <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-4 h-4 sm:w-8 sm:h-8 rounded-full shadow-md" />
+                                                                <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap text-xs sm:text-sm xl:text-base">
+                                                                    {player.player.common_name}
+                                                                </p>
+                                                                <p className="px-2 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                    {player.player.position_name}
+                                                                </p>
+                                                                <p className="px-2 mt-1 truncate max-w-full whitespace-nowrap text-[10px] sm:text-xs">
+                                                                    {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                </p>
+
+                                                            </div>
+                                                        )
+                                                    })}
+                                                    {renderSkeletons(4, pitchViewList2.bench.length)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {leagueData?.draftID?.state !== "Ended" && (
+                                            <div className='ribbon-2 text-base xl:text-xl text-[#ff7A00] text-center'>
+                                                Drafting not completed yet.
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto lg:h-[68vh] lg:overflow-y-auto lg:scrollbar">
+                                        <table className="w-full text-left text-white text-xs sm:text-sm xl:text-base">
+                                            <thead className="bg-[#1d374a] sticky top-0 z-10">
+                                                <tr className="text-center">
+                                                    <th className="p-2 text-left pl-4">Player</th>
+                                                    <th className="p-2">Team</th>
+                                                    <th className="p-2">Points</th>
+                                                    {/* <th className="p-2">Actions</th> */}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {/* Main positions */}
+                                                {["Goalkeeper", "Defender", "Midfielder", "Attacker"].map((pos) => (
+                                                    pitchViewList2.lineup[pos].length > 0 && (
+                                                        <React.Fragment key={pos}>
+                                                            {/* Section Heading */}
+                                                            <tr>
+                                                                <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                                    {pos}
+                                                                </td>
+                                                            </tr>
+                                                            {pitchViewList2.lineup[pos].map((player) => {
+                                                                const gameweekPoints = player.player.points.find(
+                                                                    (p) => p.gameweek._id === gameweek
+                                                                );
+                                                                return (
+                                                                    <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                        {/* Player Name + Image */}
+                                                                        <td className="px-2 text-left truncate max-w-36">
+                                                                            <div className="flex items-center space-x-2">
+                                                                                {player.player.image_path && (
+                                                                                    <img
+                                                                                        src={player.player.image_path}
+                                                                                        alt={player.player.team_name || 'Team Logo'}
+                                                                                        className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
+                                                                                    />
+                                                                                )}
+                                                                                <div className="overflow-hidden">
+                                                                                    <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                                </div>
+                                                                                <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
+                                                                            </div>
+                                                                        </td>
+                                                                        {/* Team Logo */}
+                                                                        <td className="p-2 text-center truncate">
+                                                                            <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
+                                                                        </td>
+                                                                        <td className="p-2 text-center truncate">
+                                                                            {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                        </td>
+                                                                        {/* Controls */}
+                                                                        {/* <td className="p-2 text-center truncate">
                                                                             <div className="flex justify-center items-center gap-2">
                                                                                 <button
                                                                                     className="bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white"
@@ -524,53 +870,53 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                                                                                 </button>
                                                                             </div>
                                                                         </td> */}
-                                                                </tr>
-                                                            )
-                                                        })}
-                                                    </React.Fragment>
-                                                )
-                                            ))}
+                                                                    </tr>
+                                                                )
+                                                            })}
+                                                        </React.Fragment>
+                                                    )
+                                                ))}
 
-                                            {/* Substitutes */}
-                                            {pitchViewList2.bench.length > 0 && (
-                                                <React.Fragment>
-                                                    <tr>
-                                                        <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
-                                                            Substitutes
-                                                        </td>
-                                                    </tr>
-                                                    {pitchViewList2.bench.map((player) => {
-                                                        const gameweekPoints = player.player.points.find(
-                                                            (p) => p.gameweek._id === gameweek
-                                                        );
-                                                        return (
-                                                            <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
-                                                                {/* Player Name + Image */}
-                                                                {/* Player Name + Image */}
-                                                                <td className="px-2 text-left truncate max-w-28 sm:max-w-none">
-                                                                    <div className="flex items-center space-x-2">
-                                                                        {player.player.image_path && (
-                                                                            <img
-                                                                                src={player.player.image_path}
-                                                                                alt={player.player.common_name || 'Player Logo'}
-                                                                                className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
-                                                                            />
-                                                                        )}
-                                                                        <div className="overflow-hidden">
-                                                                            <p className="font-bold truncate">{player.player.common_name}</p>
+                                                {/* Substitutes */}
+                                                {pitchViewList2.bench.length > 0 && (
+                                                    <React.Fragment>
+                                                        <tr>
+                                                            <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                                Substitutes
+                                                            </td>
+                                                        </tr>
+                                                        {pitchViewList2.bench.map((player) => {
+                                                            const gameweekPoints = player.player.points.find(
+                                                                (p) => p.gameweek._id === gameweek
+                                                            );
+                                                            return (
+                                                                <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                    {/* Player Name + Image */}
+                                                                    {/* Player Name + Image */}
+                                                                    <td className="px-2 text-left truncate max-w-36">
+                                                                        <div className="flex items-center space-x-2">
+                                                                            {player.player.image_path && (
+                                                                                <img
+                                                                                    src={player.player.image_path}
+                                                                                    alt={player.player.common_name || 'Player Logo'}
+                                                                                    className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
+                                                                                />
+                                                                            )}
+                                                                            <div className="overflow-hidden">
+                                                                                <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                            </div>
+                                                                            <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
                                                                         </div>
-                                                                        <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
-                                                                    </div>
-                                                                </td>
-                                                                {/* Team Logo */}
-                                                                <td className="p-2 text-center">
-                                                                    <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
-                                                                </td>
-                                                                <td className="p-2 text-center truncate">
-                                                                    {gameweekPoints?.points ? gameweekPoints.points : 0}
-                                                                </td>
-                                                                {/* Controls */}
-                                                                {/* <td className="p-2 text-center truncate">
+                                                                    </td>
+                                                                    {/* Team Logo */}
+                                                                    <td className="p-2 text-center">
+                                                                        <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto shadow-md" />
+                                                                    </td>
+                                                                    <td className="p-2 text-center truncate">
+                                                                        {gameweekPoints?.points ? gameweekPoints.points : 0}
+                                                                    </td>
+                                                                    {/* Controls */}
+                                                                    {/* <td className="p-2 text-center truncate">
                                                                         <div className="flex justify-center items-center gap-2">
                                                                             <button
                                                                                 className="bg-[#1d374a] border border-[#1d374a] text-white px-2 sm:px-6 py-1 text-xs sm:text-sm rounded-md hover:bg-[#FF8A00] hover:text-white"
@@ -589,14 +935,15 @@ const FixtureModal = ({ fixture, gameweek, leagueId, onClose, handlePlayerClick 
                                                                             </button>
                                                                         </div>
                                                                     </td> */}
-                                                            </tr>
-                                                        )
-                                                    })}
-                                                </React.Fragment>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                                </tr>
+                                                            )
+                                                        })}
+                                                    </React.Fragment>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

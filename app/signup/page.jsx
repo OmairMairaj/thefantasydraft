@@ -191,6 +191,15 @@ const SignUp = () => {
               "Create Account"
             )}
           </button>
+          <p className="mt-4 text-sm md:text-base text-gray-400">
+            Already have an account?{" "}
+            <a
+              href="/login"
+              className="text-orange-500 hover:underline"
+            >
+              Login
+            </a>
+          </p>
         </form>
       </div>
     </div>
