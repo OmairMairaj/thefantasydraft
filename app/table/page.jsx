@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Exo_2 } from 'next/font/google';
 
 const exo2 = Exo_2({
-    weight: ['700', '800'],
+    weight: ['400', '500', '600', '700', '800'],
     style: ['italic'],
     subsets: ['latin'],
 });
@@ -45,52 +45,67 @@ const Table = () => {
     };
 
     return (
-        <div className="min-h-[88vh] flex flex-col items-center space-y-8 px-4 sm:px-8 md:px-16 lg:px-20">
+        <div className={`min-h-[88vh] flex flex-col my-8 text-white px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-10 ${exo2.className}`}>
             {/* Table */}
-            <div className="w-full max-w-5xl my-20">
-                <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-10 ${exo2.className}`}>{`League Standings`}</h2>
+            <div className="w-full">
+                <h2 className="text-2xl sm:text-xl md:text-2xl xl:text-3xl font-bold mb-4">{`League Standings`}</h2>
                 <div className="overflow-x-auto">
-                    {standings && standings.length > 0 ? (
-                        <table className="min-w-full text-white rounded-xl" style={{ overflow: 'hidden' }}>
-                            <thead className="bg-[#090808]">
-                                <tr className="text-xs sm:text-sm md:text-base lg:text-lg">
-                                    <th className="py-3 px-2 sm:px-4 text-left font-semibold text-[#FF8A00]">#</th>
-                                    <th className="py-3 px-2 sm:px-4 text-left font-semibold text-[#FF8A00]">Club</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">P</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">W</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">D</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">L</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">GF</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">GA</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">GD</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">Points</th>
-                                    <th className="py-3 px-2 sm:px-4 text-center font-semibold text-[#FF8A00]">Form</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {standings.map((team, index) => (
-                                    <tr key={team._id} className={`bg-[#242424] ${index % 2 === 0 ? 'bg-opacity-80' : 'bg-opacity-60'} hover:bg-opacity-90 text-xs sm:text-sm md:text-base lg:text-lg`}>
-                                        <td className="py-3 px-2 sm:px-4 text-left">{team.position}</td>
-                                        <td className="py-3 px-2 sm:px-4 text-left flex items-center">
-                                            <img src={team.image_path} alt={`${team.name} logo`} className="w-6 h-6 sm:w-8 sm:h-8 xl:w-12 xl:h-12 mr-2 sm:mr-3" />
-                                            <span className="font-bold">{team.name}</span>
-                                        </td>
-                                        <td className="py-3 px-2 sm:px-4 text-center">{team.games_played}</td>
-                                        <td className="py-3 px-2 sm:px-4 text-center">{team.wins}</td>
-                                        <td className="py-3 px-2 sm:px-4 text-center">{team.draws}</td>
-                                        <td className="py-3 px-2 sm:px-4 text-center">{team.lost}</td>
-                                        <td className="py-3 px-2 sm:px-4 text-center">{team.goals_scored}</td>
-                                        <td className="py-3 px-2 sm:px-4 text-center">{team.goals_conceded}</td>
-                                        <td className="py-3 px-2 sm:px-4 text-center">{team.goals_scored - team.goals_conceded}</td>
-                                        <td className="py-3 px-2 sm:px-4 text-center font-bold">{team.points}</td>
-                                        <td className="py-3 px-2 sm:px-4">{team.form.sort((a, b) => b.sort_order - a.sort_order).slice(0, 5).map((item) => item.form + " ")}</td>
+                    {standings ?
+                        standings.length > 0 ? (
+                            <table className="min-w-full text-white rounded-xl border border-[#1d374a] bg-[#0C1922] text-xs sm:text-sm xl:text-base" style={{ overflow: 'hidden' }}>
+                                <thead className="bg-[#1d374a]">
+                                    <tr className="">
+                                        <th className="py-3 px-2 sm:px-4 text-left font-semibold">#</th>
+                                        <th className="py-3 px-2 sm:px-4 text-left font-semibold">Club</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">P</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">W</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">D</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">L</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">GF</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">GA</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">GD</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">Points</th>
+                                        <th className="py-3 px-2 sm:px-4 text-center font-semibold">Form</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : (
-                        <p className="text-center text-white">Loading Table...</p>
-                    )}
+                                </thead>
+                                <tbody>
+                                    {standings.map((team, index) => (
+                                        <tr key={team._id} className={`bg-[#0C1922] ${index % 2 === 0 ? 'bg-opacity-80' : 'bg-opacity-60'} hover:bg-opacity-90`}>
+                                            <td className="py-3 px-2 sm:px-4 text-left">{team.position}</td>
+                                            <td className="py-3 px-2 sm:px-4 text-left flex items-center">
+                                                <img src={team.image_path} alt={`${team.name} logo`} className="w-6 h-6 sm:w-8 sm:h-8 xl:w-12 xl:h-12 mr-2 sm:mr-3" />
+                                                <span className="font-bold">{team.name}</span>
+                                            </td>
+                                            <td className="py-3 px-2 sm:px-4 text-center">{team.games_played}</td>
+                                            <td className="py-3 px-2 sm:px-4 text-center">{team.wins}</td>
+                                            <td className="py-3 px-2 sm:px-4 text-center">{team.draws}</td>
+                                            <td className="py-3 px-2 sm:px-4 text-center">{team.lost}</td>
+                                            <td className="py-3 px-2 sm:px-4 text-center">{team.goals_scored}</td>
+                                            <td className="py-3 px-2 sm:px-4 text-center">{team.goals_conceded}</td>
+                                            <td className="py-3 px-2 sm:px-4 text-center">{team.goals_scored - team.goals_conceded}</td>
+                                            <td className="py-3 px-2 sm:px-4 text-center font-bold">{team.points}</td>
+                                            <td>
+                                                <div className="py-2 px-2 text-center flex items-center justify-center gap-1">
+                                                    {team?.form?.sort((a, b) => a.sort_order - b.sort_order).slice(-5).map((item, idx) => (
+                                                        <span
+                                                            key={item._id || idx}
+                                                            className={`rounded-sm w-4 h-4 md:w-5 md:h-5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-sm sm:text-base lg:text-sm flex justify-center items-center text-white ${item.form === 'W' ? 'bg-green-500' : item.form === 'L' ? 'bg-red-500' : item.form === 'D' ? 'bg-yellow-400' : 'bg-gray-500'}`}
+                                                        >
+                                                            {item.form}
+                                                        </span>
+                                                    ))
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <p className="h-56 text-xs sm:text-sm xl:text-base text-center flex items-center justify-center text-white">No standings available at the moment.</p>
+                        ) : (
+                            <p className="text-xs sm:text-sm xl:text-base text-center text-white">Loading Table...</p>
+                        )}
                 </div>
             </div>
         </div>

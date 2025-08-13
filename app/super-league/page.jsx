@@ -10,6 +10,7 @@ import SuperLeagueDetail from "./components/SuperLeagueDetail";
 import SuperLeagueEditForm from "./components/SuperLeagueEditForm";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import { useAlert } from "@/components/AlertContext/AlertContext";
+import Image from "next/image";
 
 const exo2 = Exo_2({
     weight: ["400", "500", "700", "800"],
@@ -172,12 +173,12 @@ const SuperLeague = () => {
                     {view !== "list" && (
                         <button
                             onClick={handleBackToList}
-                            className={`flex items-center rounded-full text-white font-bold fade-gradient hover:bg-[#e77d00] transition py-2 px-5 sm:py-2 sm:px-7 md:py-2 md:px-8 text-xs sm:text-sm md:text-lg ${exo2.className}`}
+                            className={`fade-gradient px-4 sm:px-6 py-1 lg:py-2 bg-gray-300 rounded-3xl flex items-center justify-start text-sm xl:text-base ${exo2.className}`}
                         >
                             BACK
                         </button>
                     )}
-                    <h1 className="text-2xl md:text-3xl xl:text-4xl font-bold">
+                    <h1 className="text-2xl xl:text-3xl font-bold">
                         {view === "detail"
                             ? "Super League"
                             : view === "create"
@@ -189,15 +190,15 @@ const SuperLeague = () => {
                 </div>
                 {view == "list" && !showEmptyView && superLeagues.length > 0 && (
                     <button
-                        className={`fade-gradient px-4 py-2 sm:px-6 sm:py-2 md:px-8 xl:px-10 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl rounded-xl text-white font-bold border-2 cursor-pointer bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00] transition`} onClick={handleCreate}
+                        className={`fade-gradient px-4 sm:px-6 py-1 lg:py-2 bg-gray-300 rounded-3xl flex items-center justify-start text-sm xl:text-base`} onClick={handleCreate}
                     >
-                        + Create Super League
+                        + Create <span className="hidden sm:block pl-1">Super League</span>
                     </button>
                 )}
 
                 {view == "detail" && (
                     <button
-                        className={`bg-red-700 px-4 py-2 sm:px-6 sm:py-2 md:px-8 xl:px-10 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl rounded-xl text-white font-bold cursor-pointer flex items-center hover:bg-red-800 transition`}
+                        className={`bg-red-700 px-4 sm:px-6 py-1 lg:py-2 rounded-3xl flex items-center justify-start text-sm xl:text-base hover:bg-red-600 transition-colors`}
                         onClick={() => {
                             setShowDeletePopup(true);
                         }}
@@ -215,21 +216,21 @@ const SuperLeague = () => {
                 <>
                     {view === "list" &&
                         (showEmptyView ? (
-                            <div className="w-full relative custom-dash-spacing px-2 sm:px-4 md:px-8 rounded-3xl shadow-lg flex flex-col items-center space-y-8 sm:space-y-10 md:space-y-12 py-20 sm:py-24 md:py-32 lg:py-16 xl:py-24 2xl:py-36">
-                                <div className="flex flex-col items-center justify-center w-full max-w-md">
+                            <div className="w-full relative custom-dash-spacing px-2 sm:px-4 md:px-8 rounded-3xl shadow-lg flex flex-col items-center space-y-8 sm:space-y-10 md:space-y-12 py-20 sm:py-16 md:py-16 lg:py-16 xl:py-20">
+                                <div className="flex flex-col items-center justify-center w-full max-w-lg">
                                     <img
                                         src="/images/empty-super-league.png"
                                         alt="No super leagues"
-                                        className="w-28 sm:w-32 md:w-40 xl:w-52 mb-4 md:mb-5"
+                                        className="w-28 sm:w-32 xl:w-40 mb-4 md:mb-5"
                                     />
-                                    <h2 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl font-bold mb-1 sm:mb-2 text-center">
+                                    <h2 className="text-2xl xl:text-3xl font-bold mb-1 sm:mb-2 text-center">
                                         No Super Leagues Yet
                                     </h2>
-                                    <p className="text-gray-300 text-xs sm:text-sm md:text-base xl:text-lg mb-4 text-center px-4">
+                                    <p className="text-gray-300 text-xs sm:text-sm xl:text-base mb-4 text-center px-4">
                                         Create a Super League to track multiple leagues in one place.
                                     </p>
                                     <button
-                                        className="fade-gradient px-4 sm:px-8 md:px-10 xl:px-14 py-2 sm:py-2.5 md:py-3 rounded-xl text-white font-bold text-sm sm:text-base md:text-lg border-2 cursor-pointer bg-gradient-to-r from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00] transition-all"
+                                        className="fade-gradient px-4 sm:px-6 py-1 lg:py-2 bg-gray-300 rounded-3xl flex items-center justify-start text-sm xl:text-base"
                                         onClick={handleCreate}
                                     >
                                         + Create Super League
@@ -249,33 +250,34 @@ const SuperLeague = () => {
                                             onClick={() => handleCardClick(sl)}
                                             className="group"
                                         >
-                                            <div className="relative rounded-2xl bg-white/10 hover:scale-105 transition-transform flex flex-col items-center p-4 cursor-pointer min-h-[260px] sm:min-h-[300px] md:min-h-[340px] xl:min-h-[380px] w-full">
+                                            <div className="relative rounded-2xl bg-[#0c1922] hover:scale-105 transition-transform flex flex-col items-center p-4 cursor-pointer min-h-[260px] sm:min-h-[300px] md:min-h-[340px] xl:min-h-[380px] w-full">
                                                 <button onClick={(e) => {
                                                     e.stopPropagation(); // prevent click bubbling to card
                                                     handleEditClick(sl);
-                                                }} className="absolute top-3 right-3 md:top-4 md:right-4 border border-gray-700 text-white/50 hover:text-white rounded-xl p-2 z-10 text-base md:text-lg">
+                                                }} className="absolute top-3 right-3 md:top-4 md:right-4 border border-[#1D374A] text-white/50 hover:text-white rounded-xl p-2 z-10 text-base md:text-lg">
                                                     <FaEdit />
                                                 </button>
-                                                <div className="w-16 h-16 sm:w-20 sm:h-20 xl:w-24 xl:h-24 mb-3">
-                                                    <img
+                                                <div className="relative w-16 h-16 sm:w-20 sm:h-20 xl:w-24 xl:h-24 mb-3">
+                                                    <Image
                                                         src={sl.image || "/images/default_team_logo.png"}
                                                         alt={sl.name}
-                                                        className="w-full h-full rounded-full object-cover"
+                                                        fill
+                                                        className="rounded-lg object-cover"
                                                     />
                                                 </div>
-                                                <div className="text-lg sm:text-xl xl:text-2xl font-semibold text-center">{sl.name}</div>
-                                                <div className="text-gray-300 text-xs sm:text-sm mt-1 text-center">
+                                                <div className="text-base sm:text-lg xl:text-xl font-semibold text-center">{sl.name}</div>
+                                                <div className="text-gray-300 text-xs sm:text-sm xl:text-base mt-1 text-center">
                                                     {sl.leagues?.length || 0} league{sl.leagues?.length === 1 ? "" : "s"}
                                                 </div>
                                                 {/* Leagues 6-slot grid */}
                                                 <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-4 w-full">
                                                     {/* Filled slots */}
                                                     {leaguesArray.map(lg => (
-                                                        <div key={lg._id} className="p-2 rounded-md flex items-center space-x-2 bg-black/40 min-h-[32px] sm:min-h-[44px]">
+                                                        <div key={lg._id} className="p-2 rounded-md flex items-center space-x-2 bg-[#1D374A] min-h-[32px] sm:min-h-[44px]">
                                                             <img
                                                                 src={lg.league_image_path || "/images/default_team_logo.png"}
                                                                 alt={lg.league_name}
-                                                                className="w-6 h-6 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full object-cover"
+                                                                className="w-6 h-6 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-lg object-cover"
                                                             />
                                                             <span className="text-xs sm:text-sm xl:text-base truncate">{lg.league_name}</span>
                                                         </div>

@@ -388,7 +388,7 @@ const LeagueSettings = () => {
                         {isCreator &&
                             <div className='flex items-center gap-4 text-sm xl:text-base'>
                                 <label className='block text-sm xl:text-base text-gray-300'>Invite Code:</label>
-                                <div className={`w-40 cursor-none relative px-4 py-1 md:py-2 rounded-lg text-white bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]`} >
+                                <div className={`w-40 cursor-default relative px-4 py-1 md:py-2 rounded-lg text-white bg-[#091218] focus:outline-none focus:border-[#FF8A00] border border-[#333333]`} >
                                     {leagueData?.invite_code}
                                     <button
                                         onClick={() => {
@@ -408,7 +408,7 @@ const LeagueSettings = () => {
                             <Image
                                 src={leagueData.league_image_path ? leagueData.league_image_path : "/images/default_team_logo.png"}
                                 alt='League Logo'
-                                // layout='fill'
+                                fill
                                 className='rounded-md object-cover '
                             />
                             {/* Edit Icon - Shown Only in Editing Mode */}
