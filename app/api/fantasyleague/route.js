@@ -167,7 +167,8 @@ export const POST = async (req, res) => {
         time_per_pick: payload.draft_configuration.time_per_pick,
         state: payload.draft_configuration.state,
         start_date: payload.draft_configuration.start_date,
-        teams: newFantasyLeague.teams
+        teams: newFantasyLeague.teams,
+        paid : true
       });
 
       // Add league ID to draft

@@ -95,11 +95,14 @@ export const POST = async (req, res) => {
     if (index == -1) { throw err; }
     else if (index == (draft.order.length - 1)) {
       draft.order = draft.order.reverse();
-      draft.draft_round = draft.draft_round + 1;
+      // draft.draft_round = draft.draft_round + 1;
       draft.turn = draft.order[0];
     } else {
       draft.turn = draft.order[index + 1]
     }
+
+    // draft round calculation
+    draft.draft_round = Math.floor(draft.players_selected.length / draft.teams.length) + 1;
 
     // Checking for draft end
     if ((draft.draft_round - 1) === draft.squad_players) {
