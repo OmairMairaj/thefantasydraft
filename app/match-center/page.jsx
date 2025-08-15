@@ -1035,7 +1035,7 @@ const MatchCenter = () => {
                                                     alt={homeTeam?.team_name}
                                                     className="object-cover w-12 h-12 sm:w-14 sm:h-14 xl:w-16 xl:h-16 rounded-md"
                                                 />
-                                                <span className="text-white mt-2 text-xs sm:text-sm xl:text-base">
+                                                <span className="text-white mt-2 px-2 text-xs sm:text-sm xl:text-base">
                                                     {homeTeam?.team_name}
                                                 </span>
                                             </div>
@@ -1053,7 +1053,7 @@ const MatchCenter = () => {
                                                     alt={awayTeam?.team_name}
                                                     className="object-cover w-12 h-12 sm:w-14 sm:h-14 xl:w-16 xl:h-16 rounded-md"
                                                 />
-                                                <span className="text-white mt-2 text-xs sm:text-sm xl:text-base">
+                                                <span className="text-white mt-2 px-2 text-xs sm:text-sm xl:text-base">
                                                     {awayTeam?.team_name}
                                                 </span>
                                             </div>

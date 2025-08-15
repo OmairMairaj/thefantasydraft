@@ -166,12 +166,12 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
     return (
         <div className="w-full flex flex-col items-center">
             <form onSubmit={handleSubmit} className="w-full text-white">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-0 xl:gap-16">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-4 xl:gap-16">
                     <div className="flex flex-col space-y-6 sm:space-y-8">
                         {/* Image */}
                         <div className="flex flex-col space-y-2">
                             <label
-                                className="font-bold text-base sm:text-lg xl:text-xl"
+                                className="font-bold text-sm sm:text-base xl:text-lg"
                                 htmlFor="superleague-logo"
                             >
                                 Super League Logo
@@ -184,7 +184,7 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                                     onChange={handleImageChange}
                                     className="hidden"
                                 />
-                                <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 xl:w-40 xl:h-40 bg-[#0C1922] flex relative items-center justify-center rounded-lg">
+                                <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 xl:w-40 xl:h-40 bg-[#0c1922] flex relative items-center justify-center rounded-lg">
                                     {image ? (
                                         <Image
                                             src={image}
@@ -198,7 +198,7 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                                 </div>
                                 <label
                                     htmlFor="superleague-logo"
-                                    className="cursor-pointer py-2 px-6 sm:px-8 ml-4 sm:ml-4 rounded-full text-white font-bold text-sm md:text-base border border-[#fff] hover:bg-[#FF8A00] hover:border-[#FF8A00] transition-all text-center"
+                                    className="cursor-pointer py-1 lg:py-2 px-6 ml-4 sm:ml-4 rounded-full text-white font-bold text-sm sm:text-base xl:text-lg border border-[#fff] hover:bg-[#FF8A00] hover:border-[#FF8A00] transition-all text-center"
                                 >
                                     Choose File
                                 </label>
@@ -206,9 +206,9 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                         </div>
 
                         {/* Name */}
-                        <div className="flex flex-col xl:hidden">
+                        <div className="flex flex-col lg:hidden">
                             <label
-                                className="font-bold text-base sm:text-lg xl:text-xl mb-2 block"
+                                className="font-bold text-sm sm:text-base xl:text-lg mb-2 block"
                                 htmlFor="superleague-name"
                             >
                                 Super League Name<span className="text-red-400">*</span>
@@ -220,7 +220,7 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Enter super league name"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-base"
+                                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm xl:text-base"
                                 maxLength={40}
                                 required
                             />
@@ -229,7 +229,7 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
 
                         {/* Add leagues by invite code */}
                         <div className="mb-4">
-                            <label className="font-bold text-base sm:text-lg xl:text-xl mb-1 sm:mb-2 block">
+                            <label className="font-bold text-sm sm:text-base xl:text-lg mb-1 sm:mb-2 block">
                                 Add Leagues (by Invite Code)
                             </label>
                             <div className="flex flex-row md:items-center space-x-2 md:space-x-4 w-full">
@@ -237,7 +237,7 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                                     value={inviteCode}
                                     onChange={(e) => setInviteCode(e.target.value)}
                                     placeholder="Enter Invite Code"
-                                    className={`flex-1 px-3 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm sm:text-base ${selectedLeagues.length >= 6 ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    className={`flex-1 px-3 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm xl:text-base ${selectedLeagues.length >= 6 ? "opacity-50 cursor-not-allowed" : ""}`}
                                     maxLength={16}
                                     disabled={selectedLeagues.length >= 6 || searching}
                                 />
@@ -249,7 +249,7 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                                         !inviteCode ||
                                         selectedLeagues.length >= 6
                                     }
-                                    className={`bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00] transition px-4 py-2 rounded-xl text-white font-bold text-sm sm:text-base min-w-[100px] flex items-center justify-center ${selectedLeagues.length >= 6 ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    className={`bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00] transition px-4 py-1 sm:py-2 rounded-3xl text-white text-sm xl:text-base min-w-[100px] flex items-center justify-center ${selectedLeagues.length >= 6 ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
                                     {searching ? (
                                         <span className="flex items-center">
@@ -263,39 +263,35 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
 
                             {/* League Card Display if Search Result Found */}
                             {searchResult && (
-                                <div className="w-full mt-4 px-4 py-4 md:py-6 bg-[#070E13] rounded-2xl md:rounded-3xl shadow-[0_0_1px_4px_rgba(12,25,34,1)] flex flex-col space-y-2 md:space-y-4 relative">
+                                <div className="w-full mt-4 px-4 py-4 md:py-6 bg-[#0C1922] rounded-xl md:rounded-3xl shadow-[0_0_1px_4px_#1D374A] flex flex-col space-y-2 md:space-y-4 relative">
                                     <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:justify-between ">
                                         <div className="flex items-center space-x-4 ">
-                                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 xl:w-32 xl:h-32 overflow-hidden rounded-lg bg-[#101e2b] border border-[#232e38]">
-                                                {searchResult.league_image_path ? (
-                                                    <Image
-                                                        src={searchResult.league_image_path}
-                                                        alt="League Logo"
-                                                        fill
-                                                        className="object-cover object-center"
-                                                    />
-                                                ) : (
-                                                    <div className="flex items-center justify-center w-full h-full text-gray-500">No Logo</div>
-                                                )}
+                                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-20 md:h-20 xl:w-24 xl:h-24 overflow-hidden rounded-lg bg-[#101e2b] border border-[#232e38]">
+                                                <Image
+                                                    src={searchResult.league_image_path ? searchResult.league_image_path : "/images/default_team_logo.png"}
+                                                    alt="League Logo"
+                                                    fill
+                                                    className="object-cover object-center"
+                                                />
                                             </div>
                                             <div className="flex flex-col">
-                                                <h2 className="text-lg sm:text-xl xl:text-2xl font-bold">{searchResult.league_name}</h2>
-                                                <div className="text-xs sm:text-sm text-gray-400">
+                                                <h2 className="text-sm sm:text-xl xl:text-2xl font-bold">{searchResult.league_name}</h2>
+                                                <div className="text-xs xl:text-sm text-gray-400">
                                                     Owner: {searchResult.creator}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-4 right-2 md:top-[-12px] sm:right-6">
+                                    <div className="absolute bottom-4 right-2 md:top-[6px] sm:right-6">
                                         <button
                                             type="button"
-                                            className="bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00] px-6 sm:px-8 py-2 rounded-xl text-white mt-3 font-bold text-xs sm:text-sm md:text-base"
+                                            className="bg-gradient-to-b from-[#FF8A00] to-[#FF8A00A3] hover:from-[#FF8A00] hover:to-[#FF8A00] px-4 sm:px-6 py-1 xl:py-2 rounded-3xl flex items-center justify-start text-sm xl:text-base"
                                             onClick={handleAddLeague}
                                         >
                                             Confirm Add
                                         </button>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm md:text-base mt-2">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm xl:text-base mt-2">
                                         <div className="space-y-2">
                                             <p>
                                                 Players Joined:
@@ -331,9 +327,9 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                     </div>
                     <div className="flex flex-col space-y-6 sm:space-y-8">
                         {/* Name */}
-                        <div className="hidden xl:flex flex-col">
+                        <div className="hidden lg:flex flex-col">
                             <label
-                                className="font-bold text-base sm:text-lg xl:text-xl mb-2 block"
+                                className="font-bold text-sm sm:text-base xl:text-lg mb-2 block"
                                 htmlFor="superleague-name"
                             >
                                 Super League Name<span className="text-red-400">*</span>
@@ -345,14 +341,14 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Enter super league name"
-                                className="w-full px-4 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-base"
+                                className="w-full px-3 py-2 rounded-lg bg-[#0C1922] border border-[#828282] focus:outline-none focus:border-[#FF8A00] text-white text-sm xl:text-base"
                                 maxLength={40}
                                 required
                             />
                         </div>
                         {/* Added Leagues - Drag and Drop */}
                         <div className="flex flex-col">
-                            <label className="font-bold text-base sm:text-lg xl:text-xl mb-2 block">
+                            <label className="font-bold text-sm sm:text-base xl:text-lg mb-2 block">
                                 Added Leagues (Drag to reorder, At least 1)<span className="text-red-400">*</span>
                             </label>
                             {/* 3x2 grid, always 6 slots */}
@@ -365,37 +361,38 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                                             className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full"
                                         >
                                             {Array.from({ length: 6 }).map((_, idx) => {
-                                                const lg = selectedLeagues[idx];
+                                                const leagues = selectedLeagues[idx];
                                                 return (
                                                     <Draggable
-                                                        key={lg?.inviteCode || `empty-${idx}`}
-                                                        draggableId={lg?.inviteCode || `empty-${idx}`}
+                                                        key={leagues?.inviteCode || `empty-${idx}`}
+                                                        draggableId={leagues?.inviteCode || `empty-${idx}`}
                                                         index={idx}
-                                                        isDragDisabled={!lg}
+                                                        isDragDisabled={!leagues}
                                                     >
                                                         {(dragProvided) => (
                                                             <div
                                                                 ref={dragProvided.innerRef}
                                                                 {...dragProvided.draggableProps}
                                                                 {...dragProvided.dragHandleProps}
-                                                                className={`h-14 sm:h-16 flex items-center justify-center rounded-xl border-2 border-dashed ${lg ? "border-[#1bffa2]" : "border-gray-400/60"} bg-transparent px-4 transition`}
+                                                                className={`h-14 xl:h-16 flex items-center justify-center rounded-xl border-2 border-dashed ${leagues ? "border-[#1bffa2]" : "border-gray-400/60"} bg-transparent px-4 transition`}
                                                             >
-                                                                {lg ? (
+                                                                {leagues ? (
                                                                     <div className="flex items-center w-full">
-                                                                        <Image
-                                                                            src={lg.leagueImage || "/images/default_team_logo.png"}
-                                                                            alt=""
-                                                                            width={36}
-                                                                            height={36}
-                                                                            className="rounded-full"
-                                                                        />
-                                                                        <span className="ml-2 sm:ml-3 font-semibold flex-1 truncate text-sm sm:text-base">
-                                                                            {lg.leagueName}
+                                                                        <div className="relative w-10 h-10 sm:w-8 sm:h-8 xl:w-10 xl:h-10 flex-shrink-0 mr-2">
+                                                                            <Image
+                                                                                src={leagues.leagueImage || "/images/default_team_logo.png"}
+                                                                                alt=""
+                                                                                fill
+                                                                                className="object-cover rounded-lg"
+                                                                            />
+                                                                        </div>
+                                                                        <span className="font-semibold flex-1 truncate text-sm xl:text-base">
+                                                                            {leagues.leagueName}
                                                                         </span>
                                                                         <button
                                                                             type="button"
-                                                                            onClick={() => handleRemoveLeague(lg.inviteCode)}
-                                                                            className={`ml-2 sm:ml-3 text-red-400 hover:text-red-700 ${selectedLeagues.length <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                                            onClick={() => handleRemoveLeague(leagues.inviteCode)}
+                                                                            className={`ml-2 sm:ml-3 p-2 text-red-400 hover:text-red-700 ${selectedLeagues.length <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
                                                                             aria-label="Remove league"
                                                                             disabled={selectedLeagues.length <= 1}
                                                                         >
@@ -423,13 +420,13 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                 <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between mt-8 sm:mt-12 gap-4">
                     {/* Errors */}
                     {error ?
-                        <div className="text-[#df2d2d] text-sm sm:text-base md:text-lg font-bold flex-1">{error}</div>
+                        <div className="text-[#df2d2d] text-sm xl:text-base font-bold flex-1">{error}</div>
                         : <div className="flex-1"></div>
                     }
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className={`fade-gradient w-full sm:w-auto py-2 rounded-full px-6 sm:px-10 md:px-12 font-bold text-base md:text-lg sm:mt-0`}
+                        className={`fade-gradient font-bold px-4 sm:px-6 py-2 bg-gray-300 rounded-3xl flex items-center justify-center text-sm xl:text-base`}
                         disabled={submitting}
                     >
                         {submitting ? "Updating..." : "Update Super League"}

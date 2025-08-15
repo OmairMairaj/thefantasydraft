@@ -12,27 +12,31 @@ const exo2 = Exo_2({
 export default function Intro() {
     return (
         <section className="intro-section py-8 sm:py-12 md:py-16">
-            <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-8">
+            <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-8 ">
                 {/* Right Content - Image */}
-                <div className="w-full md:w-1/2">
-                    <Image
-                        src="/images/intro-image.svg"  // Replace with the correct path to your image
-                        alt="Introduction Image"
-                        width={1200}
-                        height={700}
-                        className="rounded-xl object-cover"
-                    />
+
+                <div className="w-full flex justify-center lg:w-1/2 relative">
+                    <div className="absolute -inset-4 rounded-2xl opacity-25 blur-2xl bg-[conic-gradient(from_00deg,transparent,rgba(255,138,0,0.7),transparent)]" />
+                    <div className="relative w-full sm:w-[80%] md:w-[70%] lg:w-full h-[48vw] sm:h-[40vw] md:h-[35vw] lg:h-[23vw] 2xl:h-[370px] overflow-hidden">
+                        <Image
+                            src="/images/intro-image1.svg"  // Replace with the correct path to your image
+                            alt="Introduction Image"
+                            priority
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
                 </div>
 
                 {/* Left Content */}
-                <div className="w-full md:w-1/2 text-center md:text-left">
-                    <h2 className={`text-2xl sm:text-3xl md:text-5xl font-bold italic mb-4 ${exo2.className}`}>
+                <div className="w-full lg:w-1/2 text-center lg:text-left">
+                    <h2 className={`text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold italic mb-4 ${exo2.className}`}>
                         Welcome to Fantasy Football Drafting
                     </h2>
-                    <p className="text-base sm:text-lg md:text-xl mb-4">
+                    <p className="text-sm md:text-base lg:text-lg 2xl:text-xl mb-4">
                         Our platform allows you to experience fantasy football in a whole new way. Draft unique squads and compete head-to-head with friends in real time. Build your team, make strategic decisions, and enjoy the most exhilarating fantasy football experience. With innovative features and real-time performance tracking, you'll always stay in control.
                     </p>
-                    <p className="text-base sm:text-lg md:text-xl mb-6">
+                    <p className="text-sm md:text-base lg:text-lg 2xl:text-xl mb-6">
                         Join the community today and become the true champion of fantasy football!
                     </p>
                     <Link href="/how-to-play" className={`fade-gradient px-4 sm:px-6 md:px-8 lg:px-12 pt-2 pb-3 rounded-full text-white text-center font-bold text-sm md:text-base lg:text-lg cursor-pointer ${exo2.className}`}>
