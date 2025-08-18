@@ -108,18 +108,18 @@ export const POST = async (req, res) => {
         }
 
         // Check if in-player is available for selection
-        // let playerEligible = false;
-        // let allPlayers = await Player.find({});
-        // let eligiblePlayers = await filterPlayersForTransfer(allPlayers, draft._id, team._id);
-        // eligiblePlayers.map((x) => {
-        //     if (x._id.equals(playerIn._id)) playerEligible = true;
-        // })
-        // if (!playerEligible) {
-        //     return NextResponse.json({
-        //         error: true,
-        //         message: "Player is not eligible for selection. Please select another player."
-        //     })
-        // }
+        let playerEligible = false;
+        let allPlayers = await Player.find({});
+        let eligiblePlayers = await filterPlayersForTransfer(allPlayers, draft._id, team._id, playerOut._id);
+        eligiblePlayers.map((x) => {
+            if (x._id.equals(playerIn._id)) playerEligible = true;
+        })
+        if (!playerEligible) {
+            return NextResponse.json({
+                error: true,
+                message: "Player is not eligible for selection. Please select a player from another team/position."
+            })
+        }
 
         // Check if out-player is in team
         let playerFoundInTeam = false;
