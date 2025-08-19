@@ -117,16 +117,16 @@ export const POST = async (req, res) => {
         // Check if in-player is available for selection
         let playerEligible = false;
         let allPlayers = await Player.find({});
-        console.log(team._id)
+        // console.log(team._id)
         let eligiblePlayers = await filterPlayersForTransfer(allPlayers, draft._id, team._id, playerOut._id);
         eligiblePlayers.map((x) => {
             if (x._id.equals(playerIn._id)) playerEligible = true;
         })
-        console.log("playerEligible : " + playerEligible)
+        // console.log("playerEligible : " + playerEligible)
         if (!playerEligible) {
             return NextResponse.json({
                 error: true,
-                message: "Player is not eligible for selection. Please select a player from another team/position."
+                message: "Player is not eligible for selection. Please select a player from another team / position."
             })
         }
 

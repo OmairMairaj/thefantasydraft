@@ -441,10 +441,14 @@ const Transfer = () => {
                 axios.post(URL, body).then((response) => {
                     console.log("response");
                     console.log(response);
-                    addAlert('Transfer submitted successfully', 'success');
-                    setRefresh(!refresh);
-                    setPlayersIn(null);
-                    setPlayersOut(null);
+                    if(response.data.error === true){
+                        addAlert(response.data.message, 'error');
+                    }else{
+                        addAlert('Transfer submitted successfully', 'success');
+                        setRefresh(!refresh);
+                        setPlayersIn(null);
+                        setPlayersOut(null);
+                    }
                 })
             } catch (err) {
                 addAlert("An unexpected error occurred. Please try again", "error");
