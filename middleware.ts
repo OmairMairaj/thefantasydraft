@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export const config = {
-  matcher: "/api//:path*", // Apply only to API routes
+  matcher: "/api/:path*", // Apply only to API routes
 };
 
 export default function middleware(request: NextRequest) {

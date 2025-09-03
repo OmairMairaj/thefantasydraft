@@ -100,7 +100,7 @@ const Dashboard = () => {
           selectedLeague.teams.map(async (team) => {
             try {
               if (team.team) {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyteam/${team.team._id}`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyteam/${team.team._id}`);
                 if (!response.data.error) {
                   return response.data.data;
                 } else {
@@ -157,7 +157,7 @@ const Dashboard = () => {
 
   const fetchLeaguesByUser = async (userEmail) => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?email=${userEmail}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyleague?email=${userEmail}`);
       if (!response.data.error) {
         setLeagues(response.data.data);
         console.log("Leagues By User: ", response.data.data);

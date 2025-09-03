@@ -109,7 +109,7 @@ const Achievements = () => {
     const fetchUserTeamForLeague = async (userEmail, leagueId) => {
         try {
             // Step 1: Get League Data
-            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyleague?leagueId=${leagueId}`);
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyleague?leagueId=${leagueId}`);
 
             if (response.data && !response.data.error) {
                 const league = response.data.data;
