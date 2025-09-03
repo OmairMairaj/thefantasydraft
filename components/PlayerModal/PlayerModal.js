@@ -20,7 +20,7 @@ const PlayerModal = ({ player, onClose }) => {
     // Fetch the current gameweek
     const fetchCurrentGameweek = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`);
             if (!response.data.error) {
                 const currentGW = parseInt(response.data.data.name, 10);
                 setCurrentGameweek(currentGW);
@@ -35,7 +35,7 @@ const PlayerModal = ({ player, onClose }) => {
     const fetchPlayerMatches = async () => {
         try {
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/match/team-season?seasonID=${player.points[0]?.seasonID}&teamID=${player.teamID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}match/team-season?seasonID=${player.points[0]?.seasonID}&teamID=${player.teamID}`
             );
             if (!response.data.error) {
                 setMatches(response.data.data);

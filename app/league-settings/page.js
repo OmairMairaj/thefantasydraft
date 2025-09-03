@@ -136,7 +136,7 @@ const LeagueSettings = () => {
         try {
             // console.log("editData");    
             // console.log(editData);
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague/edit`, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyleague/edit`, {
                 leagueData: leagueData
             });
             if (response.data && !response.data.error) {
@@ -160,7 +160,7 @@ const LeagueSettings = () => {
     const fetchLeagueData = async () => {
         try {
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${leagueID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyleague?leagueId=${leagueID}`
             );
             if (response.data && !response.data.error) {
                 console.log("leagueData: ", response.data.data);
@@ -271,7 +271,7 @@ const LeagueSettings = () => {
         }
         try {
             const response = await axios.delete(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${leagueData?._id}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyleague?leagueId=${leagueData?._id}`
             );
 
             if (response.data && !response.data.error) {

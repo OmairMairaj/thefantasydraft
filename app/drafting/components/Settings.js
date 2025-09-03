@@ -54,7 +54,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
             setLoading(true);
             try {
                 const response = await axios.get(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?draftID=${draftID}`
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft?draftID=${draftID}`
                 );
                 if (response.data && !response.data.error) {
                     setDraftData(response.data.data);
@@ -144,7 +144,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
 
             // console.log("editData");    
             // console.log(editData);
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/edit`, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/edit`, {
                 draftData: editData
             });
             if (response.data && !response.data.error) {
@@ -210,7 +210,7 @@ const DraftSettings = ({ draftID, user, onBack }) => {
     //     }
     //     try {
     //         const response = await axios.delete(
-    //             `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyleague?leagueId=${draftData?.leagueID?._id}`
+    //             `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyleague?leagueId=${draftData?.leagueID?._id}`
     //         );
 
     //         if (response.data && !response.data.error) {

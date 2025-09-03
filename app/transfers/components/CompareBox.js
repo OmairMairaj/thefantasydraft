@@ -19,7 +19,7 @@ const CompareBox = ({ playerObj, label }) => {
     const fetchMatches = async () => {
         try {
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/match/team-season?seasonID=${playerObj?.points[0]?.seasonID}&teamID=${playerObj?.teamID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}match/team-season?seasonID=${playerObj?.points[0]?.seasonID}&teamID=${playerObj?.teamID}`
             );
             if (!response.data.error) {
                 setMatches(response.data.data);

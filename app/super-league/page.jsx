@@ -58,7 +58,7 @@ const SuperLeague = () => {
             // Note: it's better REST to get by /api/super-league (backend gets user from session),
             // but this matches your pattern:
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague?user=${userId}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}superleague?user=${userId}`
             );
             if (!response.data.error) {
                 setSuperLeagues(response.data.data || []);
@@ -140,7 +140,7 @@ const SuperLeague = () => {
         }
         try {
             const response = await axios.delete(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague?Id=${selectedSuperLeague?._id}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}superleague?Id=${selectedSuperLeague?._id}`
             );
             console.log("Delete response:", response);
 

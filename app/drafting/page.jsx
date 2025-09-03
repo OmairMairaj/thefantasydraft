@@ -88,7 +88,7 @@ const Drafting = () => {
     const fetchdraftData = async () => {
         try {
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?leagueID=${leagueID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft?leagueID=${leagueID}`
             );
             if (response.data && !response.data.error) {
                 console.log("draftData: ", response.data.data[0]);
@@ -180,7 +180,7 @@ const Drafting = () => {
     // Fetch players from API
     const fetchPlayers = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/player`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}player`);
             if (response.data && !response.data.error) {
                 setPlayers(response.data.data || []);
                 console.log("Players:", response.data.data);
@@ -400,7 +400,7 @@ const Drafting = () => {
             console.log("User Email: ", user.email);
             if (draftData.state === 'Manual' || draftData.state === 'Scheduled') {
                 try {
-                    const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/startNow`, { draftID: draftData._id, user_email: user.email });
+                    const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/startNow`, { draftID: draftData._id, user_email: user.email });
                     if (response.data && !response.data.error) {
                         addAlert("Draft has been started", "success");
                         setDraftData(response.data.data);

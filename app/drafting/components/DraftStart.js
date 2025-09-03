@@ -57,7 +57,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
 
     useEffect(() => {
         try {
-            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/team`)
+            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}team`)
                 .then((response) => {
                     if (response && response.data && response.data.data) setTeams(response.data.data);
                     else addAlert("Error fetching teams. Please try again", 'error');
@@ -76,7 +76,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft?draftID=${draftID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft?draftID=${draftID}`
             );
             if (response.data && !response.data.error) {
                 setDraftData(response.data.data);
@@ -261,7 +261,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
             }
             // Make the API call
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players?draftID=${draftID}&teamID=${teamID}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players?draftID=${draftID}&teamID=${teamID}`
             );
             if (response.data && !response.data.error) {
                 setPlayers(response.data.data || []);
@@ -332,7 +332,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                 draftID: draftID,
                 playerObj: player,
             };
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players`, requestBody);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players`, requestBody);
             if (response.data && !response.data.error) {
                 //console.log("Player successfully picked:", response.data);
                 // Fetch updated draft data
@@ -355,7 +355,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
         if (isPicking) return;
         setIsPicking(true);
         try {
-            let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
+            let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
             axios.get(link).then((response) => {
                 // console.log(response);
                 if (response.data && !response.data.error) {

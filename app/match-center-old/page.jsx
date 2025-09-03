@@ -30,7 +30,7 @@ const MatchCenterPage = () => {
 
     const fetchCurrentGameweek = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`, { cache: 'no-store' });
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`, { cache: 'no-store' });
             if (!response.data.error) {
                 const currentGameweek = response.data.data;
                 setGameweekName(parseInt(currentGameweek.name, 10));
@@ -44,7 +44,7 @@ const MatchCenterPage = () => {
 
     const fetchTotalGameweeks = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/count`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/count`);
             setTotalPages(response.data.totalGameweeks);
         } catch (error) {
             console.error('Error fetching total gameweeks:', error);
@@ -53,7 +53,7 @@ const MatchCenterPage = () => {
 
     const fetchMatches = async (gameweek) => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match?gameweek=${gameweek}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}match?gameweek=${gameweek}`);
             setMatches(response.data.data);
             console.log(response.data.data);
         } catch (error) {
@@ -63,7 +63,7 @@ const MatchCenterPage = () => {
 
     const fetchGameweekDetails = async (gameweek) => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/${gameweek}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/${gameweek}`);
             setGameweekDetails(response.data.data);
         } catch (error) {
             console.error('Error fetching gameweek data:', error);

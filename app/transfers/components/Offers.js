@@ -25,7 +25,7 @@ const Offers = () => {
     useEffect(() => {
         if (leagueId && user) {
             try {
-                axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyleague?leagueId=${leagueId}`)
+                axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyleague?leagueId=${leagueId}`)
                     .then((response) => {
                         if (response.data && !response.data.error) {
                             const league = response.data.data;
@@ -62,7 +62,7 @@ const Offers = () => {
     useEffect(() => {
         if (userTeam) {
             try {
-                let URL = process.env.NEXT_PUBLIC_BACKEND_URL + `/transfer?teamID=${userTeam._id}`
+                let URL = process.env.NEXT_PUBLIC_BACKEND_URL + `transfer?teamID=${userTeam._id}`
                 axios.get(URL)
                     .then((response) => {
                         console.log("response")
@@ -93,7 +93,7 @@ const Offers = () => {
 
     function handleClick(operation, ID) {
         try {
-            const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/transfer/" + operation;
+            const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "transfer/" + operation;
             const body = {
                 "transferID": ID
             }

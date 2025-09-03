@@ -57,7 +57,7 @@ const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
         setSearching(true);
         try {
             const res = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague/code?inviteCode=${inviteCode.trim()}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}superleague/code?inviteCode=${inviteCode.trim()}`
             );
             if (!res.data || res.data.error || !res.data.data) {
                 setError("League not found.");
@@ -116,7 +116,7 @@ const SuperLeagueCreateForm = ({ User, onBack, onCreated }) => {
                 leagues: selectedLeagues.map((l) => l._id),
             };
             const res = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague`,
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}superleague`,
                 payload
             );
             if (!res.data.error) {

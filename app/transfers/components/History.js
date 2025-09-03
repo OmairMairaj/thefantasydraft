@@ -20,7 +20,7 @@ const History = () => {
     useEffect(() => {
         if (leagueId) {
             try {
-                let URL = process.env.NEXT_PUBLIC_BACKEND_URL + `/transfer?leagueId=${leagueId}`
+                let URL = process.env.NEXT_PUBLIC_BACKEND_URL + `transfer?leagueId=${leagueId}`
                 axios.get(URL)
                     .then((response) => {
                         console.log("response")

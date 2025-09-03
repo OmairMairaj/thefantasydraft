@@ -117,7 +117,7 @@ const MatchCenter = () => {
 
     const fetchCurrentGameweek = () => {
         axios
-            .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`, { cache: 'no-store' })
+            .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`, { cache: 'no-store' })
             .then((response) => {
                 if (!response.data.error) {
                     const currentGameweek = response.data.data;
@@ -189,7 +189,7 @@ const MatchCenter = () => {
 
     // const fetchStandings = () => {
     //     axios
-    //         .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/standing`)
+    //         .get(process.env.NEXT_PUBLIC_BACKEND_URL + `standing`)
     //         .then((response) => {
     //             console.log(response.data.data);
     //             setStandings(response.data.data);
@@ -200,7 +200,7 @@ const MatchCenter = () => {
     const fetchUserTeamForLeague = async (userEmail, leagueId) => {
         try {
             // Step 1: Get League Data
-            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyleague?leagueId=${leagueId}`);
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyleague?leagueId=${leagueId}`);
 
             if (response.data && !response.data.error) {
                 const league = response.data.data;
@@ -242,7 +242,7 @@ const MatchCenter = () => {
 
     const fetchTeamDetails = async (teamId) => {
         try {
-            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyteam/${teamId}`);
+            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyteam/${teamId}`);
             if (teamResponse.data && !teamResponse.data.error) {
                 console.log("Team Data", teamResponse.data.data);
                 setTeam(teamResponse.data.data);
@@ -259,7 +259,7 @@ const MatchCenter = () => {
 
     const fetchLeagueTeamPoints = async (league, team, gameweek) => {
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/points?teamID=` + team + `&leagueID=` + league + `&gameweekID=` + gameweek);
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `points?teamID=` + team + `&leagueID=` + league + `&gameweekID=` + gameweek);
             if (response.data && !response.data.error) {
                 console.log("Points Data", response.data.data);
                 setLeaguePoints(response.data.data);
@@ -399,7 +399,7 @@ const MatchCenter = () => {
         const id = player.player._id;
         console.log(id);
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/player/with-points/${id}`);
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `player/with-points/${id}`);
             if (response.data && !response.data.error) {
                 console.log("Player Data", response.data.data);
 
@@ -507,7 +507,7 @@ const MatchCenter = () => {
             await Promise.all(
                 allTeamIds.map(async (teamId) => {
                     const res = await axios.get(
-                        `${process.env.NEXT_PUBLIC_BACKEND_URL}/points/team?leagueID=${leagueId}&teamID=${teamId}&gameweekID=${gameweekDetails._id}`
+                        `${process.env.NEXT_PUBLIC_BACKEND_URL}points/team?leagueID=${leagueId}&teamID=${teamId}&gameweekID=${gameweekDetails._id}`
                     );
                     if (res.data && !res.data.error) {
                         pointsMap[teamId] = res.data.data?.points || 0;

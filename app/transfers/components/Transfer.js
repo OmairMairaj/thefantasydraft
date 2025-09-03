@@ -130,7 +130,7 @@ const Transfer = () => {
 
     // const fetchStandings = () => {
     //     axios
-    //         .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/standing`)
+    //         .get(process.env.NEXT_PUBLIC_BACKEND_URL + `standing`)
     //         .then((response) => {
     //             console.log(response.data.data);
     //             setStandings(response.data.data);
@@ -141,7 +141,7 @@ const Transfer = () => {
     const fetchUserTeamForLeague = async (userEmail, leagueId) => {
         try {
             // Step 1: Get League Data
-            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyleague?leagueId=${leagueId}`);
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyleague?leagueId=${leagueId}`);
 
             if (response.data && !response.data.error) {
                 console.log(`League Data: `, response.data.data);
@@ -184,7 +184,7 @@ const Transfer = () => {
 
     const fetchTeamDetails = async (teamId) => {
         try {
-            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyteam/${teamId}`);
+            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyteam/${teamId}`);
             if (teamResponse.data && !teamResponse.data.error) {
                 console.log("Team Data", teamResponse.data.data);
                 return teamResponse.data.data;
@@ -200,7 +200,7 @@ const Transfer = () => {
 
     const fetchLeagueTeamPoints = async (league, team, gameweek) => {
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/points?teamID=` + team + `&leagueID=` + league + `&gameweekID=` + gameweek);
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `points?teamID=` + team + `&leagueID=` + league + `&gameweekID=` + gameweek);
             if (response.data && !response.data.error) {
                 console.log("Points Data", response.data.data);
                 setLeaguePoints(response.data.data);
@@ -216,7 +216,7 @@ const Transfer = () => {
 
     const fetchOtherPlayers = async (leagueId, teamId) => {
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/transfer/players?teamID=${teamId}&leagueID=${leagueId}`);
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `transfer/players?teamID=${teamId}&leagueID=${leagueId}`);
             if (response.data && !response.data.error) {
                 console.log("Other Players", response.data.data);
                 setOtherPlayers(response.data.data);
@@ -428,7 +428,7 @@ const Transfer = () => {
         if (playersIn && playersOut && playersIn._id && playersOut._id) {
             // Logic to handle transfer submission
             try {
-                const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/transfer";
+                const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "transfer";
                 console.log(URL);
                 const body = {
                     "teamID": userTeam._id,
@@ -477,7 +477,7 @@ const Transfer = () => {
 
     useEffect(() => {
         try {
-            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/team`)
+            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}team`)
                 .then((response) => {
                     if (response && response.data && response.data.data) setTeams(response.data.data);
                     else addAlert("Error fetching teams. Please try again", 'error');

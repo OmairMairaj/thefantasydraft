@@ -97,7 +97,7 @@ const TeamPage = () => {
 
     const fetchCurrentGameweek = () => {
         axios
-            .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`, { cache: 'no-store' })
+            .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`, { cache: 'no-store' })
             .then((response) => {
                 console.log("current")
                 console.log(response)
@@ -152,7 +152,7 @@ const TeamPage = () => {
 
     const fetchStandings = () => {
         axios
-            .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/standing`)
+            .get(process.env.NEXT_PUBLIC_BACKEND_URL + `standing`)
             .then((response) => {
                 console.log(response.data.data);
                 setStandings(response.data.data);
@@ -163,7 +163,7 @@ const TeamPage = () => {
     const fetchUserTeamForLeague = async (userEmail, leagueId) => {
         try {
             // Step 1: Get all leagues for the user
-            const leagueResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyleague?email=${userEmail}`);
+            const leagueResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyleague?email=${userEmail}`);
 
             if (leagueResponse.data && !leagueResponse.data.error) {
                 console.log(leagueResponse.data.data);
@@ -202,7 +202,7 @@ const TeamPage = () => {
 
     const fetchTeamDetails = async (teamId) => {
         try {
-            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyteam/${teamId}`);
+            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyteam/${teamId}`);
             if (teamResponse.data && !teamResponse.data.error) {
                 console.log("Team Data", teamResponse.data.data);
                 setTeam(teamResponse.data.data);
@@ -397,7 +397,7 @@ const TeamPage = () => {
 
         try {
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/fantasyteam/${team._id}`,
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyteam/${team._id}`,
                 updatePayload,
                 {
                     headers: {

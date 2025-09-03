@@ -105,7 +105,7 @@ const LeagueTablePage = () => {
 
     const fetchCurrentGameweek = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/current`, { cache: 'no-store' });
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`, { cache: 'no-store' });
             if (!response.data.error) {
                 setGameweekName(parseInt(response.data.data.name, 10));
                 console.log("Gameweek (gameweekName): ", parseInt(response.data.data.name, 10));
@@ -126,7 +126,7 @@ const LeagueTablePage = () => {
 
     const fetchMatches = async (gameweek) => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match?gameweek=${gameweek}`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}match?gameweek=${gameweek}`);
             setMatches(response.data.data);
             console.log("Matches", response.data.data);
         } catch (error) {
@@ -137,7 +137,7 @@ const LeagueTablePage = () => {
     const fetchLeague = async (user_email, leagueId) => {
         try {
             // Step 1: Get all leagues for the user
-            const leagueResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyleague?leagueId=${leagueId}`);
+            const leagueResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyleague?leagueId=${leagueId}`);
 
             if (leagueResponse.data && !leagueResponse.data.error) {
                 setLeagueData(leagueResponse.data.data);
@@ -196,7 +196,7 @@ const LeagueTablePage = () => {
 
     const fetchTeamDetails = async (teamId) => {
         try {
-            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyteam/${teamId}`);
+            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyteam/${teamId}`);
             if (teamResponse.data && !teamResponse.data.error) {
                 console.log("Team Data", teamResponse.data.data);
                 setPlayers(teamResponse.data.data.players);
@@ -265,7 +265,7 @@ const LeagueTablePage = () => {
 
     // const fetchTotalGameweeks = async () => {
     //     try {
-    //         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/count`);
+    //         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/count`);
     //         setTotalPages(response.data.totalGameweeks);
     //     } catch (error) {
     //         console.error('Error fetching total gameweeks:', error);
@@ -274,7 +274,7 @@ const LeagueTablePage = () => {
 
     // const fetchGameweekDetails = async (gameweek) => {
     //     try {
-    //         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/gameweek/${gameweek}`);
+    //         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/${gameweek}`);
     //         setGameweekDetails(response.data.data);
     //         console.log("Gameweek Details", response.data.data);
     //     } catch (error) {

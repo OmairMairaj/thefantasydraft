@@ -38,7 +38,7 @@ const TeamModal = ({ selectedTeam, gameweek, leagueData, onClose, handlePlayerCl
 
     const fetchTeamDetails = async (teamId) => {
         try {
-            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/fantasyteam/${teamId}`);
+            const teamResponse = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `fantasyteam/${teamId}`);
             if (teamResponse.data && !teamResponse.data.error) {
                 console.log("Team Data", teamResponse.data.data);
                 setTeam(teamResponse.data.data);
@@ -56,7 +56,7 @@ const TeamModal = ({ selectedTeam, gameweek, leagueData, onClose, handlePlayerCl
 
     const fetchLeagueTeamPoints = async (league, team, gameweek) => {
         try {
-            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/points?teamID=` + team + `&leagueID=` + league + `&gameweekID=` + gameweek);
+            const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `points?teamID=` + team + `&leagueID=` + league + `&gameweekID=` + gameweek);
             if (response.data && !response.data.error) {
                 console.log("Points Data", response.data.data);
                 setLeaguePoints(response.data.data);

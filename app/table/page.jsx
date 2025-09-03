@@ -36,7 +36,7 @@ const Table = () => {
 
     const fetchStandings = () => {
         axios
-            .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/standing`)
+            .get(process.env.NEXT_PUBLIC_BACKEND_URL + `standing`)
             .then((response) => {
                 console.log(response.data.data);
                 setStandings(response.data.data);

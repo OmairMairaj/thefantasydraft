@@ -63,7 +63,7 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
         setSearching(true);
         try {
             const res = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague/code?inviteCode=${inviteCode.trim()}`
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}superleague/code?inviteCode=${inviteCode.trim()}`
             );
             if (!res.data || res.data.error || !res.data.data) {
                 setError("League not found.");
@@ -143,7 +143,7 @@ const SuperLeagueEditForm = ({ superLeague, onUpdate }) => {
                 leagues: selectedLeagues.map((l) => l._id),
             };
             const res = await axios.patch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/superleague?Id=${superLeague._id}`,
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}superleague?Id=${superLeague._id}`,
                 payload
             );
             if (!res.data.error) {

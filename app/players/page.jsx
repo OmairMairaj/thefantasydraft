@@ -25,7 +25,7 @@ const PlayersListing = () => {
 
     useEffect(() => {
         try {
-            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/team`)
+            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}team`)
                 .then((response) => {
                     if (response && response.data && response.data.data) setTeams(response.data.data);
                     else addAlert("Error fetching teams. Please try again", 'error');
@@ -42,7 +42,7 @@ const PlayersListing = () => {
     const fetchPlayers = async () => {
         setLoading(true); // Start loading before fetching
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/player/with-points `);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}player/with-points `);
             if (response.data && !response.data.error) {
                 console.log('Players:', response.data.data);
                 setPlayers(response.data.data || []);
