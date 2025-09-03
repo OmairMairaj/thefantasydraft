@@ -181,9 +181,14 @@ const Dashboard = () => {
         }
 
         setShowEmptyView(false);
+      }else{
+        console.log("Error")
+        console.log(response)
       }
     } catch (error) {
-      console.error("Error fetching leagues: ", error);
+      console.log("Error")
+      console.log(error)
+      // console.error("Error fetching leagues: ", error);
     } finally {
       setLoading(false); // Ensures loading is stopped in all cases
     }
