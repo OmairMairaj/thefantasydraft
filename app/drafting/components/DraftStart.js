@@ -529,7 +529,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
 
         return (
             <div
-                className={`${bg} w-5 h-5 text-black flex items-center justify-center text-xs my-4 rounded-full `}
+                className={`${bg} w-5 h-5 text-black flex items-center justify-center text-xs my-2 rounded-full `}
             >
                 {text}
             </div>
@@ -655,7 +655,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                         {/* Main Draft Section */}
                         <div className="grid grid-cols-8 gap-2 ">
                             {/* Players Section */}
-                            <div className="col-span-8 lg:col-span-3 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full ">
+                            <div className="col-span-8 lg:col-span-3 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full max-h-[46rem]">
                                 <div className='flex flex-col justify-between'>
                                     <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-1`}>
                                         Players
@@ -673,7 +673,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                 <option value="rating">Rating</option>
                                             </select>
                                         </div>
-                                        <div className='flex items-center gap-2 w-[32%] sm:w-3/12'>
+                                        <div className='flex items-center gap-2 w-[32%] sm:w-2/12'>
                                             {/* <p className="text-gray-400">Filter:</p> */}
                                             <select
                                                 value={filter}
@@ -717,7 +717,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                     </div>
                                 </div>
                                 {/* Table */}
-                                <div className="relative w-full h-[450px] sm:h-[650px] overflow-hidden rounded-lg border border-[#1D374A]">
+                                <div className="relative w-full h-[450px] sm:h-[650px] lg:h-[90.5%] overflow-hidden rounded-lg border border-[#1D374A]">
                                     {/* Scrollable Wrapper */}
                                     <div className="overflow-x-auto overflow-y-auto h-[450px] sm:h-[650px] scrollbar">
                                         <table className="table-auto w-full text-left text-white text-xs xl:text-sm">
@@ -771,7 +771,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                             </div>
 
                             {/* Auto Pick List Section */}
-                            <div className="col-span-8 sm:col-span-3 md:col-span-4 lg:col-span-2 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full">
+                            <div className="col-span-8 sm:col-span-3 md:col-span-4 lg:col-span-2 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full min-h-[16rem]">
                                 <div className='flex justify-between'>
                                     <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-2`}>
                                         Auto Pick List
@@ -830,12 +830,12 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                             </div>
                                         </div>
                                         : (
-                                            <div className="h-[95%] overflow-auto flex flex-col justify-center space-y-2 rounded-lg border border-[#1D374A]">
+                                            <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2 rounded-lg border border-[#1D374A]">
                                                 <div className="text-xs xl:text-sm text-gray-400 text-center">No players selected for auto pick.</div>
                                             </div>
                                         )
                                     : (
-                                        <div className="h-[95%] overflow-auto flex flex-col justify-center space-y-2 rounded-lg border border-[#1D374A]">
+                                        <div className="h-[85%] overflow-auto flex flex-col justify-center space-y-2 rounded-lg border border-[#1D374A]">
                                             <div className="text-xs xl:text-sm text-gray-400 text-center">Fetching auto pick list...</div>
                                         </div>
                                     )
@@ -843,7 +843,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                             </div>
 
                             {/* Chosen Players Section */}
-                            <div className="col-span-8 sm:col-span-5 md:col-span-4 lg:col-span-3 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full ">
+                            <div className="col-span-8 sm:col-span-5 md:col-span-4 lg:col-span-3 bg-[#0c1922] rounded-xl p-4 xl:p-6 h-full max-h-[46rem]">
                                 <div className="flex justify-between">
                                     <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className} mb-2`}>Picks</h3>
                                     <div className="flex items-center rounded-lg overflow-hidden mb-2 text-xs xl:text-sm">
@@ -864,49 +864,137 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                 {chosenPlayers && pitchViewList ? (
                                     chosenPlayers.length > 0 ? (
                                         view === 'List' ? (
-                                            <div className="relative w-full h-[570px] lg:h-[685px] overflow-hidden rounded-lg border border-[#1D374A]">
-                                                <div className="overflow-x-auto overflow-y-auto h-[570px] lg:h-[685px] scrollbar">
-                                                    <table className="table-auto w-full text-left text-white text-xs xl:text-sm">
-                                                        <thead className="bg-[#1D374A] sticky top-0 z-10">
+                                            <div className="relative w-full overflow-hidden rounded-lg border border-[#1d374a] bg-[#0C1922]">
+                                                <div className="overflow-x-auto overflow-y-auto scrollbar max-h-[40rem]">
+                                                    <table className="w-full text-left text-white text-xs xl:text-sm">
+                                                        <thead className="bg-[#1d374a] sticky top-0 z-10">
                                                             <tr className="text-center">
-                                                                <th className="p-2 max-w-[100px] text-left pl-4">Name</th>
-                                                                <th className="p-2"></th>
+                                                                <th className="p-2 text-left pl-4">Player</th>
+                                                                <th className="p-2">Pos.</th>
+                                                                {/* <th className="p-2">Actions</th> */}
                                                             </tr>
                                                         </thead>
-                                                        <tbody className="">
-                                                            {chosenPlayers.map((player) => (
-                                                                <tr
-                                                                    key={player.player.id}
-                                                                    className="border-b border-[#1D374A] text-center items-center justify-center"
-                                                                >
-                                                                    <td className="p-2 max-w-[100px] text-left truncate">
-                                                                        <div className="flex items-center space-x-2">
-                                                                            {player.player.image_path && (
-                                                                                <img
-                                                                                    src={player.player.image_path}
-                                                                                    alt={player.player.team_name || 'Team Logo'}
-                                                                                    className="w-8 h-8 xl:w-10 xl:h-10 rounded-lg"
-                                                                                />
-                                                                            )}
-                                                                            <div className="overflow-hidden">
-                                                                                <p className="font-bold truncate">
-                                                                                    {player.player.common_name}
-                                                                                </p>
-                                                                                <p className="text-[10px] xl:text-xs text-gray-400 truncate">
-                                                                                    {player.player.team_name}
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className="h-full flex justify-center items-center">
-                                                                        {positionIcon(player.player.position_name)}
-                                                                    </td>
-                                                                </tr>
+                                                        <tbody>
+                                                            {/* Main positions */}
+                                                            {["Goalkeeper", "Defender", "Midfielder", "Attacker"].map((pos) => (
+                                                                pitchViewList.lineup[pos].length > 0 && (
+                                                                    <React.Fragment key={pos}>
+                                                                        {/* Section Heading */}
+                                                                        {/* <tr>
+                                                                            <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-[10px] xl:text-xs">
+                                                                                {pos}
+                                                                            </td>
+                                                                        </tr> */}
+                                                                        {pitchViewList.lineup[pos].map((player) => (
+                                                                            <tr key={player.player._id} className={`bg-transparent border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                                {/* Player Name + Image */}
+                                                                                <td className="px-2 text-left truncate max-w-28 sm:max-w-none">
+                                                                                    <div className="flex items-center space-x-2">
+                                                                                        {player.player.image_path && (
+                                                                                            <img
+                                                                                                src={player.player.image_path}
+                                                                                                alt={player.player.team_name || 'Team Logo'}
+                                                                                                className="w-8 h-8 xl:w-10 xl:h-10 my-2 rounded-lg"
+                                                                                            />
+                                                                                        )}
+                                                                                        <div className="overflow-hidden">
+                                                                                            <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                                            <p className="text-[10px] xl:text-xs text-gray-400 truncate">
+                                                                                                {player.player.team_name}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td className="p-2 text-center truncate">
+                                                                                    <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </React.Fragment>
+                                                                )
                                                             ))}
+
+                                                            {/* Substitutes */}
+                                                            {pitchViewList.bench.length > 0 && (
+                                                                <React.Fragment>
+                                                                    {/* <tr>
+                                                                        <td colSpan="3" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-[10px] xl:text-xs">
+                                                                            Substitutes
+                                                                        </td>
+                                                                    </tr> */}
+                                                                    {pitchViewList.bench.map((player) => (
+                                                                        <tr key={player.player._id} className={`bg-[#0b1115] border-b border-[#1d374a] text-center items-center justify-center`} onClick={() => handlePlayerClick(player)}>
+                                                                            <td className="px-2 text-left truncate max-w-28 sm:max-w-none">
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    {player.player.image_path && (
+                                                                                        <img
+                                                                                            src={player.player.image_path}
+                                                                                            alt={player.player.common_name || 'Player Logo'}
+                                                                                            className="w-8 h-8 xl:w-10 xl:h-10 my-2 rounded-lg"
+                                                                                        />
+                                                                                    )}
+                                                                                    <div className="overflow-hidden">
+                                                                                        <p className="font-bold truncate">{player.player.common_name}</p>
+                                                                                        <p className="text-[10px] xl:text-xs text-gray-400 truncate">
+                                                                                            {player.player.team_name}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="p-2 text-center min-w-48">
+                                                                                <div className='flex items-center justify-center'>{positionIcon(player.player.position_name)}</div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </React.Fragment>
+                                                            )}
                                                         </tbody>
                                                     </table>
                                                 </div>
                                             </div>
+                                            // <div className="relative w-full h-[570px] lg:h-[685px] overflow-hidden rounded-lg border border-[#1D374A]">
+                                            //     <div className="overflow-x-auto overflow-y-auto h-[570px] lg:h-[685px] scrollbar">
+                                            //         <table className="table-auto w-full text-left text-white text-xs xl:text-sm">
+                                            //             <thead className="bg-[#1D374A] sticky top-0 z-10">
+                                            //                 <tr className="text-center">
+                                            //                     <th className="p-2 max-w-[100px] text-left pl-4">Name</th>
+                                            //                     <th className="p-2"></th>
+                                            //                 </tr>
+                                            //             </thead>
+                                            //             <tbody className="">
+                                            //                 {chosenPlayers.map((player) => (
+                                            //                     <tr
+                                            //                         key={player.player.id}
+                                            //                         className="border-b border-[#1D374A] text-center items-center justify-center"
+                                            //                     >
+                                            //                         <td className="p-2 max-w-[100px] text-left truncate">
+                                            //                             <div className="flex items-center space-x-2">
+                                            //                                 {player.player.image_path && (
+                                            //                                     <img
+                                            //                                         src={player.player.image_path}
+                                            //                                         alt={player.player.team_name || 'Team Logo'}
+                                            //                                         className="w-8 h-8 xl:w-10 xl:h-10 rounded-lg"
+                                            //                                     />
+                                            //                                 )}
+                                            //                                 <div className="overflow-hidden">
+                                            //                                     <p className="font-bold truncate">
+                                            //                                         {player.player.common_name}
+                                            //                                     </p>
+                                            //                                     <p className="text-[10px] xl:text-xs text-gray-400 truncate">
+                                            //                                         {player.player.team_name}
+                                            //                                     </p>
+                                            //                                 </div>
+                                            //                             </div>
+                                            //                         </td>
+                                            //                         <td className="h-full flex justify-center items-center">
+                                            //                             {positionIcon(player.player.position_name)}
+                                            //                         </td>
+                                            //                     </tr>
+                                            //                 ))}
+                                            //             </tbody>
+                                            //         </table>
+                                            //     </div>
+                                            // </div>
                                         ) : (
                                             <div className='flex flex-col gap-1'>
                                                 <div className="py-6 px-2 xl:px-4 text-white rounded-lg border border-[#1D374A] bg-[#0c1922] pitch-view">
@@ -1020,7 +1108,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
 
                                                 {/* Substitute Players */}
                                                 <div className='w-full py-1 px-4 bg-[#071117] rounded-lg'>
-                                                    <div className="flex justify-center items-center gap-2 xl:gap-4">
+                                                    <div className="flex justify-center items-center gap-2 xl:gap-4 text-xs">
                                                         {pitchViewList.bench.map((player) => (
                                                             <div
                                                                 key={player.player.id}

@@ -137,10 +137,10 @@ const CompareBox = ({ player }) => {
             </div>
 
             {/* Stats Table */}
-            <div className="mt-4 max-h-[30vh] overflow-y-auto">
-                <div className="overflow-x-auto [-webkit-overflow-scrolling:touch] touch-pan-x">
+            <div className="mt-4 relative">
+                <div className="overflow-x-auto max-h-[20vh] overflow-y-auto scrollbar [-webkit-overflow-scrolling:touch] touch-pan-x touch-pan-y">
                     <table className="min-w-[400px] w-full text-[10px] sm:text-xs xl:text-xs">
-                        <thead>
+                        <thead className="sticky top-0 bg-[#111] z-10">
                             <tr className="bg-gray-800 text-center">
                                 <th className="p-2">GW</th>
                                 <th className="p-2">Opponent</th>
@@ -173,7 +173,7 @@ const CompareBox = ({ player }) => {
                                         ? player.points.find(p => getGwId(p.gameweek) === rowGwId)
                                         : null;
                                     return (
-                                        <tr key={index} className="text-center border-b border-gray-700">
+                                        <tr key={index} className="text-center border-b h-auto border-gray-700">
                                             <td className="p-2">{game.gameweek.name || '-'}</td>
                                             <td className="p-2 flex justify-center items-center space-x-2 min-w-24 ">
                                                 {matchDetails ? (
@@ -215,10 +215,10 @@ const CompareBox = ({ player }) => {
                                     return (
                                         <tr key={index} className="text-center border-b border-gray-700">
                                             <td className="p-2">{game.gameweek.name || '-'}</td>
-                                            <td className="p-2 flex justify-center items-center space-x-2 min-w-28 ">
+                                            <td className="p-2 flex justify-center items-center space-x-2 min-w-24 ">
                                                 {matchDetails ? (
                                                     <div className="flex items-center space-x-2">
-                                                        <img src={matchDetails.opponentTeam.image_path} className="w-8 h-8 rounded-full" alt="opponent" />
+                                                        <img src={matchDetails.opponentTeam.image_path} className="w-6 h-6 rounded-full" alt="opponent" />
                                                         <span>{matchDetails.opponentTeam.short_code}</span>
                                                         <span>{matchDetails?.location || '-'}</span>
                                                     </div>
@@ -232,7 +232,7 @@ const CompareBox = ({ player }) => {
                                                     </div>
                                                 ) : '-'}
                                             </td>
-                                            <td className="p-2">{player.points.find((item) => item.gameweek._id === game.gameweek._id).points ?? '0'}</td>
+                                            <td className="p-2">{playerGw?.points ?? '0'}</td>
                                             <td className="p-2">{stats["minutes-played"] ?? '0'}</td>
                                             <td className="p-2">{stats.goals ?? '0'}</td>
                                             <td className="p-2">{stats.assists ?? '0'}</td>

@@ -934,9 +934,11 @@ const TeamPage = () => {
                                                                             score.team_id === awayTeam?.team_id
                                                                     )?.goals ?? 0}`
                                                                     : new Date(match.starting_at).toLocaleString('en-US', {
-                                                                        timeZone: 'Australia/Brisbane',
-                                                                        weekday: 'short',
-                                                                        hour: 'numeric',
+                                                                        year: 'numeric',
+                                                                        month: 'short',
+                                                                        weekday: 'long',
+                                                                        day: '2-digit',
+                                                                        hour: '2-digit',
                                                                         minute: '2-digit',
                                                                     })}
                                                             </div>

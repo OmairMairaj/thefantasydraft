@@ -38,22 +38,25 @@ shift email given in all models of the owner/creator to the user ID
 
 --------------------------------------OMAIR--------------------------------------
 DONE
-
+Draft pages responsiveness
+MyTeam page lineup configuration check and skeleton render accordingly
+MyTeam page list view switch and view options
+Realign settings from draft settings and move to league settings
+O: When no teams after creating league, show next opponent as empty
 IN PROCESS
 
 TO-DO
-Draft pages responsiveness
+
 Draft page ended view: remove players and autopick box and show list view and pitch view side by side
-MyTeam page lineup configuration check and skeleton render accordingly
-MyTeam page list view switch and view options
+
+
 MyTeam page make captain/vice-captain option
 O: no functionality to invite user after league creation
 O: Clicking on force pick does not stop timer and does not disables button
 O: Add Loaders on picking
 O: If pick is auto and turn is last then, it makes two calls to auto pick.
 O: Image pickers picking all types of files
-O: When no teams after creating league, show next opponent as empty
+
 O: Remove a team functionality
-Realign settings from draft settings and move to league settings
 team name, team logo, stadium name, stadium image change option? and till when allowed
 league creation middle of season or start so points display by gameweek how?

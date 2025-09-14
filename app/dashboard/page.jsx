@@ -181,7 +181,7 @@ const Dashboard = () => {
         }
 
         setShowEmptyView(false);
-      }else{
+      } else {
         console.log("Error")
         console.log(response)
       }
@@ -365,21 +365,23 @@ const Dashboard = () => {
                           <h2 className={`text-2xl sm:text-2xl md:text-4xl lg:text-3xl xl:text-4xl font-bold ${exo2.className}`}>
                             {selectedLeague.league_name}
                           </h2>
-                          <div className="flex flex-wrap md:justify-start text-sm lg:text-sm xl:text-base"><strong className="mr-2">Owner:</strong>{selectedLeague.creator}</div>
+                          <div className="flex flex-wrap md:justify-start text-sm lg:text-sm xl:text-base"><strong className="mr-2">Chairman:</strong>{selectedLeague.creator}</div>
                         </div>
                       </div>
 
                       <div className="flex flex-col sm:flex-row sm:justify-between space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4 md:pb-2 z-40 sm:mt-3">
                         {!showUnpaid ? (
                           <div className="flex space-x-2 md:space-x-4">
-                            <Link href={"/league-settings?leagueID=" + selectedLeague._id} className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 md:py-2 lg:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
+                            {/* <Link href={"/league-settings?leagueID=" + selectedLeague._id} className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 md:py-2 lg:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
                               <FaCog className="text-sm md:text-base lg:text-lg xl:text-xl" />
                               <span>League Settings</span>
-                            </Link>
-                            <Link href={"/drafting?leagueID=" + selectedLeague._id} className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 lg:py-2 md:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
-                              <FaDraft2Digital className="text-sm md:text-base lg:text-lg xl:text-xl" />
-                              <span>Drafting</span>
-                            </Link>
+                            </Link> */}
+                            {selectedLeague.draftID && selectedLeague.draftID.state !== "Ended" && (
+                              <Link href={"/drafting?leagueID=" + selectedLeague._id} className="fade-gradient text-sm lg:text-sm xl:text-base flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 lg:px-3 py-1 sm:py-2 lg:py-2 md:py-2 xl:px-5 text-white rounded-full font-bold transition-all ease-in-out">
+                                <FaDraft2Digital className="text-sm md:text-base lg:text-lg xl:text-xl" />
+                                <span>Drafting</span>
+                              </Link>
+                            )}
                           </div>
                         ) : (
                           <div className="flex items-center text-red-600 space-x-2 text-sm sm:text-base lg:text-sm xl:text-base">
@@ -508,7 +510,7 @@ const Dashboard = () => {
                                   <img
                                     src={opponent?.team_image_path || "/images/default_team_logo.png"}
                                     alt="Opponent Logo"
-                                    className="w-12 h-12 md:w-14 md:h-14 lg:w-14 lg:h-14 object-cover rounded-full mr-2 sm:mr-4 lg:mr-2 xl:mr-3"
+                                    className="w-12 h-12 md:w-14 md:h-14 lg:w-14 lg:h-14 object-cover rounded-md mr-2 sm:mr-4 lg:mr-2 xl:mr-3"
                                   />
                                   <div>
                                     <p className="text-white text-sm md:text-base lg:text-sm xl:text-base">{opponent?.team_name || "TBD"}</p>
@@ -526,7 +528,7 @@ const Dashboard = () => {
                           {/* League Table Card */}
                           <Link href={'/league-table'} className={`w-full lg:w-[49.2%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
                             style={{
-                              backgroundImage: "url('/images/matchcenterImage.png')",
+                              backgroundImage: "url('/images/leagueTableBgImage.png')",
                             }}>
                             <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-2 ${exo2.className}`}>LEAGUE TABLE</h3>
                             <p className="text-sm md:text-base lg:text-sm xl:text-base text-gray-300 mb-4">Check where your team stands in the league</p>
@@ -581,7 +583,7 @@ const Dashboard = () => {
                           </Link>
 
                           {/* Transfers Card */}
-                          <Link href={'/transfers'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative justify-between bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
+                          <Link href={'/transfers'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative justify-between bg-cover bg-right-top cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
                             onClick={(e) => {
                               if (selectedLeague.draftID.state !== "Ended") {
                                 e.preventDefault();
@@ -589,7 +591,7 @@ const Dashboard = () => {
                               }
                             }}
                             style={{
-                              backgroundImage: "url('/images/transfersimage.png')",
+                              backgroundImage: "url('/images/transfersBgImage.png')",
                             }}>
                             <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>TRANSFERS</h3>
                             <p className="text-sm md:text-base lg:text-sm xl:text-base">Manage your transfers to get the best team performance.</p>
@@ -605,7 +607,7 @@ const Dashboard = () => {
                           </Link>
 
                           {/* Match Center Card */}
-                          <Link href={'/match-center'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col ${selectedLeague.draftID.state === "Ended" ? 'justify-between' : ''} bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
+                          <Link href={'/match-center'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative flex flex-col ${selectedLeague.draftID.state === "Ended" ? 'justify-between' : ''} bg-cover bg-right-top cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
                             onClick={(e) => {
                               if (selectedLeague.draftID.state !== "Ended") {
                                 e.preventDefault();
@@ -613,7 +615,7 @@ const Dashboard = () => {
                               }
                             }}
                             style={{
-                              backgroundImage: "url('/images/gameweekimage.png')",
+                              backgroundImage: "url('/images/matchCenterBgImage.png')",
                             }}>
                             <div className="space-y-4">
                               <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 lg:mb-1 xl:mb-2 ${exo2.className}`}>MATCH CENTER</h3>
@@ -628,13 +630,13 @@ const Dashboard = () => {
                                     {currentFixtures?.slice(0, 3).map((fixture, idx) => (
                                       <li key={idx} className="flex items-center justify-between py-1 rounded-md shadow-md">
                                         <div className="flex items-center w-1/2">
-                                          <img src={fixture.teams[0]?.team_image_path || "/images/default_team_logo.png"} alt="First Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+                                          <img src={fixture.teams[0]?.team_image_path || "/images/default_team_logo.png"} alt="First Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10 rounded-md" />
                                           <span className="text-sm md:text-base lg:text-sm xl:text-base ml-4 lg:ml-1 xl:ml-2">{fixture.teams[0]?.team_name || "Team 1"}</span>
                                         </div>
                                         <span className="text-[#FF8A00] text-base md:text-xl mx-2">v/s</span>
                                         <div className="flex items-center justify-end w-1/2">
                                           <span className="text-sm md:text-base lg:text-sm xl:text-base mr-4 lg:mr-1 xl:mr-2">{fixture.teams[1]?.team_name || "Team 2"}</span>
-                                          <img src={fixture.teams[1]?.team_image_path || "/images/default_team_logo.png"} alt="Second Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+                                          <img src={fixture.teams[1]?.team_image_path || "/images/default_team_logo.png"} alt="Second Team Logo" className="w-8 h-8 md:w-10 md:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10 rounded-md" />
                                         </div>
                                       </li>
                                     ))}
@@ -647,19 +649,19 @@ const Dashboard = () => {
                           </Link>
 
                           {/* Achievements Card */}
-                          <Link href={'/achievements'} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
+                          <Link href={"/league-settings?leagueID=" + selectedLeague._id} className={`${showUnpaid ? "hidden lg:block" : "block"} w-full lg:w-[32%] min-h-56 p-4 md:p-6 rounded-3xl shadow-lg relative bg-cover bg-center cursor-pointer hover:inset-0.5 transition-transform ease-in-out`}
                             style={{
                               backgroundImage: "url('/images/achievementsimage.png')",
                             }}>
-                            <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>ACHIEVEMENTS</h3>
-                            <p className="text-sm md:text-base lg:text-sm xl:text-base text-gray-300 mb-4">Track your team's achievements throughout the league.</p>
-                            <div className="flex items-center mt-8 lg:mt-1 xl:mt-6">
+                            <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>LEAGUE SETTINGS</h3>
+                            <p className="text-sm md:text-base lg:text-sm xl:text-base text-gray-300 mb-4">{selectedLeague.creator === user.email ? "You're the league admin—adjust rules and scoring; updates apply from the next gameweek." : "Review the league's current rules and scoring here."}</p>
+                            {/* <div className="flex items-center mt-8 lg:mt-1 xl:mt-6">
                               <CircularProgress percentage={52} />
                               <div className="ml-2">
                                 <p className="text-lg md:text-xl lg:text-lg xl:text-xl font-bold text-white">21/40</p>
                                 <p className="text-xs md:text-sm text-gray-300">Total Achievements Completed</p>
                               </div>
-                            </div>
+                            </div> */}
                           </Link>
                         </div>
                       </div>

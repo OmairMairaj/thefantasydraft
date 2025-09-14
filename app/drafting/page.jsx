@@ -37,6 +37,8 @@ const Drafting = () => {
     const [filter, setFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [draftOrder, setDraftOrder] = useState([]);
+    const [teams, setTeams] = useState(null);
+    const [teamFilter, setTeamFilter] = useState('');
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const { addAlert } = useAlert();
@@ -74,6 +76,18 @@ const Drafting = () => {
                     addAlert("League ID not found in URL", "error");
                 }
             }
+        }
+    }, []);
+
+    useEffect(() => {
+        try {
+            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}team`)
+                .then((response) => {
+                    if (response && response.data && response.data.data) setTeams(response.data.data);
+                    else addAlert("Error fetching teams. Please try again", 'error');
+                });
+        } catch (error) {
+            console.error("Error fetching teams data:", error);
         }
     }, []);
 
@@ -126,7 +140,7 @@ const Drafting = () => {
                     setCurrentView('draft-start');
                 }
                 if (draft?.state === 'Ended') {
-                    setCurrentView('draft-start');
+                    setCurrentView('drafting');
                 }
 
                 setDraftData(draft);
@@ -299,6 +313,7 @@ const Drafting = () => {
     const handleClear = () => {
         setSearch('');
         setFilter('');
+        setTeamFilter('');
     }
 
     useEffect(() => {
@@ -310,6 +325,9 @@ const Drafting = () => {
         ).filter((player) =>
             // Filter by position if filter is set
             !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
+        ).filter((player) =>
+            // Filter by team name if filter is set
+            !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase()
         ).sort((a, b) => {
             if (sort === 'name') return a.name.localeCompare(b.name);
             if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
@@ -317,7 +335,7 @@ const Drafting = () => {
         });
 
         setFilteredPlayers(filterPlayers)
-    }, [players, filter, sort, search])
+    }, [players, filter, sort, teamFilter, search])
 
 
 
@@ -541,7 +559,7 @@ const Drafting = () => {
                                             {draftData?.state === 'Scheduled' && (
                                                 <p className='text-white w-full'>
                                                     The draft is scheduled and will start on <br />
-                                                    {new Date(draftData?.start_date).toLocaleString(undefined, {
+                                                    {new Date(draftData?.start_date).toLocaleString('en-US', {
                                                         weekday: 'long', // Show full day name (e.g., Monday)
                                                         year: 'numeric',
                                                         month: 'long', // Show full month name (e.g., December)
@@ -643,46 +661,56 @@ const Drafting = () => {
                                                 Players
                                             </h3>
                                             {/* Search, Filter, and Sort */}
-                                            <div className="flex gap-1 xl:gap-2 mb-2 items-center text-xs xl:text-sm">
-                                                {filter || search ?
-                                                    <button className='hidden lg:flex items-center justify-center bg-[#314553] text-white px-2 py-0 h-6 rounded-full text-[10px] xl:text-xs hover:bg-[#FF8A00] transition-colors' onClick={() => handleClear()}>Clear <span className='pl-1'><FaRegCircleXmark /></span>
+                                            <div className="flex gap-1 xl:gap-2 mb-2 items-center text-xs xl:text-xs w-full lg:w-[85%] lg:justify-end flex-wrap">
+                                                {filter || search || teamFilter ?
+                                                    <button className='hidden lg:flex w-[10%] items-center justify-center bg-[#314553] text-white px-2 py-0 h-6 rounded-full text-[10px] xl:text-xs hover:bg-[#FF8A00] transition-colors' onClick={() => handleClear()}>Clear <span className='pl-1'><FaRegCircleXmark /></span>
                                                     </button>
                                                     : null
                                                 }
                                                 <select
                                                     value={sort}
                                                     onChange={(e) => setSort(e.target.value)}
-                                                    className="p-1 xl:p-2 w-[25%] lg:w-auto rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
+                                                    className="p-1 xl:p-2 w-[32%] md:w-[20%] xl:w-[18%] rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                                 >
                                                     <option value="name">
-                                                        {window.innerWidth < 640 || (window.innerWidth > 768 && window.innerWidth < 1024) ? "Name" : "Sort by Name"}
+                                                        {window.innerWidth < 640 ? "Name" : (window.innerWidth > 768 && window.innerWidth < 1024) ? "Name" : "Sort by Name"}
                                                     </option>
                                                     <option value="rating">
-                                                        {window.innerWidth < 640 || (window.innerWidth > 768 && window.innerWidth < 1024) ? "Rating" : "Sort by Rating"}
+                                                        {window.innerWidth < 640 ? "Rating" : (window.innerWidth > 768 && window.innerWidth < 1024) ? "Rating" : "Sort by Rating"}
                                                     </option>
                                                 </select>
                                                 <select
                                                     value={filter}
                                                     onChange={(e) => setFilter(e.target.value)}
-                                                    className="p-1 xl:p-2 w-[25%] lg:w-auto rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
+                                                    className="p-1 xl:p-2 w-[32%] md:w-[20%] xl:w-[15%] rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                                 >
                                                     <option className="hidden" value="">
-                                                        {window.innerWidth < 640 || (window.innerWidth > 768 && window.innerWidth < 1024) ? "Postion" : "Filter by Position"}
+                                                        {"Position"}
                                                     </option>
                                                     <option value="attacker">Attacker</option>
                                                     <option value="midfielder">Midfielder</option>
                                                     <option value="defender">Defender</option>
                                                     <option value="goalkeeper">Goalkeeper</option>
                                                 </select>
+                                                <select
+                                                    value={teamFilter}
+                                                    onChange={(e) => setTeamFilter(e.target.value)}
+                                                    className="p-1 xl:p-2 w-[33%] md:w-[20%] rounded-md bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
+                                                >
+                                                    <option value="">Team</option>
+                                                    {teams ? teams.map((item) => <>
+                                                        <option value={item.name}>{item.name}</option>
+                                                    </>) : null}
+                                                </select>
                                                 <input
                                                     type="text"
                                                     placeholder="Search players..."
                                                     value={search}
                                                     onChange={(e) => handleSearch(e.target.value)}
-                                                    className="p-1 xl:p-2 w-[40%] lg:w-auto rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
+                                                    className="p-1 xl:p-2 w-[80%] md:w-[26%] xl:w-[30%] rounded-lg bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#333333]"
                                                 />
-                                                {filter || search ?
-                                                    <button className='flex lg:hidden w-[8%] lg:w-auto items-center justify-center bg-[#314553] text-white p-1 h-6 rounded-full text-sm hover:bg-[#FF8A00] transition-colors' onClick={() => handleClear()}><FaRegCircleXmark />
+                                                {filter || search || teamFilter ?
+                                                    <button className='flex lg:hidden w-[18%] md:w-[8%] items-center justify-center bg-[#314553] text-white p-1 h-6 rounded-full text-[10px] xl:text-xs hover:bg-[#FF8A00] transition-colors' onClick={() => handleClear()}><span className='pr-1 block md:hidden'>Clear</span><FaRegCircleXmark />
                                                     </button>
                                                     : null
                                                 }

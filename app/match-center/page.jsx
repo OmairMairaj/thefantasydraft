@@ -1078,12 +1078,12 @@ const MatchCenter = () => {
                                                 )?.goals ?? 0
                                                 }`
                                                 : new Date(match.starting_at).toLocaleString('en-US', {
-                                                    timeZone: 'Australia/Brisbane', //Keeping this to cancel out the UK GMT
-                                                    weekday: "long",
-                                                    month: "short",
-                                                    day: "numeric",
-                                                    hour: "numeric",
-                                                    minute: "2-digit"
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    weekday: 'long',
+                                                    day: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
                                                 })}
                                         </div> */}
                                     </div>
