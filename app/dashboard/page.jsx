@@ -19,6 +19,9 @@ const exo2 = Exo_2({
 });
 
 const Dashboard = () => {
+
+  const overlayColorEnd = 'rgba(100,100,100,0.1)'
+  const overlayColorStart = 'rgba(0,0,0,0.9)'
   // const [leagueDetails, setLeagueDetails] = useState(null);
   const router = useRouter();
   const [leagues, setLeagues] = useState(null);
@@ -35,6 +38,7 @@ const Dashboard = () => {
   const [headToHeadTable, setHeadToHeadTable] = useState(null);
   const [classicTable, setClassicTable] = useState(null);
   const [currentFixtures, setCurrentFixtures] = useState(null);
+  const [creatorName, setCreatorName] = useState(null);
 
   const { addAlert } = useAlert();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -223,6 +227,22 @@ const Dashboard = () => {
   }, [selectedLeague]);
 
   useEffect(() => {
+    setCreatorName(null);
+    if (selectedLeague && selectedLeague.creator) {
+      const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "user/email?email="+selectedLeague.creator;
+      axios.get(URL).then((response) => {
+        if(response && response.data && response.data.name){
+          setCreatorName(response.data.name);
+        } else {
+          setCreatorName("Not Found");
+        }
+      }).catch((err)=>{
+        setCreatorName("Not Found");
+      });      
+    }
+  }, [selectedLeague]);
+
+  useEffect(() => {
     if (team && gameweek && selectedLeague) {
       const headToHeadData = selectedLeague.head_to_head_points;
       const classicData = selectedLeague.classic_points;
@@ -365,7 +385,7 @@ const Dashboard = () => {
                           <h2 className={`text-2xl sm:text-2xl md:text-4xl lg:text-3xl xl:text-4xl font-bold ${exo2.className}`}>
                             {selectedLeague.league_name}
                           </h2>
-                          <div className="flex flex-wrap md:justify-start text-sm lg:text-sm xl:text-base"><strong className="mr-2">Chairman:</strong>{selectedLeague.creator}</div>
+                          <div className="flex flex-wrap md:justify-start text-sm lg:text-sm xl:text-base"><strong className="mr-2">Chairman:</strong>{creatorName ? creatorName : "Fetching..."}</div>
                         </div>
                       </div>
 
@@ -591,7 +611,7 @@ const Dashboard = () => {
                               }
                             }}
                             style={{
-                              backgroundImage: "url('/images/transfersBgImage.png')",
+                              backgroundImage: `linear-gradient(to right, ${overlayColorStart}, ${overlayColorEnd}),url('/images/transfersBgImage.jpeg')`,
                             }}>
                             <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>TRANSFERS</h3>
                             <p className="text-sm md:text-base lg:text-sm xl:text-base">Manage your transfers to get the best team performance.</p>

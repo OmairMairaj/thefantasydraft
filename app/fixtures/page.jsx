@@ -88,12 +88,13 @@ const Fixtures = () => {
             <div className='flex flex-col mb-4'>
               <h2 className="text-2xl sm:text-xl md:text-2xl xl:text-3xl font-bold">Current Game Week {gameweekName}</h2>
               <p className="text-xs md:text-sm xl:text-base">{gameweekDetails?.starting_at ? `Starts: ${new Date(gameweekDetails.starting_at).toLocaleString('en-US', {
-                weekday: 'long',
                 month: 'short',
                 day: 'numeric',
                 hour: 'numeric',
-                minute: '2-digit'
-              })}` : "Loading Date...."}</p>
+                minute: '2-digit',
+                timeZone: 'Asia/Dhaka'
+              })
+              }` : "Loading Date...."}</p>
             </div>
             <div className="flex justify-center space-x-2 lg:space-x-4 mb-4">
               <button
@@ -176,12 +177,11 @@ const Fixtures = () => {
                       )?.goals ?? 0
                       }`
                       : new Date(match.starting_at).toLocaleString('en-US', {
-                        year: 'numeric',
                         month: 'short',
-                        weekday: 'long',
                         day: '2-digit',
                         hour: '2-digit',
                         minute: '2-digit',
+                        timeZone: 'Asia/Dhaka'
                       })}
                   </div>
                 </div>

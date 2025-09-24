@@ -617,6 +617,7 @@ const MatchCenter = () => {
                                 {/* League Teams Section */}
                                 <motion.div className="flex flex-wrap gap-2 sm:gap-4 w-full mt-4">
                                     {leagueTeams?.filter((t) => t.team._id !== userTeam._id).map((team) => {
+                                        // console.log('selectedTeam');
                                         console.log(selectedTeam);
                                         console.log(selectedTeam?._id, team.team._id);
                                         return (
@@ -1024,8 +1025,15 @@ const MatchCenter = () => {
                             {fixtures && fixtures.length > 0 ? fixtures.map((match) => {
                                 const homeTeam = match.teams[0];
                                 const awayTeam = match.teams[1];
+                                const overlayColor = 'rgba(12,25,34,0.7)'
                                 return (
-                                    <div key={match.id} onClick={() => handleFixtureClick(match)} className="bg-[#0C1922] rounded-xl text-center space-y-2 xl:space-y-4 pb-3 cursor-pointer hover:scale-[1.01]">
+                                    <div key={match.id} onClick={() => handleFixtureClick(match)} className="bg-[#0C1922] rounded-xl text-center space-y-2 xl:space-y-4 pb-3 cursor-pointer hover:scale-[1.01]"
+                                    style={{
+                                        backgroundImage: `linear-gradient(${overlayColor}, ${overlayColor}), url(${homeTeam.ground_image_path})`,
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
+                                    }}
+                                    >
                                         {/* Teams Logos and VS */}
                                         <div className="flex justify-between items-center">
                                             {/* Home Team */}

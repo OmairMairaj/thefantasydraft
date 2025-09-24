@@ -12,7 +12,7 @@ export default function Home() {
       <Intro />
       <PlayByPlay />
       <UpcomingGames />
-      <Partners />
+      {/* <Partners /> */}
     </div>
   );
 }
