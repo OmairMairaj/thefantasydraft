@@ -525,12 +525,13 @@ const LeagueTablePage = () => {
                                                                 score.team_id === awayTeam?.team_id
                                                         )?.goals ?? 0}`
                                                         : new Date(match.starting_at).toLocaleString('en-US', {
-                                                            year: 'numeric',
+                                                            // year: 'numeric',
                                                             month: 'short',
-                                                            weekday: 'long',
+                                                            // weekday: 'long',
                                                             day: '2-digit',
                                                             hour: '2-digit',
                                                             minute: '2-digit',
+                                                            timeZone: 'Asia/Dhaka'
                                                         })}
                                                 </div>
 

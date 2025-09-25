@@ -885,6 +885,7 @@ const TeamPage = () => {
                                         day: "numeric",
                                         hour: "numeric",
                                         minute: "2-digit",
+                                        timeZone: 'Asia/Dhaka'
                                     })}`}
                                 </p>
                             ) : (
@@ -940,6 +941,7 @@ const TeamPage = () => {
                                                                         day: '2-digit',
                                                                         hour: '2-digit',
                                                                         minute: '2-digit',
+                                                                        timeZone: 'Asia/Dhaka'
                                                                     })}
                                                             </div>
 
