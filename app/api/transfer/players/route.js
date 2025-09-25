@@ -14,7 +14,7 @@ export const GET = async (req, res) => {
         if (team) {
             let league = await FantasyLeague.findOne({ _id: team.leagueID }).populate("draftID");
             let draft = league.draftID;
-            let allPlayers = await Player.find({});
+            let allPlayers = await Player.find({}).populate({ path: "points.gameweek" });
             let eligiblePlayers = allPlayers.filter(player =>
                 !team.players.some(teamPlayer => teamPlayer.player.equals(player._id))
             );
