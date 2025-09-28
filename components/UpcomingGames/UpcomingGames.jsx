@@ -233,28 +233,26 @@ export default function UpcomingGames() {
                   className={`text-[#FF8A00] text-sm sm:text-base md:text-lg ${exo2.className}`}
                 >
                   {game.state !== "Not Started"
-                    ? `${
-                        game.scores.find(
-                          (score) =>
-                            score.score_type_name === "Current" &&
-                            score.team_id === homeTeam?.team_id
-                        )?.goals ?? 0
-                      } - ${
-                        game.scores.find(
-                          (score) =>
-                            score.score_type_name === "Current" &&
-                            score.team_id === awayTeam?.team_id
-                        )?.goals ?? 0
-                      }`
-                    : new Date(game.starting_at).toLocaleString("en-GB", {
-                        year: "numeric",
-                        month: "short",
-                        weekday: "long",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        timeZone: 'Asia/Dhaka'
-                      })}
+                    ? `${game.scores.find(
+                      (score) =>
+                        score.score_type_name === "Current" &&
+                        score.team_id === homeTeam?.team_id
+                    )?.goals ?? 0
+                    } - ${game.scores.find(
+                      (score) =>
+                        score.score_type_name === "Current" &&
+                        score.team_id === awayTeam?.team_id
+                    )?.goals ?? 0
+                    }`
+                    : new Date(game.starting_at).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      weekday: "long",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: 'Asia/Dhaka'
+                    })}
                 </div>
               </div>
             );

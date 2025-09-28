@@ -374,8 +374,8 @@ const Nav = () => {
                 </div>
 
                 {/* Main nav (mobile shortcuts first) */}
-                <div className="py-1 block lg:hidden border-b border-[#1D374A]">
-                  <a href="/achievements" className="block sm:hidden px-4 py-2 hover:bg-[#FF8A00]/10">Achievements</a>
+                <div className="py-1 block sm:hidden border-b border-[#1D374A]">
+                  <a href="/achievements" className="block  px-4 py-2 hover:bg-[#FF8A00]/10">Achievements</a>
                 </div>
 
                 <div className="py-1 block lg:hidden border-b border-[#1D374A]">

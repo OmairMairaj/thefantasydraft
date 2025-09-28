@@ -10,6 +10,8 @@ import { useAlert } from "@/components/AlertContext/AlertContext";
 import { FaChevronLeft, FaChevronRight, FaRegCircleXmark } from 'react-icons/fa6';
 import Image from 'next/image';
 import CompareBox from './CompareBox';
+import { AnimatePresence, motion } from "framer-motion";
+import { FiSliders } from "react-icons/fi";
 
 const exo2 = Exo_2({
     weight: ['400', '500', '700', '800'],
@@ -50,6 +52,15 @@ const Transfer = () => {
     const [filter, setFilter] = useState('');
     const [filteredPlayers, setFilteredPlayers] = useState([]);
     const [teamFilter, setTeamFilter] = useState('');
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [statFilters, setStatFilters] = useState({
+        ppg: 0,     // Points per game
+        per90: 0,   // Points per 90
+        goals: 0,
+        assists: 0,
+        cleanSheets: 0,
+        saves: 0,
+    });
     const [search, setSearch] = useState('');
     const router = useRouter();
     const [gameweekName, setGameweekName] = useState(null);
@@ -80,7 +91,14 @@ const Transfer = () => {
     const [currentGameweek, setCurrentGameweek] = useState(null);
     const [history, setHistory] = useState([]);
     const [activeTab, setActiveTab] = useState('history');
+    const [onlyUnowned, setOnlyUnowned] = useState(false);
     const [refresh, setRefresh] = useState(true)
+
+    const activeFilterCount = (
+        (filter ? 1 : 0) +
+        (teamFilter ? 1 : 0) +
+        Object.values(statFilters).filter(v => Number(v) > 0).length
+    );
 
     useEffect(() => {
         // Check if window is defined to ensure we are on the client side
@@ -125,7 +143,6 @@ const Transfer = () => {
     useEffect(() => {
         if (team && team._id && gameweekDetails && gameweekDetails._id && leagueId) {
             fetchLeagueTeamPoints(leagueId, team._id, gameweekDetails._id);
-
         }
     }, [gameweekDetails, leagueId, team]);
 
@@ -360,10 +377,10 @@ const Transfer = () => {
     const renderOptionsMenu = (player, team) => (
         <div ref={optionsRef} className="absolute bottom-0 bg-[#1d374a] w-full text-white rounded-lg shadow-md z-50 text-[8px] sm:text-xs lg:text-[10px] xl:text-xs">
             {(!playersIn || playersIn?.position_name === player.player.position_name) &&
-                <button onClick={() => setPlayersOut(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#162631] w-full text-center'>Transfer</button>
+                <button onClick={() => setPlayersOut(player.player)} className='py-2 hover:text-[#ff8a00] hover:bg-[#162631] w-full text-center'>Transfer</button>
             }
-            <button onClick={() => setComparePlayer1(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#162631] w-full text-center'>Compare With</button>
-            <button onClick={() => setComparePlayer2(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#162631] w-full text-center'>Compare To</button>
+            <button onClick={() => setComparePlayer1(player.player)} className='py-2 hover:text-[#ff8a00] hover:bg-[#162631] w-full text-center'>Compare</button>
+            {/* <button onClick={() => setComparePlayer2(player.player)} className='py-1 hover:text-[#ff8a00] hover:bg-[#162631] w-full text-center'>Compare To</button> */}
         </div>
     );
 
@@ -416,16 +433,6 @@ const Transfer = () => {
     };
 
     const handleTransferClick = () => {
-        // console.log("userTeam")
-        // console.log(userTeam)
-        // console.log("leagueId")
-        // console.log(leagueId)
-        // console.log("playersIn")
-        // console.log(playersIn)
-        // console.log("playersOut")
-        // console.log(playersOut)
-        // console.log("transferOfferAmount")
-        // console.log(transferOfferAmount)
         if (playersIn && playersOut && playersIn._id && playersOut._id) {
             // Logic to handle transfer submission
             try {
@@ -497,36 +504,41 @@ const Transfer = () => {
         setFilter('');
         setTeamFilter('');
         setSort('rating');
+        setOnlyUnowned(false);
     }
 
     useEffect(() => {
         filterPlayers();
-    }, [search, teamFilter, filter, sort, otherPlayers]);
+    }, [search, teamFilter, filter, sort, otherPlayers, onlyUnowned, statFilters]);
 
     const filterPlayers = () => {
-        const filtered = otherPlayers.filter((player) =>
-            // Filter players by name or common_name
-            player.name.toLowerCase().includes(search.toLowerCase()) ||
-            player.common_name?.toLowerCase().includes(search.toLowerCase())
-            // ||
-            // player.team_name?.toLowerCase().includes(search.toLowerCase())
-        )
+        const filtered = (otherPlayers || [])
             .filter((player) =>
-                // Filter by team name if filter is set
-                !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase()
+                player.name.toLowerCase().includes(search.toLowerCase()) ||
+                player.common_name?.toLowerCase().includes(search.toLowerCase())
             )
-            .filter((player) =>
-                // Filter by position if filter is set
-                !filter || player.position_name?.toLowerCase() === filter.toLowerCase()
-            )
+            .filter((player) => !onlyUnowned || !(player?.owned === true))
+            .filter((player) => !teamFilter || player.team_name?.toLowerCase() === teamFilter.toLowerCase())
+            .filter((player) => !filter || player.position_name?.toLowerCase() === filter.toLowerCase())
+            .filter((player) => {
+                // NEW: stats thresholds
+                const t = totalsMap[getPid(player)] || {};
+                if (statFilters.ppg > 0 && (t.ppg ?? 0) < statFilters.ppg) return false;
+                if (statFilters.per90 > 0 && (t.per90 ?? 0) < statFilters.per90) return false;
+                if (statFilters.goals > 0 && (t.goals ?? 0) < statFilters.goals) return false;
+                if (statFilters.assists > 0 && (t.assists ?? 0) < statFilters.assists) return false;
+                if (statFilters.cleanSheets > 0 && (t.cleanSheets ?? 0) < statFilters.cleanSheets) return false;
+                if (statFilters.saves > 0 && (t.saves ?? 0) < statFilters.saves) return false;
+                return true;
+            })
             .sort((a, b) => {
                 if (sort === 'name') return a.name.localeCompare(b.name);
-                if (sort === 'rating') return b.rating - a.rating; // Example for sorting by rating
+                if (sort === 'rating') return b.rating - a.rating;
                 return 0;
             });
 
         setFilteredPlayers(filtered);
-    }
+    };
 
 
     const positionIcon = (position) => {
@@ -541,12 +553,71 @@ const Transfer = () => {
 
         return (
             <div
-                className={`${bg} w-4 h-4 md:w-5 md:h-5 text-black font-bold flex items-center justify-center text-xs md:text-sm my-2 rounded-full `}
+                className={`${bg} w-3 h-3 md:w-4 md:h-4 text-black font-bold flex items-center justify-center text-xs sm:text-xs xl:text-sm rounded-full `}
             >
                 {text}
             </div>
         );
     };
+
+
+    // helpers
+    const getPid = (p) => p?._id ?? p?.id;
+
+    const getGwNumber = (gw) => {
+        const raw = gw?.gameweek?.name ?? gw?.gameweek?.id ?? gw?.gameweek_id?.name ?? gw?.name ?? gw;
+        const n = parseInt(raw, 10);
+        return Number.isFinite(n) ? n : null;
+    };
+
+    // sum FPL-ish stats across GWs (<= currentGW)
+    const aggregateSeasonStats = (player, currentGW) => {
+        const games = Array.isArray(player?.points) ? player.points.filter(p => {
+            const n = getGwNumber(p);
+            return !currentGW || (n && n <= currentGW);
+        }) : [];
+
+        const t = games.reduce((acc, gw) => {
+            const s = gw.fpl_stats || {};
+            acc.points += +(gw.points ?? gw.player_points ?? 0);
+            acc.minutes += +(s["minutes-played"] ?? 0);
+            acc.goals += +(s.goals ?? 0);
+            acc.assists += +(s.assists ?? 0);
+            acc.cleanSheets += s["clean-sheet"] ? 1 : 0;
+            acc.goalsConceded += +(s["goals-conceded"] ?? 0);
+            acc.interceptions += +(s.interceptions ?? 0);
+            acc.penaltyMisses += +(s["penalty-miss"] ?? 0);
+            acc.penaltySaves += +(s["penalty-save"] ?? 0);
+            acc.tackles += +(s.tackles ?? 0);
+            acc.saves += +(s.saves ?? 0);
+            acc.yellow += +(s.yellowcards ?? 0);
+            acc.red += +(s.redcards ?? 0);
+            acc.bonus += +(s.bonus ?? 0);
+            acc.apps += (+(s["minutes-played"] ?? 0) > 0) ? 1 : 0;
+            return acc;
+        }, { points: 0, minutes: 0, goals: 0, assists: 0, cleanSheets: 0, goalsConceded: 0, interceptions: 0, penaltyMisses: 0, penaltySaves: 0, tackles: 0, saves: 0, yellow: 0, red: 0, bonus: 0, apps: 0 });
+
+        t.ppg = t.apps ? +(t.points / t.apps).toFixed(2) : 0;
+        t.per90 = t.minutes ? +((t.points * 90) / t.minutes).toFixed(2) : 0;
+        return t;
+    };
+
+    // season totals for *my* team players (list view uses player.player)
+    const myTotalsMap = React.useMemo(() => {
+        const map = {};
+        (players || []).forEach(p => {
+            const base = p?.player || p;                 // roster item shape is { player: {...} }
+            map[getPid(base)] = aggregateSeasonStats(base, currentGameweek);
+        });
+        return map;
+    }, [players, currentGameweek]);
+
+    // cache totals for all players shown on the page
+    const totalsMap = React.useMemo(() => {
+        const map = {};
+        (otherPlayers || []).forEach(p => { map[getPid(p)] = aggregateSeasonStats(p, currentGameweek); });
+        return map;
+    }, [otherPlayers, currentGameweek]);
 
 
     return (
@@ -801,7 +872,7 @@ const Transfer = () => {
                                             </div>
 
                                             {/* Substitute Players */}
-                                            <div className='w-full flex flex-col py-3 px-4 bg-[#071117] rounded-lg'>
+                                            <div className='w-full flex flex-col py-3 px-4 bg-[#050c11] rounded-lg'>
                                                 <div className="flex justify-center items-center gap-1 sm:gap-4">
                                                     {pitchViewList.bench.map((player) => {
                                                         // Find the specific gameweek points for the current gameweek
@@ -842,7 +913,7 @@ const Transfer = () => {
                                                         <th className="p-2 text-left pl-4">Player</th>
                                                         {/* <th className="p-2">Role</th> */}
                                                         {/* <th className="p-2">Team</th> */}
-                                                        <th className="p-2">Pos.</th>
+                                                        {/* <th className="p-2">Pos.</th> */}
                                                         <th className="p-2">Actions</th>
                                                     </tr>
                                                 </thead>
@@ -853,40 +924,48 @@ const Transfer = () => {
                                                             <React.Fragment key={pos}>
                                                                 {/* Section Heading */}
                                                                 <tr>
-                                                                    <td colSpan="4" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                                    <td colSpan="2" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
                                                                         {pos}
                                                                     </td>
                                                                 </tr>
                                                                 {pitchViewList.lineup[pos].map((player) => (
                                                                     <tr key={player.player.id} className="border-b border-[#333333] text-center items-center justify-center">
-                                                                        <td className="px-2 text-left truncate">
-                                                                            <div className="flex items-center space-x-2">
-                                                                                {player.player.image_path && (
-                                                                                    <img
-                                                                                        src={player.player.image_path}
-                                                                                        alt={player.player.team_name || 'Team Logo'}
-                                                                                        className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
-                                                                                    />
-                                                                                )}
-                                                                                <div className="overflow-hidden">
-                                                                                    <p className="font-bold truncate">{player.player.common_name}</p>
-                                                                                    <p className="text-[10px] sm:text-xs text-gray-400 truncate">{player.player.team_name}</p>
+                                                                        <td className="px-2 text-left truncate min-w-44 max-w-44 sm:max-w-96">
+                                                                            <div className='flex flex-col gap-0 my-1 truncate'>
+                                                                                <div className="flex items-center space-x-2 truncate">
+                                                                                    {player.player.image_path && (
+                                                                                        <img
+                                                                                            src={player.player.image_path}
+                                                                                            alt={player.player.team_name || 'Team Logo'}
+                                                                                            className="w-8 h-8 sm:w-10 sm:h-10 my-1 rounded-lg"
+                                                                                        />
+                                                                                    )}
+                                                                                    <div className="overflow-hidden truncate">
+                                                                                        <p className="font-bold truncate flex items-center">{player.player.common_name}<span className='ml-2'>{positionIcon(player.player.position_name)}</span></p>
+                                                                                        <p className="text-[10px] sm:text-xs text-gray-400 truncate">{player.player.team_name}</p>
+                                                                                    </div>
+
                                                                                 </div>
+                                                                                {/* Compact stat line + collapsible */}
+                                                                                <PlayerStatLine
+                                                                                    stats={myTotalsMap[getPid(player.player)]}
+                                                                                    position={player.player.position_name}
+                                                                                />
                                                                             </div>
                                                                         </td>
                                                                         {/* <td className="p-2 text-center truncate">
                                                                     <img src={player.player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg mx-auto shadow-md" />
                                                                 </td> */}
-                                                                        <td className="p-2 text-center truncate">
+                                                                        {/* <td className="p-2 text-center truncate">
                                                                             <div className='flex justify-center items-center'>
                                                                                 {positionIcon(player.player.position_name)}
                                                                             </div>
-                                                                        </td>
-                                                                        <td className="p-2 text-center truncate">
+                                                                        </td> */}
+                                                                        <td className="p-2 text-center truncate max-w-24">
                                                                             <div className="flex justify-center items-center gap-2">
                                                                                 <button disabled={playersIn && playersIn?.position_name !== player.player.position_name} onClick={() => setPlayersOut(player.player)} className={`${playersIn && playersIn?.position_name !== player.player.position_name ? "bg-[#191218]" : "bg-[#ff8800b7] hover:bg-[#FF8A00]"} text-[10px] sm:text-xs xl:text-xs px-2 py-1 rounded`}>Transfer</button>
-                                                                                <button onClick={() => setComparePlayer1(player.player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white"'>Compare With</button>
-                                                                                <button onClick={() => setComparePlayer2(player.player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white"'>Compare To</button>
+                                                                                <button onClick={() => setComparePlayer1(player.player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white"'>Compare</button>
+                                                                                {/* <button onClick={() => setComparePlayer2(player.player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white"'>Compare To</button> */}
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -900,27 +979,33 @@ const Transfer = () => {
                                                     {pitchViewList.bench.length > 0 && (
                                                         <React.Fragment>
                                                             <tr>
-                                                                <td colSpan="4" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
+                                                                <td colSpan="2" className="py-2 px-4 text-left font-bold bg-[#192a37] text-[#FF8A00] uppercase text-xs sm:text-sm">
                                                                     Substitutes
                                                                 </td>
                                                             </tr>
                                                             {pitchViewList.bench.map((player) => (
                                                                 <tr key={player.player.id} className="border-b border-[#333333] text-center items-center justify-center">
-                                                                    <td className="px-2 text-left truncate">
-                                                                        <div className="flex items-center space-x-2">
-                                                                            {player.player.image_path && (
-                                                                                <img
-                                                                                    src={player.player.image_path}
-                                                                                    alt={player.player.team_name || 'Team Logo'}
-                                                                                    className="w-10 h-10 my-2 rounded-lg"
-                                                                                />
-                                                                            )}
-                                                                            <div className="overflow-hidden">
-                                                                                <p className="font-bold truncate">{player.player.common_name}
+                                                                    <td className="px-2 text-left truncate min-w-44 max-w-44 sm:max-w-96">
+                                                                        <div className='flex flex-col gap-0 my-1 truncate'>
+                                                                            <div className="flex items-center space-x-2 truncate">
+                                                                                {player.player.image_path && (
+                                                                                    <img
+                                                                                        src={player.player.image_path}
+                                                                                        alt={player.player.team_name || 'Team Logo'}
+                                                                                        className="w-8 h-8 sm:w-10 sm:h-10 my-1 rounded-lg"
+                                                                                    />
+                                                                                )}
+                                                                                <div className="overflow-hidden truncate">
+                                                                                    <p className="font-bold truncate flex items-center">{player.player.common_name}<span className='ml-2'>{positionIcon(player.player.position_name)}</span></p>
+                                                                                    <p className="text-[10px] sm:text-xs text-gray-400 truncate">{player.player.team_name}</p>
+                                                                                </div>
 
-                                                                                </p>
-                                                                                <p className="text-xs text-gray-400 truncate">{player.player.team_name}</p>
                                                                             </div>
+                                                                            {/* Compact stat line + collapsible */}
+                                                                            <PlayerStatLine
+                                                                                stats={myTotalsMap[getPid(player.player)]}
+                                                                                position={player.player.position_name}
+                                                                            />
                                                                         </div>
                                                                     </td>
                                                                     {/* <td className="p-2 text-center truncate">
@@ -930,16 +1015,16 @@ const Transfer = () => {
                                                                     {/* <td className="p-2 text-center truncate">
                                                                 <img src={player.player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
                                                             </td> */}
-                                                                    <td className="p-2 text-center truncate">
+                                                                    {/* <td className="p-2 text-center truncate">
                                                                         <div className='flex justify-center items-center'>
                                                                             {positionIcon(player.player.position_name)}
                                                                         </div>
-                                                                    </td>
-                                                                    <td className="p-2 text-center truncate">
+                                                                    </td> */}
+                                                                    <td className="p-2 text-center truncate ">
                                                                         <div className="flex justify-center items-center gap-2">
                                                                             <button disabled={playersIn && playersIn?.position_name !== player.player.position_name} onClick={() => setPlayersOut(player.player)} className={`${playersIn && playersIn?.position_name !== player.player.position_name ? "bg-[rgb(25,18,24)]" : "bg-[#ff8800b7] hover:bg-[#FF8A00]"} text-[10px] sm:text-xs xl:text-xs px-2 py-1 rounded`}>Transfer</button>
-                                                                            <button onClick={() => setComparePlayer1(player.player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white'>Compare With</button>
-                                                                            <button onClick={() => setComparePlayer2(player.player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white'>Compare To</button>
+                                                                            <button onClick={() => setComparePlayer1(player.player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white'>Compare</button>
+                                                                            {/* <button onClick={() => setComparePlayer2(player.player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white'>Compare To</button> */}
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -955,55 +1040,112 @@ const Transfer = () => {
                         </div>
 
                         <div className="border border-[#1D374A] bg-gradient-to-br from-[#0C1922] to-[#0C192250] rounded-xl p-4 h-full min-w-0">
-                            <div className='flex flex-col lg:flex-row justify-between py-2'>
-                                <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className}`}>
-                                    Players
-                                </h3>
-                                {/* Search, Filter, and Sort */}
-                                <div className="flex items-center gap-2 w-full lg:w-9/12 mt-2 lg:mt-0">
-                                    <div className='flex items-center gap-2 w-4/12'>
-                                        {/* <p className="text-gray-400 text-sm">Sort:</p> */}
-                                        <select
-                                            value={sort}
-                                            onChange={(e) => setSort(e.target.value)}
-                                            className="p-1 xl:p-1 rounded-lg text-xs xl:text-sm w-full bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#2a4960]"
-                                        >
-                                            <option value="name">Name</option>
-                                            <option value="rating">Rating</option>
-                                        </select>
-                                    </div>
-                                    <div className='flex items-center gap-2 w-4/12'>
-                                        {/* <p className="text-gray-400 text-sm">Filter:</p> */}
-                                        <select
-                                            value={filter}
-                                            onChange={(e) => setFilter(e.target.value)}
-                                            className="p-1 xl:p-1 rounded-lg text-xs xl:text-sm w-full bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#2a4960]"
-                                        >
-                                            <option value="">Position</option>
-                                            <option value="attacker">Attacker</option>
-                                            <option value="midfielder">Midfielder</option>
-                                            <option value="defender">Defender</option>
-                                            <option value="goalkeeper">Goalkeeper</option>
-                                        </select>
-                                    </div>
-                                    <div className='flex items-center gap-2 w-4/12'>
-                                        {/* <p className="text-gray-400 text-sm">Filter:</p> */}
-                                        <select
-                                            value={teamFilter}
-                                            onChange={(e) => setTeamFilter(e.target.value)}
-                                            className="p-1 xl:p-1 rounded-lg text-xs xl:text-sm w-full bg-[#1D374A] text-white focus-visible:outline-none focus:border-[#FF8A00] border border-[#2a4960]"
-                                        >
-                                            <option value="">Team</option>
-                                            {teams ? teams.map((item) => <>
-                                                <option value={item.name}>{item.name}</option>
-                                            </>) : null}
-                                        </select>
+                            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+                                <div className='flex flex-col items-center gap-2 xl:gap-0 w-full'>
+                                    <div className='flex flex-col sm:flex-row gap-2 justify-between w-full xl:my-2'>
+                                        <h3 className={`text-xl xl:text-2xl font-bold text-[#FF8A00] ${exo2.className}`}>Players</h3>
+                                        <div className="flex flex-row items-stretch sm:items-center gap-2 w-full sm:w-[75%]">
+                                            {/* SORT radio (segmented) */}
+                                            <div className="w-1/3 flex rounded-lg overflow-hidden border border-[#2a4960] bg-[#1D374A] text-xs xl:text-sm">
+                                                {["rating", "name"].map(opt => (
+                                                    <button
+                                                        key={opt}
+                                                        type="button"
+                                                        onClick={() => setSort(opt)}
+                                                        className={`w-1/2 px-1.5 py-1 ${sort === opt ? "bg-[#ff8800b7] text-white" : "text-white"}`}
+                                                    >
+                                                        {opt === "rating" ? "Rating" : "Name"}
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            {/* OWNED toggle outside the panel */}
+                                            <div className="w-1/3 flex rounded-lg overflow-hidden border border-[#2a4960] bg-[#1D374A] text-xs xl:text-sm">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setOnlyUnowned(false)}
+                                                    className={`w-1/3 px-1.5 py-1 ${!onlyUnowned ? "bg-[#ff8800b7] text-white" : "text-white"}`}
+                                                >
+                                                    All
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setOnlyUnowned(true)}
+                                                    className={`w-2/3 px-1.5 py-1 ${onlyUnowned ? "bg-[#ff8800b7] text-white" : "text-white"}`}
+                                                >
+                                                    Unowned
+                                                </button>
+                                            </div>
+
+                                            {/* FILTERS button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsFilterOpen(v => !v)}
+                                                className="relative w-1/3 flex items-center gap-2 px-2 py-1 rounded-lg border border-[#2a4960] bg-[#1D374A] text-white text-xs xl:text-sm hover:border-[#FF8A00]"
+                                            >
+                                                <FiSliders className='w-10' />
+                                                Filters
+                                                {activeFilterCount > 0 && (
+                                                    <span className="ml-1 inline-flex items-center justify-center text-[10px] min-w-4 h-4 px-1 rounded-full bg-[#ff8800b7] text-white">
+                                                        {activeFilterCount}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
 
+                                    {/* SEARCH with inline clear */}
+                                    <div className="relative w-full">
+                                        <input
+                                            type="text"
+                                            placeholder="Search players…"
+                                            value={search}
+                                            onChange={(e) => handleSearch(e.target.value)}
+                                            className="w-full p-1.5 pl-3 pr-8 rounded-lg text-xs xl:text-sm bg-[#1D374A] text-white border border-[#2a4960] focus-visible:outline-none focus:border-[#FF8A00]"
+                                        />
+                                        {search && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setSearch('')}
+                                                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-white"
+                                                aria-label="Clear search"
+                                            >
+                                                <FaRegCircleXmark className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-
                             </div>
-                            <div className='flex justify-between items-center mb-3 xl:mb-4 gap-2'>
+
+                            {/* Animated filters panel (inline, collapses in place) */}
+                            <AnimatePresence>
+                                {isFilterOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0, y: -6 }}
+                                        animate={{ opacity: 1, height: "auto", y: 0 }}
+                                        exit={{ opacity: 0, height: 0, y: -6 }}
+                                        transition={{ duration: 0.18 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <FilterPanel
+                                            teams={teams}
+                                            filter={filter}
+                                            setFilter={setFilter}
+                                            teamFilter={teamFilter}
+                                            setTeamFilter={setTeamFilter}
+                                            statFilters={statFilters}
+                                            setStatFilters={setStatFilters}
+                                            onApply={() => setIsFilterOpen(false)}
+                                            onClear={() => {
+                                                setFilter('');
+                                                setTeamFilter('');
+                                                setStatFilters({ ppg: 0, per90: 0, goals: 0, assists: 0, cleanSheets: 0, saves: 0 });
+                                            }}
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                            {/* <div className='flex justify-between items-center mb-3 xl:mb-4 gap-2'>
                                 <div className='flex items-center gap-2 w-9/12  '>
                                     <input
                                         type="text"
@@ -1018,19 +1160,19 @@ const Transfer = () => {
                                     </button>
                                     : <div className='w-auto'></div>
                                 }
-                            </div>
+                            </div> */}
                             {/* Table */}
-                            <div className="relative w-full max-h-[69rem] overflow-hidden rounded-lg mt-2 border border-[#1D374A]">
+                            <div className={`relative w-full ${viewType === "List" ? "max-h-[48rem] lg:max-h-[86rem]" : "max-h-[48rem]"} overflow-hidden rounded-lg mt-3 border border-[#1D374A]`}>
                                 {/* Scrollable Wrapper */}
-                                <div className="overflow-x-auto max-h-[69rem] overflow-y-auto scrollbar">
+                                <div className={`overflow-x-auto ${viewType === "List" ? "max-h-[48rem] lg:max-h-[86rem]" : "max-h-[48rem]"} overflow-y-auto scrollbar`}>
                                     <table className="w-full text-left text-white text-xs sm:text-xs xl:text-sm">
                                         {/* Table Header */}
                                         <thead className="bg-[#1D374A] sticky top-0 z-10">
                                             <tr className="text-center">
                                                 <th className="p-2 text-left pl-4">Player</th>
                                                 {/* <th className='p-2'>Team</th> */}
-                                                <th className='p-2'>Owned</th>
-                                                <th className="p-2">Pos.</th>
+                                                {/* <th className='p-2'>Owned</th> */}
+                                                {/* <th className="p-2">Pos.</th> */}
                                                 <th className="p-2">Actions</th>
                                                 {/* <th className="p-2 sticky right-0 z-20">Actions</th> */}
                                             </tr>
@@ -1038,38 +1180,56 @@ const Transfer = () => {
                                         <tbody className=''>
                                             {filteredPlayers && filteredPlayers?.map((player) => (
                                                 <tr key={player.id} className="border-b border-[#333333] text-center items-center justify-center">
-                                                    <td className="px-2 text-left truncate max-w-32 xl:max-w-36">
-                                                        <div className="flex items-center space-x-2 truncate">
-                                                            {player.image_path && (
-                                                                <img
-                                                                    src={player.image_path}
-                                                                    alt={player.team_name || 'Team Logo'}
-                                                                    className="w-8 h-8 sm:w-10 sm:h-10 my-2 rounded-lg"
-                                                                />
-                                                            )}
-                                                            <div className="overflow-hidden truncate">
-                                                                <p className="font-bold truncate">{player.common_name}</p>
-                                                                <p className="text-[10px] sm:text-xs text-gray-400 truncate">{player.team_name}</p>
+                                                    <td className="px-2 text-left truncate max-w-44 sm:max-w-none">
+                                                        <div className='flex flex-col gap-0 my-1'>
+                                                            <div className="flex items-center space-x-2 truncate relative">
+                                                                {player.image_path && (
+                                                                    <img
+                                                                        src={player.image_path}
+                                                                        alt={player.team_name || 'Team Logo'}
+                                                                        className="w-8 h-8 sm:w-10 sm:h-10 my-1 rounded-lg"
+                                                                    />
+                                                                )}
+                                                                <div className="overflow-hidden truncate">
+                                                                    <p className="font-bold truncate flex items-center">{player.common_name}<span className='ml-2'>{positionIcon(player.position_name)}</span></p>
+                                                                    <p className="text-[10px] sm:text-xs text-gray-400 truncate">{player.team_name}</p>
+                                                                </div>
+                                                                {player.owned &&
+                                                                    <div className="absolute top-0 right-0 sm:right-2 lg:right-0 xl:right-2">
+                                                                        <div className={`flex items-center gap-2 bg-rose-500/10 text-rose-300 px-1.5 sm:px-3.5 lg:px-1.5 xl:px-3.5 py-0 rounded-full border border-white/5 shadow-lg`}>
+                                                                            {/* <span className={`rounded-full bg-rose-40 animate-pulse`} /> */}
+                                                                            <span className="text-[8px] sm:text-[10px] font-semibold">
+                                                                                Taken
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+
                                                             </div>
+                                                            {/* Compact stat line + collapsible */}
+                                                            <PlayerStatLine
+                                                                stats={totalsMap[getPid(player)]}
+                                                                position={player.position_name}
+                                                            />
                                                         </div>
                                                     </td>
                                                     {/* <td className="p-2 text-center truncate">
                                                                     <img src={player.team_image_path} alt="Team Logo" className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg mx-auto shadow-md" />
                                                                 </td> */}
 
-                                                    <td className="p-2 text-center truncate">
+                                                    {/* <td className="p-2 text-center truncate">
                                                         <div className="flex justify-center items-center space-x-2">{player.owned ? "Yes" : "No"}</div>
-                                                    </td>
-                                                    <td className="p-2 text-center truncate">
+                                                    </td> */}
+                                                    {/* <td className="p-2 text-center truncate">
                                                         <div className='flex justify-center items-center'>
                                                             {positionIcon(player.position_name)}
                                                         </div>
-                                                    </td>
+                                                    </td> */}
                                                     <td className="p-2 text-center truncate">
                                                         <div className="flex justify-center items-center gap-2">
                                                             <button disabled={playersOut && playersOut?.position_name !== player.position_name} onClick={() => setPlayersIn(player)} className={`${playersOut && playersOut?.position_name !== player.position_name ? "bg-[rgb(25,18,24)]" : "bg-[#ff8800b7] hover:bg-[#FF8A00]"} text-[10px] sm:text-xs xl:text-xs px-2 py-1 rounded`}>Transfer</button>
-                                                            <button onClick={() => setComparePlayer1(player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white'>Compare With</button>
-                                                            <button onClick={() => setComparePlayer2(player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white'>Compare To</button>
+                                                            {/* <button onClick={() => setComparePlayer1(player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white'>Compare With</button> */}
+                                                            <button onClick={() => setComparePlayer2(player)} className='bg-[#1d374a] border border-[#1d374a] text-white px-2 py-1 text-[10px] sm:text-xs xl:text-xs rounded-md hover:bg-[#FF8A00] hover:text-white'>Compare</button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -1079,286 +1239,211 @@ const Transfer = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Other Team */}
-                        {/* <div className='bg-[#1c1c1c] rounded-lg p-4'>
-                    <div className='flex justify-between items-center mb-4'>
-                        <select value={selectedTeam?.team_name || ''} onChange={(e) => handleTeamSelect(e.target.value)} className='bg-[#333] px-4 py-2 rounded'>
-                            <option hidden value=''>Select Team</option>
-                            {leagueTeams
-                                .filter(t => t.team._id !== userTeam?._id) // exclude user's team
-                                .map(t => (
-                                    <option key={t.team._id} value={t.team.team_name}>{t.team.team_name}</option>
-                                ))}
-                        </select>
-                        <div className='flex gap-2'>
-                            <button onClick={() => setViewType('List')} className={`px-4 py-1 ${viewType === 'List' ? 'bg-[#FF8A00]' : 'bg-[#333]'} rounded`}>List</button>
-                            <button onClick={() => setViewType('Pitch')} className={`px-4 py-1 ${viewType === 'Pitch' ? 'bg-[#FF8A00]' : 'bg-[#333]'} rounded`}>Pitch</button>
-                        </div>
-                    </div>
-                    <div className='space-y-2'>
-                        {viewType === 'Pitch' && otherPlayers && otherPlayers.length > 0 ? (
-                            <div className="relative">
-                                <div className={`flex flex-col gap-2 ${otherPlayers?.length === 0 ? 'blur-sm' : ''}`}>
-                                    <div className="py-6 px-4 text-white rounded-lg border border-[#333333] bg-[#1C1C1C] pitch-view">
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex justify-center items-center gap-4">
-                                                {otherPitchViewList.lineup.Goalkeeper.map((player) => {
-                                                    // Find the specific gameweek points for the current gameweek
-                                                    const gameweekPoints = player.player.points.find(
-                                                        (p) => p.gameweek === gameweekDetails._id
-                                                    );
-                                                    return (
-                                                        <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
-                                                            <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
-                                                            <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
-
-                                                            {player.captain && (
-                                                                <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                    C
-                                                                </span>
-                                                            )}
-                                                            {player.vice_captain && !player.captain && (
-                                                                <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                    VC
-                                                                </span>
-                                                            )}
-                                                            <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
-                                                                {player.player.common_name}
-                                                            </p>
-                                                            <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
-                                                                {player.player.position_name}
-                                                            </p>
-                                                            {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
-                                                        </div>
-                                                    )
-                                                })}
-                                                {renderSkeletons(1, otherPitchViewList.lineup.Goalkeeper.length)}
-                                            </div>
-
-                                            <div className="flex justify-center items-center gap-4">
-                                                {otherPitchViewList.lineup.Defender.map((player) => {
-                                                    // Find the specific gameweek points for the current gameweek
-                                                    const gameweekPoints = player.player.points.find(
-                                                        (p) => p.gameweek === gameweekDetails._id
-                                                    );
-                                                    return (
-                                                        <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
-                                                            <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
-                                                            <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
-
-                                                            {player.captain && (
-                                                                <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                    C
-                                                                </span>
-                                                            )}
-                                                            {player.vice_captain && !player.captain && (
-                                                                <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                    VC
-                                                                </span>
-                                                            )}
-                                                            <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
-                                                                {player.player.common_name}
-                                                            </p>
-                                                            <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
-                                                                {player.player.position_name}
-                                                            </p>
-                                                            {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
-                                                        </div>
-                                                    )
-                                                })}
-                                                {renderSkeletons(3, otherPitchViewList.lineup.Defender.length)}
-                                            </div>
-
-                                            <div className="flex justify-center items-center gap-4">
-                                                {otherPitchViewList.lineup.Midfielder.map((player) => {
-                                                    // Find the specific gameweek points for the current gameweek
-                                                    const gameweekPoints = player.player.points.find(
-                                                        (p) => p.gameweek === gameweekDetails._id
-                                                    );
-                                                    return (
-                                                        <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
-                                                            <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
-                                                            <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
-
-                                                            {player.captain && (
-                                                                <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                    C
-                                                                </span>
-                                                            )}
-                                                            {player.vice_captain && !player.captain && (
-                                                                <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                    VC
-                                                                </span>
-                                                            )}
-                                                            <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
-                                                                {player.player.common_name}
-                                                            </p>
-                                                            <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
-                                                                {player.player.position_name}
-                                                            </p>
-                                                            {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
-                                                        </div>
-                                                    )
-                                                })}
-                                                {renderSkeletons(3, otherPitchViewList.lineup.Midfielder.length)}
-                                            </div>
-
-                                            <div className="flex justify-center items-center gap-4">
-                                                {otherPitchViewList.lineup.Attacker.map((player) => {
-                                                    // Find the specific gameweek points for the current gameweek
-                                                    const gameweekPoints = player.player.points.find(
-                                                        (p) => p.gameweek === gameweekDetails._id
-                                                    );
-                                                    return (
-                                                        <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
-                                                            <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
-                                                            <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
-
-                                                            {player.captain && (
-                                                                <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                    C
-                                                                </span>
-                                                            )}
-                                                            {player.vice_captain && !player.captain && (
-                                                                <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                    VC
-                                                                </span>
-                                                            )}
-                                                            <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
-                                                                {player.player.common_name}
-                                                            </p>
-                                                            <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
-                                                                {player.player.position_name}
-                                                            </p>
-                                                            {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
-                                                        </div>
-                                                    )
-                                                })}
-                                                {renderSkeletons(2, otherPitchViewList.lineup.Attacker.length)}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className='w-full flex flex-col py-3 px-4 bg-[#131313] rounded-lg'>
-                                        <div className="flex justify-center items-center gap-4">
-                                            {otherPitchViewList.bench.map((player) => {
-                                                // Find the specific gameweek points for the current gameweek
-                                                const gameweekPoints = player.player.points.find(
-                                                    (p) => p.gameweek === gameweekDetails._id
-                                                );
-                                                return (
-                                                    <div key={player.player._id} className={`${selectedPlayer?._id === player.player._id ? "border border-[#ffa800]" : ""} relative w-1/5 flex flex-col py-4 items-center text-center overflow-hidden rounded-lg border border-[#333333] shadow-sm shadow-black bg-[#33333388] cursor-pointer hover:scale-[1.05]`} onClick={() => handlePlayerClick(player)}>
-                                                        <img src={player.player.image_path} alt={player.player.name} className="w-16 rounded-lg" />
-                                                        <img src={player.player.team_image_path} alt="Team Logo" className="absolute top-1 left-1 w-8 h-8 rounded-full shadow-md" />
-
-                                                        {player.captain && (
-                                                            <span className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                C
-                                                            </span>
-                                                        )}
-                                                        {player.vice_captain && !player.captain && (
-                                                            <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-md">
-                                                                VC
-                                                            </span>
-                                                        )}
-                                                        <p className="mt-2 px-2 truncate max-w-full whitespace-nowrap">
-                                                            {player.player.common_name}
-                                                        </p>
-                                                        <p className="px-2 truncate max-w-full whitespace-nowrap text-xs">
-                                                            {player.player.position_name}
-                                                        </p>
-                                                        {showOptions?.player._id === player.player._id && renderOptionsMenu(player, "other")}
-                                                    </div>
-                                                )
-                                            })}
-                                            {renderSkeletons(4, otherPitchViewList.bench.length)}
-                                        </div>
-                                    </div>
-                                </div>
-                                {otherPlayers?.length === 0 && (
-                                    <div className='ribbon-2 text-3xl text-[#ff7A00] text-center'>
-                                        Drafting not completed yet.
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            // List View
-                            <div className="relative w-full overflow-hidden rounded-lg border border-[#333333] bg-[#1C1C1C]">
-                                <div className="overflow-x-auto overflow-y-auto scrollbar">
-                                    <table className="w-full text-left text-white">
-                                        <thead className="bg-[#2f2f2f] sticky top-0 z-10">
-                                            <tr className="text-center">
-                                                <th className="p-2 text-left pl-4">Player</th>
-                                                <th className="p-2">Team</th>
-                                                <th className="p-2">Position</th>
-                                                <th className="p-2"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {console.log("Other Player:", otherPlayers)}
-                                            {otherPlayers && otherPlayers.length > 0 && otherPlayers.map((player) => {
-                                                const gameweekPoints = player?.player?.points?.find(
-                                                    (p) => p.gameweek === gameweekDetails._id
-                                                );
-                                                if (!player?.player) return null;
-                                                return (
-
-                                                    <tr key={player.player.id} className="border-b border-[#333333] text-center items-center justify-center">
-                                                        <td className="px-2 text-left truncate">
-                                                            <div className="flex items-center space-x-2">
-                                                                {player?.player.image_path && (
-                                                                    <img
-                                                                        src={player.player.image_path}
-                                                                        alt={player.player.team_name || 'Team Logo'}
-                                                                        className="w-10 h-10 my-2 rounded-lg"
-                                                                    />
-                                                                )}
-                                                                <div className="overflow-hidden">
-                                                                    <p className="font-bold truncate">{player.player.common_name}
-                                                                        <span className='p-2'>
-                                                                            {player.captain && <span className="bg-yellow-500 text-black px-2 py-1 rounded-md text-xs">C</span>}
-                                                                            {player.vice_captain && !player.captain && <span className="bg-blue-500 text-white px-2 py-1 rounded-md text-xs">VC</span>}
-                                                                        </span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-2 text-center truncate">
-                                                            <img src={player.player.team_image_path} alt="Team Logo" className="w-8 h-8 rounded-full mx-auto shadow-md" />
-                                                        </td>
-                                                        <td className="p-2 text-center truncate">
-                                                            {player.player.position_name}
-                                                        </td>
-                                                        <td className="p-2 text-center truncate">
-                                                            <div className='flex truncate gap-2 my-auto items-center align-middle h-full'>
-                                                                <button onClick={() => setPlayersIn([...playersIn, player])} className='bg-[#FF8A00] text-sm px-2 py-1 rounded'>Transfer</button>
-                                                                <button onClick={() => setComparePlayer1(player)} className='bg-[#2563EB] text-sm px-2 py-1 rounded'>Compare With</button>
-                                                                <button onClick={() => setComparePlayer2(player)} className='bg-[#7C3AED] text-sm px-2 py-1 rounded'>Compare To</button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })}
-                                            {otherPlayers && otherPlayers.length === 0 && (
-                                                <tr>
-                                                    <td colSpan="4" className="text-center py-4 text-gray-400">
-                                                        Team Not Selected.
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div> */}
                     </div>
                 </>
             }
-        </div>
+        </div >
     )
 }
+
+
+const StatPill = ({ k, v }) => (
+    <span className="px-1.5 rounded-full bg-[#102531] border border-[#1D374A] text-[10px] sm:text-xs text-slate-200">
+        <span className="text-[#FF8A00] font-bold">{v}</span> <span className="opacity-80">{k}</span>
+    </span>
+);
+
+const PlayerStatLine = ({ stats, position }) => {
+    if (!stats) return null;
+
+    // Helper to pick the GK’s third pill: prefer Penalty Saves if present, else Saves.
+    const gkThird = (stats.penaltySaves ?? 0) > 0
+        ? ["PS", stats.penaltySaves]
+        : ["Sv", stats.saves];
+
+    // Position-driven core pills (exactly 3)
+    const coreByPos = {
+        Goalkeeper: [["Pts", stats.points], ["CS", stats.cleanSheets], gkThird],
+        Defender: [["Pts", stats.points], ["CS", stats.cleanSheets], ["G", stats.goals]],
+        Midfielder: [["Pts", stats.points], ["A", stats.assists], ["G", stats.goals]],
+        Attacker: [["Pts", stats.points], ["G", stats.goals], ["A", stats.assists]],
+    };
+
+    const core = coreByPos[position] ?? [["Pts", stats.points], ["G", stats.goals], ["A", stats.assists]];
+
+    // All the rest (order chosen for readability). We’ll exclude anything already shown in `core`.
+    const allExtra = [
+        ["Min", stats.minutes],
+        ["Apps", stats.apps],
+        ["GC", stats.goalsConceded],
+        ["Int", stats.interceptions],
+        ["PM", stats.penaltyMisses],
+        ["PS", stats.penaltySaves],
+        ["Tkl", stats.tackles],
+        ["Sv", stats.saves],
+        ["YC", stats.yellow],
+        ["RC", stats.red],
+        ["BPS", stats.bonus],
+        ["PPG", stats.ppg],
+        ["Pts/90", stats.per90],
+        // (We purposely keep G/A/CS/Pts out here if they’re in core to avoid duplication)
+    ];
+
+    const coreKeys = new Set(core.map(([k]) => k));
+    const extras = allExtra.filter(([k]) => !coreKeys.has(k));
+
+    return (
+        <details className="group mb-1  ">
+            {/* Summary (core line) */}
+            <summary className="list-none cursor-pointer">
+                <div className="mt-0 flex flex-wrap gap-1 sm:gap-1 items-center">
+                    {core.map(([k, v]) => (
+                        <StatPill key={k} k={k} v={v} />
+                    ))}
+                    <span className="ml-1 text-[10px] sm:text-xs text-slate-400 group-open:hidden">
+                        More ▾
+                    </span>
+                    <span className="ml-1 text-[10px] sm:text-xs text-slate-400 hidden group-open:inline">
+                        Less ▴
+                    </span>
+                </div>
+            </summary>
+
+            {/* Expanded (all the rest) */}
+            <div className="mt-1 flex flex-wrap gap-1.5 sm:gap-1">
+                {extras.map(([k, v]) => (
+                    <StatPill key={k} k={k} v={v} />
+                ))}
+            </div>
+        </details>
+    );
+};
+
+const FilterPanel = ({
+    teams,
+    filter, setFilter,
+    teamFilter, setTeamFilter,
+    statFilters, setStatFilters,
+    onApply, onClear,
+}) => {
+    // Local staging so users can tweak then Apply
+    const [local, setLocal] = useState({
+        position: filter || "",
+        team: teamFilter || "",
+        ...statFilters,
+    });
+
+    useEffect(() => {
+        setLocal({ position: filter || "", team: teamFilter || "", ...statFilters });
+    }, [filter, teamFilter, statFilters]);
+
+    const apply = () => {
+        setFilter(local.position);
+        setTeamFilter(local.team);
+        setStatFilters({
+            ppg: Number(local.ppg) || 0,
+            per90: Number(local.per90) || 0,
+            goals: Number(local.goals) || 0,
+            assists: Number(local.assists) || 0,
+            cleanSheets: Number(local.cleanSheets) || 0,
+            saves: Number(local.saves) || 0,
+        });
+        onApply?.();
+    };
+
+    const clearAll = () => {
+        setLocal({ position: "", team: "", ppg: 0, per90: 0, goals: 0, assists: 0, cleanSheets: 0, saves: 0 });
+        onClear?.();
+    };
+
+    const Input = ({ id, label, step = 1 }) => (
+        <label htmlFor={id} className="flex flex-col justify-between gap-0.5 text-xs xl:text-sm">
+            <label className="text-slate-300 text-xs lg:text-[11px] xl:text-xs">{label}</label>
+            <input
+                id={id}
+                type="number"
+                step={step}
+                value={local[id]}
+                onChange={(e) => setLocal((s) => ({ ...s, [id]: e.target.value }))}
+                className="w-full px-2 py-1 rounded bg-[#0F2230] border border-[#2a4960] text-white text-xs"
+            />
+        </label>
+    );
+
+    return (
+        <div className="rounded-lg border border-[#2a4960] bg-[#0E1D27] mt-3 p-3 sm:p-4 lg:p-2 xl:p-4">
+            {/* Row 1: Position + Team */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <p className="text-[10px] xl:text-xs uppercase tracking-wide text-slate-400 mb-1">Position</p>
+                    <div className="grid grid-cols-5 gap-1">
+                        {[
+                            ["", "All"],
+                            ["goalkeeper", "GKP"],
+                            ["defender", "DEF"],
+                            ["midfielder", "MID"],
+                            ["attacker", "FWD"],
+                        ].map(([val, label]) => (
+                            <button
+                                key={label}
+                                type="button"
+                                onClick={() => setLocal(s => ({ ...s, position: val }))}
+                                className={`px-1 py-1 text-center rounded border text-xs xl:text-sm ${local.position === val
+                                    ? "bg-[#ff8800b7] text-white border-transparent"
+                                    : "bg-[#1D374A] text-white border-[#2a4960]"
+                                    }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div>
+                    <p className="text-[10px] xl:text-xs uppercase tracking-wide text-slate-400 mb-1">Team</p>
+                    <select
+                        value={local.team}
+                        onChange={(e) => setLocal(s => ({ ...s, team: e.target.value }))}
+                        className="w-full p-1 rounded bg-[#1D374A] text-white border border-[#2a4960] text-xs xl:text-sm"
+                    >
+                        <option value="">All teams</option>
+                        {(teams || []).map(t => (
+                            <option key={t.name} value={t.name}>{t.name}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+            {/* Row 2: Stat thresholds */}
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <Input id="ppg" label="Min PPG" step="0.1" />
+                <Input id="per90" label="Min Pts/90" step="0.1" />
+                <Input id="goals" label="Min Goals" />
+                <Input id="assists" label="Min Assists" />
+                <Input id="cleanSheets" label="Min CS" />
+                <Input id="saves" label="Min Saves" />
+            </div>
+
+            {/* Actions */}
+            <div className="mt-4 flex items-center justify-end gap-2">
+                <button
+                    type="button"
+                    onClick={clearAll}
+                    className="px-3 py-1 rounded-lg bg-[#102531] border border-[#2a4960] text-white text-xs xl:text-sm hover:border-[#FF8A00]"
+                >
+                    Clear filters
+                </button>
+                <button
+                    type="button"
+                    onClick={apply}
+                    className="px-6 py-1 rounded-lg bg-[#ff8800b7] hover:bg-[#FF8A00] text-white font-semibold text-xs xl:text-sm"
+                >
+                    Apply
+                </button>
+            </div>
+        </div>
+    );
+};
+
 
 export default Transfer

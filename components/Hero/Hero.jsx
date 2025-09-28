@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import bannerImage from '../../public/images/banner-image.png'; // Path to your SVG image
+import bannerImage from '../../public/images/banner-image4.png'; // Path to your SVG image
 import { Exo_2 } from 'next/font/google';
 import Link from 'next/link';
 
