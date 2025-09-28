@@ -592,8 +592,8 @@ const Dashboard = () => {
                                     classicTable && classicTable.sort((a, b) => b.points - a.points).slice(0, 3).map((team, index) => (
                                       <tr key={index}>
                                         <td className="w-2/5 text-sm sm:text-sm md:text-sm lg:text-sm xl:text-base">{team?.team.team_name}</td>
-                                        <td className="text-center">{team?.current_points || 0}</td>
-                                        <td className="text-center">{team?.total_points || 0}</td>
+                                        <td className="text-center">{team?.points_current || 0}</td>
+                                        <td className="text-center">{team?.points_total || 0}</td>
                                       </tr>
                                     ))
                                   }
