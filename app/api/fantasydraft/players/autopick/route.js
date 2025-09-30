@@ -78,10 +78,13 @@ export const GET = async (req) => {
         });
       }
     })
+    if (players_length < draft.squad_players) {
     // Updating Team
     team.players.push(playerObj);
     // Updating Draft
     draft.players_selected.push(canSelectPlayers[0]._id)
+    }
+
     let index = draft.order.indexOf(draft.turn)
     if (index == (draft.order.length - 1)) {
       draft.order = draft.order.reverse();

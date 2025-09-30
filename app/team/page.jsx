@@ -407,15 +407,14 @@ const TeamPage = () => {
             );
 
             if (response.data.error) {
-                console.error("Error updating team:", response.data.message);
-                addAlert("Failed to update team. Please try again.", "error");
+                let message = response.data.message?response.data.message:"Failed to update team. Please try again."
+                addAlert(message, "error");
             } else {
                 console.log("Team updated successfully:", response.data.data);
                 addAlert("Team updated successfully!", "success");
-
-                // Re-fetch the updated team details
-                fetchTeamDetails(team._id);
             }
+            // Re-fetch the updated team details
+            fetchTeamDetails(team._id);
         } catch (error) {
             console.error("Error sending update request:", error);
             addAlert("An error occurred while updating the team.", "error");

@@ -56,7 +56,7 @@ export const POST = async (req, res) => {
     }
     let teamID = draft.teams.find(item => item.user_email === payload.user_email).team
     // console.log(teamID);
-    let team = await FantasyTeam.findOne({ _id: teamID , is_deleted: false});
+    let team = await FantasyTeam.findOne({ _id: teamID, is_deleted: false });
 
     // let playerObj = getPlayerObjForPick(draft, payload.playerObj._id, team.players)
     // return NextResponse.json({
@@ -79,18 +79,20 @@ export const POST = async (req, res) => {
       vice_captain: players_length === 1 ? true : false,
     }
 
-    team.players.map((player)=>{
-      if(playerObj.player.toString() === player.player.toString()){
+    team.players.map((player) => {
+      if (playerObj.player.toString() === player.player.toString()) {
         return NextResponse.json({
           error: true,
           message: "Player already picked."
         });
       }
     })
-    // Updating Team
-    team.players.push(playerObj);
-    // Updating Draft
-    draft.players_selected.push(payload.playerObj._id)
+    if (players_length < draft.squad_players) {
+      // Updating Team
+      team.players.push(playerObj);
+      // Updating Draft
+      draft.players_selected.push(payload.playerObj._id)
+    }
     let index = draft.order.indexOf(draft.turn)
     if (index == -1) { throw err; }
     else if (index == (draft.order.length - 1)) {
