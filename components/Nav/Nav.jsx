@@ -413,6 +413,7 @@ const Nav = () => {
                 <div className="py-1 block lg:hidden border-b border-[#1D374A]">
                   <a href="/dashboard" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Dashboard</a>
                   <a href="/team" className="block px-4 py-2 hover:bg-[#FF8A00]/10">My Team</a>
+                  <a href="/league-table" className="block px-4 py-2 hover:bg-[#FF8A00]/10">My League</a>
                   <a href="/transfers" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Transfers</a>
                   <a href="/match-center" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Match Center</a>
                   <a href="/super-league" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Super League</a>
