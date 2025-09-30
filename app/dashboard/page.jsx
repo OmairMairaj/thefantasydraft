@@ -611,7 +611,7 @@ const Dashboard = () => {
                               }
                             }}
                             style={{
-                              backgroundImage: `linear-gradient(to right, ${overlayColorStart}, ${overlayColorEnd}),url('/images/transfersBgImage.jpeg')`,
+                              backgroundImage: `linear-gradient(to right, ${overlayColorStart}, ${overlayColorEnd}),url('/images/transfersBgImage2.png')`,
                             }}>
                             <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>TRANSFERS</h3>
                             <p className="text-sm md:text-base lg:text-sm xl:text-base">Manage your transfers to get the best team performance.</p>
