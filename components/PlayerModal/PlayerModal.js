@@ -125,7 +125,11 @@ const PlayerModal = ({ player, onClose }) => {
                                         <th className="p-2">A</th>
                                         <th className="p-2">CS</th>
                                         <th className="p-2">GC</th>
-                                        <th className="p-2">Saves</th>
+                                        <th className="p-2">Sv</th>
+                                        <th className="p-2">Int</th>
+                                        <th className="p-2">Tkl</th>
+                                        <th className="p-2">PS</th>
+                                        <th className="p-2">PM</th>
                                         <th className="p-2">YC</th>
                                         <th className="p-2">RC</th>
                                         <th className="p-2">Bonus</th>
@@ -167,6 +171,10 @@ const PlayerModal = ({ player, onClose }) => {
                                             <td className="p-2">{stats["clean-sheet"] ? 'Yes' : 'No'}</td>
                                             <td className="p-2">{stats["goals-conceded"] ?? '0'}</td>
                                             <td className="p-2">{stats.saves ?? '0'}</td>
+                                            <td className="p-2">{stats.interceptions ?? '0'}</td>
+                                            <td className="p-2">{stats.tackles ?? '0'}</td>
+                                            <td className="p-2">{stats["penalty-save"] ?? '0'}</td>
+                                            <td className="p-2">{stats["penalty-miss"] ?? '0'}</td>
                                             <td className="p-2">{stats.yellowcards ?? '0'}</td>
                                             <td className="p-2">{stats.redcards ?? '0'}</td>
                                             <td className="p-2">{stats.bonus ?? '0'}</td>

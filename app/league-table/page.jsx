@@ -392,7 +392,7 @@ const LeagueTablePage = () => {
                                                 <th className="hidden sm:table-cell lg:hidden xl:table-cell py-2 px-2 text-center"></th>
                                                 <th className="py-2 px-2 text-left">Team</th>
                                                 <th className="py-2 px-2 text-center">PTS</th>
-                                                <th className="py-2 px-2 text-center">GW</th>
+                                                <th className="py-2 px-2 text-center">GW {gameweekName}</th>
                                                 {/* <th className="py-2 px-2 text-center">GW-1</th>
                                                 <th className="py-2 px-2 text-center">GW-2</th>
                                                 <th className="py-2 px-2 text-center">GW-3</th> */}

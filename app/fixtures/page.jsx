@@ -14,6 +14,7 @@ const exo2 = Exo_2({
 const Fixtures = () => {
   const [matches, setMatches] = useState();
   const [gameweekName, setGameweekName] = useState(null);
+  const [currentGameweek, setCurrentGameweek] = useState(null);
   const [gameweekDetails, setGameweekDetails] = useState({});
   const [totalPages, setTotalPages] = useState(1);
 
@@ -33,6 +34,8 @@ const Fixtures = () => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}gameweek/current`, { cache: 'no-store' });
       if (!response.data.error) {
         const currentGameweek = response.data.data;
+        console.log(currentGameweek);
+        setCurrentGameweek(currentGameweek);
         setGameweekName(parseInt(currentGameweek.name, 10));
         setGameweekDetails(currentGameweek);
         fetchTotalGameweeks();
@@ -86,7 +89,7 @@ const Fixtures = () => {
         <>
           <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between w-full'>
             <div className='flex flex-col mb-4'>
-              <h2 className="text-2xl sm:text-xl md:text-2xl xl:text-3xl font-bold">Current Game Week {gameweekName}</h2>
+              <h2 className="text-2xl sm:text-xl md:text-2xl xl:text-3xl font-bold">{parseInt(currentGameweek.name, 10) === gameweekName ? 'Current' : ''} Game Week {gameweekName}</h2>
               <p className="text-xs md:text-sm xl:text-base">{gameweekDetails?.starting_at ? `Starts: ${new Date(gameweekDetails.starting_at).toLocaleString('en-US', {
                 month: 'short',
                 day: 'numeric',
@@ -94,7 +97,7 @@ const Fixtures = () => {
                 minute: '2-digit',
                 timeZone: 'Asia/Dhaka'
               })
-              }` : "Loading Date...."}</p>
+                }` : "Loading Date...."}</p>
             </div>
             <div className="flex justify-center space-x-2 lg:space-x-4 mb-4">
               <button
