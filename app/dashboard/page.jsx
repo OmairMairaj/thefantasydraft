@@ -229,16 +229,16 @@ const Dashboard = () => {
   useEffect(() => {
     setCreatorName(null);
     if (selectedLeague && selectedLeague.creator) {
-      const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "user/email?email="+selectedLeague.creator;
+      const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "user/email?email=" + selectedLeague.creator;
       axios.get(URL).then((response) => {
-        if(response && response.data && response.data.name){
+        if (response && response.data && response.data.name) {
           setCreatorName(response.data.name);
         } else {
           setCreatorName("Not Found");
         }
-      }).catch((err)=>{
+      }).catch((err) => {
         setCreatorName("Not Found");
-      });      
+      });
     }
   }, [selectedLeague]);
 
@@ -589,7 +589,7 @@ const Dashboard = () => {
                                       </tr>
                                     ))
                                     :
-                                    classicTable && classicTable.sort((a, b) => b.points - a.points).slice(0, 3).map((team, index) => (
+                                    classicTable && classicTable.sort((a, b) => b.points_total - a.points_total).slice(0, 3).map((team, index) => (
                                       <tr key={index}>
                                         <td className="w-2/5 text-sm sm:text-sm md:text-sm lg:text-sm xl:text-base">{team?.team.team_name}</td>
                                         <td className="text-center">{team?.points_current || 0}</td>
@@ -611,7 +611,7 @@ const Dashboard = () => {
                               }
                             }}
                             style={{
-                              backgroundImage: `linear-gradient(to right, ${overlayColorStart}, ${overlayColorEnd}),url('/images/transfersBgImage.jpeg')`,
+                              backgroundImage: `linear-gradient(to right, ${overlayColorStart}, ${overlayColorEnd}),url('/images/transfersBgImage2.png')`,
                             }}>
                             <h3 className={`text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-bold text-[#FF8A00] mb-4 ${exo2.className}`}>TRANSFERS</h3>
                             <p className="text-sm md:text-base lg:text-sm xl:text-base">Manage your transfers to get the best team performance.</p>

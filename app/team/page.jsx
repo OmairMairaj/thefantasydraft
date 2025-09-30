@@ -895,9 +895,9 @@ const TeamPage = () => {
                                     matches.length > 0 ? (
                                         <div className="w-full text-gray-300 mt-4 ">
                                             <div className="flex justify-between border-b border-[#1d374a] py-2 px-4 text-xs sm:text-sm xl:text-base">
-                                                <div className="w-2/5 text-left font-bold">Home</div>
-                                                <div className="w-1/5 text-center font-bold">Time</div>
-                                                <div className="w-2/5 text-right font-bold">Away</div>
+                                                <div className="w-[35%] text-left font-bold">Home</div>
+                                                <div className="w-[30%] text-center font-bold">Time</div>
+                                                <div className="w-[35%] text-right font-bold">Away</div>
                                             </div>
                                             <div className='h-72 overflow-y-auto scrollbar'>
                                                 {matches.map((match) => {
@@ -907,10 +907,10 @@ const TeamPage = () => {
                                                     return (
                                                         <div
                                                             key={match.id}
-                                                            className="flex justify-between items-center border-b border-[#1d374a] py-2 px-2 text-xs sm:text-sm xl:text-base"
+                                                            className="flex justify-between items-center border-b border-[#1d374a] py-2 px-2 text-xs sm:text-xs xl:text-sm"
                                                         >
                                                             {/* Home Team */}
-                                                            <div className="w-2/5 flex items-center space-x-2">
+                                                            <div className="w-[35%] flex items-center space-x-2">
                                                                 <img
                                                                     src={homeTeam?.image_path}
                                                                     alt={homeTeam?.team_name}
@@ -922,7 +922,7 @@ const TeamPage = () => {
                                                             </div>
 
                                                             {/* Time */}
-                                                            <div className="w-1/5 text-center">
+                                                            <div className="w-[30%] text-center text-[10px] sm:text-xs xl:text-sm">
                                                                 {match.state !== 'Not Started'
                                                                     ? `${match.scores.find(
                                                                         (score) =>
@@ -934,9 +934,9 @@ const TeamPage = () => {
                                                                             score.team_id === awayTeam?.team_id
                                                                     )?.goals ?? 0}`
                                                                     : new Date(match.starting_at).toLocaleString('en-US', {
-                                                                        year: 'numeric',
+                                                                        // year: 'numeric',
                                                                         month: 'short',
-                                                                        weekday: 'long',
+                                                                        // weekday: 'long',
                                                                         day: '2-digit',
                                                                         hour: '2-digit',
                                                                         minute: '2-digit',
@@ -945,7 +945,7 @@ const TeamPage = () => {
                                                             </div>
 
                                                             {/* Away Team */}
-                                                            <div className="w-2/5 flex items-center justify-end space-x-2">
+                                                            <div className="w-[35%] flex items-center justify-end space-x-2">
                                                                 <span className="truncate text-ellipsis overflow-hidden text-right">
                                                                     {awayTeam?.team_name || 'N/A'}
                                                                 </span>

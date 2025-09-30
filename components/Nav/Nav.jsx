@@ -374,14 +374,46 @@ const Nav = () => {
                 </div>
 
                 {/* Main nav (mobile shortcuts first) */}
-                <div className="py-1 block sm:hidden border-b border-[#1D374A]">
-                  <a href="/achievements" className="block  px-4 py-2 hover:bg-[#FF8A00]/10">Achievements</a>
-                </div>
+                <Link href="/achievements" onClick={() => setDropdownOpen(false)} className="py-1 flex justify-between sm:hidden border-b border-[#1D374A]">
+                  <div className="block  px-4 py-2 hover:bg-[#FF8A00]/10">Achievements</div>
+                  <div className={`group relative flex justify-center items-center w-10 h-10 lg:w-[52px] lg:h-[52px] xl:w-14 xl:h-14 rounded-full p-[5px] cursor-pointer mr-2 ${exo2.className}`}>
+                    {/* Spinning glow halo */}
+                    <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#FF8A0044_0%,transparent_25%,#FF8A0044_50%,transparent_75%,#FF8A0044_100%)] animate-[spin_10s_linear_infinite] blur-[2px] opacity-80" aria-hidden />
+
+                    {/* Progress ring */}
+                    <div className="absolute inset-[1px] rounded-full"
+                      style={{
+                        background: `conic-gradient(#FF8A00 ${achProgress.total > 0 ? Math.min(100, Math.round((achProgress.count / achProgress.total) * 100)) : 0}%, rgba(255,255,255,0.08) ${achProgress.total > 0 ? Math.min(100, Math.round((achProgress.count / achProgress.total) * 100)) : 0}% 100%)`,
+                      }}
+                      aria-hidden
+                    />
+
+                    {/* Inner disk */}
+                    <div className="absolute inset-[3px] rounded-full bg-[#0C1922] border border-[#1D374A] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]" />
+
+                    {/* Center content */}
+                    <div className="relative z-10 flex items-center justify-center leading-none select-none">
+                      <span className="text-xs lg:text-sm font-bold text-amber-200 pr-0.5">
+                        {achProgress.count}
+                      </span>
+                      <HiTrophy className="text-[#FF8A00] w-3 text-base lg:text-lg drop-shadow-[0_0_8px_rgba(255,138,0,0.65)]" />
+                    </div>
+
+                    {/* Hover tooltip */}
+                    <div className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 px-2 py-1 rounded-md bg-[#0C1922] border border-[#1D374A] text-[10px] text-slate-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                      {achProgress.count}/{achProgress.total} Achievements
+                    </div>
+
+                    {/* Tap/hover effects */}
+                    <span className="absolute inset-0 rounded-full ring-2 ring-transparent group-active:ring-[#FF8A00]/40 transition-all" />
+                    <span className="absolute inset-[4px] rounded-full bg-[#FF8A00]/0 group-hover:bg-[#FF8A00]/[0.06] transition-colors" />
+                  </div>
+                </Link>
 
                 <div className="py-1 block lg:hidden border-b border-[#1D374A]">
                   <a href="/dashboard" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Dashboard</a>
                   <a href="/team" className="block px-4 py-2 hover:bg-[#FF8A00]/10">My Team</a>
-                  <a href="/table" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Table</a>
+                  <a href="/league-table" className="block px-4 py-2 hover:bg-[#FF8A00]/10">My League</a>
                   <a href="/transfers" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Transfers</a>
                   <a href="/match-center" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Match Center</a>
                   <a href="/super-league" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Super League</a>
@@ -389,6 +421,7 @@ const Nav = () => {
 
                 <div className="py-1 block lg:hidden border-b border-[#1D374A]">
                   <a href="/fixtures" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Fixtures</a>
+                  <a href="/table" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Table</a>
                   <a href="/players" className="block px-4 py-2 hover:bg-[#FF8A00]/10">Players</a>
                 </div>
 
