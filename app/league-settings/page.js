@@ -206,7 +206,7 @@ const LeagueSettings = () => {
     }, [leagueData, gameweek]);
 
     const generatePointsTable = (pointsConfig, gameweek) => {
-        const gwPoints = pointsConfig?.find(p => p.gameweek === gameweek);
+        const gwPoints = pointsConfig?.find(p => Number(p.gameweek) === Number(gameweek));
         if (!gwPoints) return [];
         console.log("Current Gameweek: ", gameweek);
         console.log("Current Gameweek Points: ", gwPoints);
@@ -260,6 +260,9 @@ const LeagueSettings = () => {
 
 
     const handleDeleteLeague = async () => {
+        console.log("Attempting to delete league:", leagueData?.league_name.length);
+        console.log("Input League Name:", inputLeagueName.length);
+        console.log("C", inputError);
         if (!inputLeagueName) {
             setInputError(true);
             return;
@@ -292,6 +295,7 @@ const LeagueSettings = () => {
     const handleDeleteInputChange = (e) => {
         setInputLeagueName(e.target.value);
         setInputError(false);
+        console.log("B", inputError);
     };
 
     useEffect(() => {
@@ -305,6 +309,36 @@ const LeagueSettings = () => {
             document.body.style.overflow = 'auto';
         };
     }, [showDeletePopup]);
+
+
+    // Normalize the current GW to a number (your API returns a string sometimes)
+    const currGwNum = Number(gameweek ?? 0);
+
+    // Object for the current GW (so inputs can read from it)
+    const gwCfg =
+        leagueData?.points_configuration?.find(
+            (p) => Number(p.gameweek) === currGwNum
+        ) || {};
+
+    // Update one stat for current + all upcoming gameweeks
+    const updatePointsConfiguration = (key, rawValue) => {
+        // allow numbers only; tweak if you want to allow '' while typing
+        const val = Number(rawValue);
+
+        setLeagueData((prev) => {
+            if (!prev?.points_configuration) return prev;
+
+            const next = prev.points_configuration.map((cfg) => {
+                const gwNum = Number(cfg.gameweek);
+                if (gwNum >= currGwNum) {
+                    return { ...cfg, [key]: val };
+                }
+                return cfg;
+            });
+
+            return { ...prev, points_configuration: next };
+        });
+    };
 
 
     if (loading || leagueData === null || gameweek === null) {
@@ -347,6 +381,7 @@ const LeagueSettings = () => {
                                     setShowDeletePopup(false);
                                     setInputLeagueName("");
                                     setInputError(false);
+                                    console.log("A", inputError);
                                 }}
                             >
                                 Cancel
@@ -508,20 +543,9 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={leagueData.points_configuration?.[gameweek]?.[key] || 0}
-                                        onChange={(e) => {
-                                            const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
-                                            updatedPointsConfig[gameweek] = { // Modify the first object in the array
-                                                ...updatedPointsConfig[gameweek],
-                                                [key]: parseFloat(e.target.value) // Update the specific key
-                                            };
-
-                                            setLeagueData({
-                                                ...leagueData,
-                                                points_configuration: updatedPointsConfig // Update the state with the new array
-                                            });
-                                        }}
-                                        disabled={!isEditing}
+                                        value={gwCfg?.[key] ?? 0}
+                                        onChange={(e) => updatePointsConfiguration(key, e.target.value)}
+                                        disabled={!isEditing || leagueData?.draftID?.state === "In Process" || leagueData?.draftID?.state === "Ended"}
                                         className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
                                 </div>
@@ -540,20 +564,9 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={leagueData.points_configuration?.[gameweek]?.[key] || 0}
-                                        onChange={(e) => {
-                                            const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
-                                            updatedPointsConfig[gameweek] = { // Modify the first object in the array
-                                                ...updatedPointsConfig[gameweek],
-                                                [key]: parseFloat(e.target.value) // Update the specific key
-                                            };
-
-                                            setLeagueData({
-                                                ...leagueData,
-                                                points_configuration: updatedPointsConfig // Update the state with the new array
-                                            });
-                                        }}
-                                        disabled={!isEditing}
+                                        value={gwCfg?.[key] ?? 0}
+                                        onChange={(e) => updatePointsConfiguration(key, e.target.value)}
+                                        disabled={!isEditing || leagueData?.draftID?.state === "In Process" || leagueData?.draftID?.state === "Ended"}
                                         className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
                                 </div>
@@ -572,20 +585,9 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={leagueData.points_configuration?.[gameweek]?.[key] || 0}
-                                        onChange={(e) => {
-                                            const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
-                                            updatedPointsConfig[gameweek] = { // Modify the first object in the array
-                                                ...updatedPointsConfig[gameweek],
-                                                [key]: parseFloat(e.target.value) // Update the specific key
-                                            };
-
-                                            setLeagueData({
-                                                ...leagueData,
-                                                points_configuration: updatedPointsConfig // Update the state with the new array
-                                            });
-                                        }}
-                                        disabled={!isEditing}
+                                        value={gwCfg?.[key] ?? 0}
+                                        onChange={(e) => updatePointsConfiguration(key, e.target.value)}
+                                        disabled={!isEditing || leagueData?.draftID?.state === "In Process" || leagueData?.draftID?.state === "Ended"}
                                         className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
                                 </div>
@@ -604,27 +606,16 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={leagueData.points_configuration?.[gameweek]?.[key] || 0}
-                                        onChange={(e) => {
-                                            const updatedPointsConfig = [...leagueData.points_configuration]; // Create a shallow copy of the array
-                                            updatedPointsConfig[gameweek] = { // Modify the first object in the array
-                                                ...updatedPointsConfig[gameweek],
-                                                [key]: parseFloat(e.target.value) // Update the specific key
-                                            };
-
-                                            setLeagueData({
-                                                ...leagueData,
-                                                points_configuration: updatedPointsConfig // Update the state with the new array
-                                            });
-                                        }}
-                                        disabled={!isEditing}
+                                        value={gwCfg?.[key] ?? 0}
+                                        onChange={(e) => updatePointsConfiguration(key, e.target.value)}
+                                        disabled={!isEditing || leagueData?.draftID?.state === "In Process" || leagueData?.draftID?.state === "Ended"}
                                         className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <p className='text-gray-400 text-xs xl:text-sm mt-4 xl:mt-0'>Note: All changes in Points will be applied from the next gameweek.</p>
+                    <p className='text-gray-400 text-xs xl:text-sm mt-4 xl:mt-0'>Note: Points configuration can not be changed after drafting.</p>
                 </div>
 
                 {/* Points Table */}

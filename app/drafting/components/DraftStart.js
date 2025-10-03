@@ -55,6 +55,23 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     const { addAlert } = useAlert();
     const [isPicking, setIsPicking] = useState(false);
 
+    const pickLockRef = React.useRef(false);
+
+    async function withPickLock(fn) {
+        if (pickLockRef.current) return; // someone else is picking
+        pickLockRef.current = true;      // lock immediately (sync)
+        try {
+            // stop the timer so auto-pick can't race this click
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+            await fn();
+        } finally {
+            pickLockRef.current = false;   // release
+        }
+    }
+
     useEffect(() => {
         try {
             axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}team`)
@@ -171,7 +188,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                     if (prevTime <= 1000) {
                         clearInterval(intervalRef.current);
                         intervalRef.current = null;
-                        if (draftData?.turn === user.email) {
+                        if (draftData?.turn === user.email && !pickLockRef.current) {
                             // console.log(prevTime);
                             console.log("Calling auto pick");
                             autoPickCall();
@@ -318,61 +335,59 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     // };
 
     const handlePick = async (player) => {
-        if (isPicking) return;
-        setIsPicking(true);
-
-        if (loadingSelect) {
-            addAlert("Pick is in progress. Your time ran out", "info");
-            return;
-        }
-        try {
-            //console.log("Picking player:", player);
-            const requestBody = {
-                user_email: user.email,
-                draftID: draftID,
-                playerObj: player,
-            };
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players`, requestBody);
-            if (response.data && !response.data.error) {
-                //console.log("Player successfully picked:", response.data);
-                // Fetch updated draft data
-                await fetchdraftData();
-                addAlert("Player successfully picked!", "success");
-            } else {
-                console.error("1 : Failed to pick player:", response.data.message);
-                addAlert(response.data.message, 'error');
+        withPickLock(async () => {
+            setLoadingSelect(true);
+            try {
+                //console.log("Picking player:", player);
+                const requestBody = {
+                    user_email: user.email,
+                    draftID: draftID,
+                    playerObj: player,
+                };
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players`, requestBody);
+                if (response.data && !response.data.error) {
+                    //console.log("Player successfully picked:", response.data);
+                    // Fetch updated draft data
+                    await fetchdraftData();
+                    addAlert("Player successfully picked!", "success");
+                } else {
+                    console.error("1 : Failed to pick player:", response.data.message);
+                    addAlert(response.data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Failed to add player:', error);
+                addAlert("Network error while picking.", "error");
+            } finally {
+                setLoadingSelect(false);
+                // setIsPicking(false);
             }
-        } catch (error) {
-            console.error('Failed to add player:', error);
-        } finally {
-            setLoadingSelect(false);
-            setIsPicking(false);
-        }
+        })
     };
 
 
     function autoPickCall(email) {
-        if (isPicking) return;
-        setIsPicking(true);
-        try {
-            let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
-            axios.get(link).then((response) => {
-                // console.log(response);
-                if (response.data && !response.data.error) {
-                    fetchdraftData();
-                    if (email) addAlert("Player successfully FORCE Picked!", "success");
-                    else addAlert("Player successfully AUTO Picked!", "success");
-                } else {
-                    console.error("2 : Failed to pick player:", response.data.message);
-                    addAlert(response.data.message, 'error');
-                }
-            });
-        } catch (error) {
-            console.error('Failed to add player:', error);
-        } finally {
-            setLoadingSelect(false);
-            setIsPicking(false);
-        }
+        withPickLock(async () => {
+            setLoadingSelect(true);
+            try {
+                let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
+                axios.get(link).then((response) => {
+                    // console.log(response);
+                    if (response.data && !response.data.error) {
+                        fetchdraftData();
+                        if (email) addAlert("Player successfully FORCE Picked!", "success");
+                        else addAlert("Player successfully AUTO Picked!", "success");
+                    } else {
+                        console.error("2 : Failed to pick player:", response.data.message);
+                        addAlert(response.data.message, 'error');
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to add player:', error);
+            } finally {
+                setLoadingSelect(false);
+                // setIsPicking(false);
+            }
+        })
     };
 
     const fetchChosenPlayers = () => {
@@ -546,7 +561,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <div className="flex flex-col text-white">
-                {loading && !draftData & !autoPickList && !players ? (
+                {loading && !draftData && !autoPickList && !players ? (
                     <div className="w-full min-h-[70vh] flex items-center justify-center">
                         <div className="w-16 h-16 border-4 border-t-[#FF8A00] rounded-full animate-spin"></div>
                     </div>
@@ -634,7 +649,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                                 {/* Show the team name */}
                                                                 <p className="text-white">{teamData.team?.team_name || "Unnamed Team"}</p>
                                                                 {draftData && isCreator && email === draftData.turn ?
-                                                                    <button disabled={isPicking} onClick={() => { autoPickCall(email) }} className={`${isPicking ? "bg-[#3c3c3c]" : "bg-[#ff8800d6] hover:bg-[#ff8800]"} px-4 my-1 rounded-lg shadow-lg  `}>Force Pick</button>
+                                                                    <button disabled={loadingSelect || pickLockRef.current} onClick={() => { autoPickCall(email) }} className={`${loadingSelect || pickLockRef.current ? "bg-[#3c3c3c]" : "bg-[#ff8800d6] hover:bg-[#ff8800]"} px-4 my-1 rounded-lg shadow-lg  `}>Force Pick</button>
                                                                     : null
                                                                 }
                                                             </>
@@ -752,12 +767,11 @@ const DraftStart = ({ draftID, user, onSettings }) => {
                                                         <td className="p-2">{player.rating}</td>
                                                         <td className="p-0 sticky right-0">
                                                             <button
-                                                                className={`${draftData?.turn !== user.email || loadingSelect || isPicking ? 'bg-[#1D374A] cursor-not-allowed' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
+                                                                className={`${draftData?.turn !== user.email || loadingSelect || pickLockRef.current ? 'bg-[#1D374A] cursor-not-allowed' : 'bg-[#FF8A00] hover:bg-[#e77d00]'} text-white px-6 py-1 rounded-lg `}
                                                                 onClick={() => {
-                                                                    setLoadingSelect(true);
                                                                     handlePick(player)
                                                                 }}
-                                                                disabled={(draftData?.turn !== user.email) || loadingSelect || isPicking}
+                                                                disabled={(draftData?.turn !== user.email) || loadingSelect || pickLockRef.current}
                                                             >
                                                                 Pick
                                                             </button>

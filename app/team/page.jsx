@@ -407,7 +407,7 @@ const TeamPage = () => {
             );
 
             if (response.data.error) {
-                let message = response.data.message?response.data.message:"Failed to update team. Please try again."
+                let message = response.data.message ? response.data.message : "Failed to update team. Please try again."
                 addAlert(message, "error");
             } else {
                 console.log("Team updated successfully:", response.data.data);
@@ -624,7 +624,7 @@ const TeamPage = () => {
                                                             {showOptions?.player._id === player.player._id && renderOptionsMenu(player)}
                                                         </div>
                                                     ))}
-                                                    {renderSkeletons(2, pitchViewList.lineup.Attacker.length)}
+                                                    {renderSkeletons(1, pitchViewList.lineup.Attacker.length)}
                                                 </div>
                                             </div>
                                         </div>
