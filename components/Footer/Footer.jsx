@@ -15,7 +15,7 @@ const Footer = () => {
                 {/* Left side - Logo */}
                 <div className="flex md:justify-start  items-center">
                     <Image
-                        src="/images/logo.svg"
+                        src="/images/logo2.svg"
                         width={100}
                         height={100}
                         className="object-cover cursor-pointer w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28"

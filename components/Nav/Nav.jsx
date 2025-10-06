@@ -136,7 +136,7 @@ const Nav = () => {
       <div className="flex space-x-1 items-center">
         <Link href={user ? "/dashboard" : "/"}>
           <Image
-            src="/images/logo.svg"
+            src="/images/logo2.svg"
             width={100}
             height={100}
             className="object-cover cursor-pointer w-16 sm:w-18 md:w-20 lg:w-24 xl:w-28"
