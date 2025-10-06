@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAlert } from '@/components/AlertContext/AlertContext';
@@ -32,6 +32,38 @@ const LeagueSettings = () => {
     const [inputLeagueName, setInputLeagueName] = useState("");
     const [inputError, setInputError] = useState(false);
     const [isMdOnly, setIsMdOnly] = useState(false);
+
+    const [showRemovePopup, setShowRemovePopup] = useState(false);
+    const [showLeavePopup, setShowLeavePopup] = useState(false);
+    const [removeLoading, setRemoveLoading] = useState(false);
+    const [leaveLoading, setLeaveLoading] = useState(false);
+    const [removeConfirmInput, setRemoveConfirmInput] = useState("");
+    const [leaveConfirmInput, setLeaveConfirmInput] = useState("");
+
+    // selected team to remove (admin modal)
+    const [selectedRemoveTeamId, setSelectedRemoveTeamId] = useState(null);
+
+    // anti double-click locks
+    const removeLockRef = useRef(false);
+    const leaveLockRef = useRef(false);
+
+    // convenience flags
+    const draftState = leagueData?.draftID?.state;
+    const canModifyTeams = draftState === "Manual" || draftState === "Scheduled";
+
+    // helpers to get id/name safely (leagueData.teams may be populated or just IDs)
+    const getTeamId = (t) => t?.team?._id ?? t?.team;
+    const getTeamName = (t) => t?.team?.team_name ?? "(Unnamed Team)";
+    const getTeamEmail = (t) => t?.user_email ?? "";
+
+    // lists
+    const teamsAll = leagueData?.teams ?? [];
+    const teamsRemovable = teamsAll.filter(t => getTeamEmail(t) !== leagueData?.creator); // backend also blocks admin removal
+
+    // my team (for leave modal)
+    const myTeamEntry = teamsAll.find(t => getTeamEmail(t) === user?.email);
+    const myTeamId = getTeamId(myTeamEntry);
+    const myTeamName = getTeamName(myTeamEntry);
 
     useEffect(() => {
         const handleResize = () => {
@@ -319,7 +351,7 @@ const LeagueSettings = () => {
     };
 
     useEffect(() => {
-        if (showDeletePopup) {
+        if (showDeletePopup || showRemovePopup || showLeavePopup) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
@@ -328,7 +360,82 @@ const LeagueSettings = () => {
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [showDeletePopup]);
+    }, [showDeletePopup, showRemovePopup, showLeavePopup]);
+
+    useEffect(() => {
+        if (showRemovePopup) {
+            setSelectedRemoveTeamId(prev => prev ?? (teamsRemovable[0] ? getTeamId(teamsRemovable[0]) : null));
+        }
+    }, [showRemovePopup, teamsRemovable]);
+
+
+    const handleRemoveTeam = async () => {
+        if (!canModifyTeams) {
+            addAlert("You can only remove teams before the draft starts.", "error");
+            return;
+        }
+        if (!selectedRemoveTeamId) {
+            addAlert("Please select a team to remove.", "error");
+            return;
+        }
+        if (removeLockRef.current) return;
+        removeLockRef.current = true;
+        setRemoveLoading(true);
+        try {
+            const URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyteam/remove`;
+            const payload = { teamID: selectedRemoveTeamId, leagueID: leagueData?._id };
+            const res = await axios.post(URL, payload);
+            if (res.data?.error) {
+                addAlert(res.data?.message || "Could not remove team.", "error");
+            } else {
+                addAlert("Team removed from league.", "success");
+                setShowRemovePopup(false);
+                setRemoveConfirmInput("");
+                // refresh data
+                await fetchLeagueData();
+            }
+        } catch (e) {
+            console.error(e);
+            addAlert("Unexpected error removing team.", "error");
+        } finally {
+            setRemoveLoading(false);
+            removeLockRef.current = false;
+        }
+    };
+
+    const handleLeaveLeague = async () => {
+        if (!canModifyTeams) {
+            addAlert("You can only leave the league before the draft starts.", "error");
+            return;
+        }
+        if (!myTeamId) {
+            addAlert("Your team was not found in this league.", "error");
+            return;
+        }
+        if (leaveLockRef.current) return;
+        leaveLockRef.current = true;
+        setLeaveLoading(true);
+        try {
+            const URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyteam/remove`;
+            const payload = { teamID: myTeamId, leagueID: leagueData?._id };
+            const res = await axios.post(URL, payload);
+            if (res.data?.error) {
+                addAlert(res.data?.message || "Could not leave league.", "error");
+            } else {
+                addAlert("You left the league.", "success");
+                setShowLeavePopup(false);
+                setLeaveConfirmInput("");
+                // send user back to dashboard
+                router.push("/dashboard");
+            }
+        } catch (e) {
+            console.error(e);
+            addAlert("Unexpected error leaving the league.", "error");
+        } finally {
+            setLeaveLoading(false);
+            leaveLockRef.current = false;
+        }
+    };
 
 
     // Normalize the current GW to a number (your API returns a string sometimes)
@@ -366,47 +473,6 @@ const LeagueSettings = () => {
         )
     } else return (
         <div className="min-h-[88vh] flex flex-col my-8 text-white px-4 sm:px-8 md:px-10 lg:px-16 xl:px-20 pb-10">
-            {showDeletePopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
-                    <div className={`bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-sm p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center max-w-96 w-[90vw] ${exo2.className}`}>
-                        <h2 className="text-lg md:text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4">Delete League</h2>
-                        <p className="text-sm xl:text-base mb-4 text-gray-300 mx-2 sm:mx-6">
-                            Are you sure you want to delete this league? This will remove all <strong className='text-white'>teams</strong>, <strong className='text-white'>draft data</strong>, and related information.
-                        </p>
-                        <p className="text-sm xl:text-base mb-4 text-gray-400">
-                            Type <span className="font-bold text-white">{leagueData?.league_name}</span> to confirm:
-                        </p>
-                        <input
-                            type="text"
-                            value={inputLeagueName}
-                            onChange={handleDeleteInputChange}
-                            className={`w-full p-1 md:p-2 bg-[#1b3546] text-white rounded-lg mb-1 text-center text-sm xl:text-base focus:placeholder-transparent focus:outline-none  ${inputError ? "border border-[#832626]" : "focus:ring-1 focus:ring-[#425460]"}`}
-                            placeholder="Enter league name"
-                        />
-                        {inputError && <p className="text-sm xl:text-base text-[#ca3c3c] mb-1">League name does not match.</p>}
-                        <div className="flex justify-between mt-4">
-                            <button
-                                className={`px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md ${!inputLeagueName ? "fade-gradient-no-hover opacity-50 cursor-not-allowed" : "fade-gradient"}`}
-                                onClick={handleDeleteLeague}
-                                disabled={!inputLeagueName}
-                            >
-                                Yes, I'm sure
-                            </button>
-                            <button
-                                className="fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md"
-                                onClick={() => {
-                                    setShowDeletePopup(false);
-                                    setInputLeagueName("");
-                                    setInputError(false);
-                                    console.log("A", inputError);
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
             <div className='flex justify-between items-center'>
                 <h1 className={`text-2xl md:text-3xl xl:text-4xl font-bold ${exo2.className}`}>League Settings</h1>
                 {isCreator && (
@@ -726,42 +792,36 @@ const LeagueSettings = () => {
                     {/* <div className="flex gap-4 px-6 pb-6"> */}
                     {isCreator ? (
                         <div className='flex justify-center items-center gap-1 sm:gap-4'>
-                            {/* Delete League Button */}
+                            {/* Delete League */}
                             <button
                                 className={`fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-xs sm:text-sm xl:text-base rounded-2xl transition duration-300 ${exo2.className}`}
-                                onClick={() => {
-                                    // Handle Delete League logic here
-                                    console.log("Delete League clicked");
-                                    setShowDeletePopup(true);
-                                }}
+                                onClick={() => setShowDeletePopup(true)}
                             >
                                 DELETE LEAGUE
                             </button>
 
-                            {/* Remove a Team Button */}
-                            {/* {leagueData?.draftID?.state === "Scheduled" || leagueData?.draftID?.state === "Manual" ? ( */}
+                            {/* Remove a Team (admin only) */}
                             <button
-                                className={`bg-[#FF8A00] text-black px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-xs sm:text-sm xl:text-base rounded-2xl shadow-md hover:bg-[#FF8A00] hover:text-white hover:scale-105 transition duration-300 ${exo2.className}`}
+                                className={`bg-[#FF8A00] text-black px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-xs sm:text-sm xl:text-base rounded-2xl shadow-md transition duration-300 ${exo2.className} ${!canModifyTeams ? "opacity-60 cursor-not-allowed" : "hover:bg-[#FF8A00] hover:text-white hover:scale-105"}`}
                                 onClick={() => {
-                                    // Handle Remove a Team logic here
-                                    console.log("Remove a Team clicked");
+                                    if (!canModifyTeams) { addAlert("You can only remove teams before the draft starts.", "error"); return; }
+                                    setShowRemovePopup(true);
                                 }}
+                                disabled={!canModifyTeams}
                             >
                                 REMOVE A TEAM
                             </button>
-                            {/* )
-                                : null
-                            } */}
                         </div>
                     ) : (
                         <>
-                            {/* Leave League Button */}
+                            {/* Leave League (non-admin) */}
                             <button
-                                className={`fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-2xl transition duration-300 ${exo2.className}`}
+                                className={` px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-2xl transition duration-300 ${exo2.className} ${!canModifyTeams ? "opacity-60 cursor-not-allowed fade-gradient-no-hover" : "fade-gradient"}`}
                                 onClick={() => {
-                                    // Handle Leave League logic here
-                                    console.log("Leave League clicked");
+                                    if (!canModifyTeams) { addAlert("You can only leave before the draft starts.", "error"); return; }
+                                    setShowLeavePopup(true);
                                 }}
+                                disabled={!canModifyTeams}
                             >
                                 LEAVE LEAGUE
                             </button>
@@ -770,6 +830,153 @@ const LeagueSettings = () => {
                     {/* </div> */}
                 </div>
             </div>
+            {showDeletePopup && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+                    <div className={`bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-sm p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center max-w-96 w-[90vw] ${exo2.className}`}>
+                        <h2 className="text-lg md:text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4">Delete League</h2>
+                        <p className="text-sm xl:text-base mb-4 text-gray-300 mx-2 sm:mx-6">
+                            Are you sure you want to delete this league? This will remove all <strong className='text-white'>teams</strong>, <strong className='text-white'>draft data</strong>, and related information.
+                        </p>
+                        <p className="text-sm xl:text-base mb-4 text-gray-400">
+                            Type <span className="font-bold text-white">{leagueData?.league_name}</span> to confirm:
+                        </p>
+                        <input
+                            type="text"
+                            value={inputLeagueName}
+                            onChange={handleDeleteInputChange}
+                            className={`w-full p-1 md:p-2 bg-[#1b3546] text-white rounded-lg mb-1 text-center text-sm xl:text-base focus:placeholder-transparent focus:outline-none  ${inputError ? "border border-[#832626]" : "focus:ring-1 focus:ring-[#425460]"}`}
+                            placeholder="Enter league name"
+                        />
+                        {inputError && <p className="text-sm xl:text-base text-[#ca3c3c] mb-1">League name does not match.</p>}
+                        <div className="flex justify-between mt-4">
+                            <button
+                                className={`px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md ${!inputLeagueName ? "fade-gradient-no-hover opacity-50 cursor-not-allowed" : "fade-gradient"}`}
+                                onClick={handleDeleteLeague}
+                                disabled={!inputLeagueName}
+                            >
+                                Yes, I'm sure
+                            </button>
+                            <button
+                                className="fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md"
+                                onClick={() => {
+                                    setShowDeletePopup(false);
+                                    setInputLeagueName("");
+                                    setInputError(false);
+                                    console.log("A", inputError);
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showRemovePopup && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className={`bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-sm p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center max-w-[28rem] w-[90vw] ${exo2.className}`}>
+                        <h2 className="text-lg md:text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4">Remove a Team</h2>
+                        {teamsRemovable.length === 0 ? (
+                            <p className="text-sm xl:text-base text-gray-300 mb-4">No removable teams found.</p>
+                        ) : (
+                            <>
+                                <div className="text-left text-sm xl:text-base mb-3">
+                                    <label className="text-gray-300">Select team to remove</label>
+                                    <select
+                                        className="mt-1 w-full p-2 bg-[#1b3546] text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-[#425460]"
+                                        value={selectedRemoveTeamId ?? ""}
+                                        onChange={(e) => setSelectedRemoveTeamId(e.target.value)}
+                                    >
+                                        {teamsRemovable.map((t) => (
+                                            <option key={getTeamId(t)} value={getTeamId(t)}>
+                                                {getTeamName(t)} — {getTeamEmail(t)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <p className="text-xs xl:text-sm text-gray-400 mb-2">
+                                    Type the team name to confirm removal.
+                                </p>
+                                <input
+                                    type="text"
+                                    value={removeConfirmInput}
+                                    onChange={(e) => setRemoveConfirmInput(e.target.value)}
+                                    placeholder="Type the exact team name"
+                                    className="w-full p-2 bg-[#1b3546] text-white rounded-lg mb-1 text-center focus:outline-none focus:ring-1 focus:ring-[#425460]"
+                                />
+                                <div className="flex justify-between mt-4">
+                                    <button
+                                        className={`px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md ${(!selectedRemoveTeamId || removeConfirmInput !== (getTeamName(teamsRemovable.find(t => getTeamId(t) === selectedRemoveTeamId)) ?? "")) || removeLoading
+                                            ? "fade-gradient-no-hover opacity-50 cursor-not-allowed"
+                                            : "fade-gradient"
+                                            }`}
+                                        onClick={handleRemoveTeam}
+                                        disabled={
+                                            !selectedRemoveTeamId ||
+                                            removeConfirmInput !== (getTeamName(teamsRemovable.find(t => getTeamId(t) === selectedRemoveTeamId)) ?? "") ||
+                                            removeLoading
+                                        }
+                                    >
+                                        {removeLoading ? "Removing..." : "Remove Team"}
+                                    </button>
+                                    <button
+                                        className="fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md"
+                                        onClick={() => {
+                                            setShowRemovePopup(false);
+                                            setRemoveConfirmInput("");
+                                            setSelectedRemoveTeamId(null);
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+            {showLeavePopup && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className={`bg-gradient-to-r from-[#0C1922] to-[#0C192250] backdrop-blur-sm p-6 rounded-xl shadow-md shadow-[#1f1f1f] text-center max-w-[28rem] w-[90vw] ${exo2.className}`}>
+                        <h2 className="text-lg md:text-xl xl:text-2xl font-bold text-[#FF8A00] mb-4">Leave League</h2>
+                        <p className="text-sm xl:text-base text-gray-300 mb-2">
+                            You’re about to leave <span className="text-white font-semibold">{leagueData?.league_name}</span>.
+                        </p>
+                        <p className="text-xs xl:text-sm text-gray-400 mb-4">
+                            This will remove your team <span className="text-white font-semibold">{myTeamName}</span> from the league.
+                        </p>
+                        <p className="text-xs xl:text-sm text-gray-400 mb-2">Type <span className="text-white font-semibold">LEAVE</span> to confirm.</p>
+                        <input
+                            type="text"
+                            value={leaveConfirmInput}
+                            onChange={(e) => setLeaveConfirmInput(e.target.value)}
+                            placeholder="LEAVE"
+                            className="w-full p-2 bg-[#1b3546] text-white rounded-lg mb-1 text-center focus:outline-none focus:ring-1 focus:ring-[#425460]"
+                        />
+                        <div className="flex justify-between mt-4">
+                            <button
+                                className={`px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md ${leaveConfirmInput !== "LEAVE" || leaveLoading
+                                    ? "fade-gradient-no-hover opacity-50 cursor-not-allowed"
+                                    : "fade-gradient"
+                                    }`}
+                                onClick={handleLeaveLeague}
+                                disabled={leaveConfirmInput !== "LEAVE" || leaveLoading}
+                            >
+                                {leaveLoading ? "Leaving..." : "Leave League"}
+                            </button>
+                            <button
+                                className="fade-gradient px-4 sm:px-6 xl:px-8 py-1 md:py-2 text-sm xl:text-base rounded-xl shadow-md"
+                                onClick={() => {
+                                    setShowLeavePopup(false);
+                                    setLeaveConfirmInput("");
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

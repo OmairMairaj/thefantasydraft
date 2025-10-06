@@ -54,21 +54,65 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     // const router = useRouter();
     const { addAlert } = useAlert();
     const [isPicking, setIsPicking] = useState(false);
+    const draftRef = React.useRef(null);
+    useEffect(() => { draftRef.current = draftData; }, [draftData]);
 
     const pickLockRef = React.useRef(false);
+    const autoPickInFlightRef = React.useRef(false);
+
+    useEffect(() => {
+        if (!draftData?.state || !draftData?.turn) return;
+
+        const setupIntervals = () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+
+            // tick every second, recompute from server timestamp to avoid drift
+            intervalRef.current = setInterval(() => {
+                const d = draftRef.current;
+                if (!d) return;
+
+                const now = Date.now();
+                const lastUpdated = new Date(d.updatedAt).getTime();
+                const turnEnd = lastUpdated + (d.time_per_pick ?? 0) * 1000;
+                const msLeft = Math.max(turnEnd - now, 0);
+
+                setTimeRemaining(msLeft);
+
+                // if it's my turn and timer is 0, keep trying autopick until turn changes
+                if (msLeft === 0 && d.turn === user.email && !autoPickInFlightRef.current) {
+                    autoPickInFlightRef.current = true;
+                    autoPickCall().finally(() => {
+                        autoPickInFlightRef.current = false;
+                    });
+                }
+            }, 1000);
+
+            // polling (you can keep your 10s if you like; 3–5s feels snappier)
+            if (!pollingIntervalRef.current) {
+                pollingIntervalRef.current = setInterval(fetchdraftData, 5000);
+            }
+        };
+
+        setupIntervals();
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            intervalRef.current = null;
+            if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+        };
+    }, [draftData?.state, draftData?.turn, draftData?.updatedAt, user.email]);
 
     async function withPickLock(fn) {
-        if (pickLockRef.current) return; // someone else is picking
-        pickLockRef.current = true;      // lock immediately (sync)
+        if (pickLockRef.current) return false;
+        pickLockRef.current = true;
         try {
-            // stop the timer so auto-pick can't race this click
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
             }
-            await fn();
+            return await fn();            // <— return result
         } finally {
-            pickLockRef.current = false;   // release
+            pickLockRef.current = false;
         }
     }
 
@@ -174,53 +218,53 @@ const DraftStart = ({ draftID, user, onSettings }) => {
     //     };
     // }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
 
-    useEffect(() => {
-        const setupIntervals = () => {
-            const now = Date.now();
-            const lastUpdated = new Date(draftData.updatedAt).getTime();
-            const turnEndTime = lastUpdated + draftData.time_per_pick * 1000;
-            const remainingTime = Math.max(turnEndTime - now, 0);
-            setTimeRemaining(remainingTime);
+    // useEffect(() => {
+    //     const setupIntervals = () => {
+    //         const now = Date.now();
+    //         const lastUpdated = new Date(draftData.updatedAt).getTime();
+    //         const turnEndTime = lastUpdated + draftData.time_per_pick * 1000;
+    //         const remainingTime = Math.max(turnEndTime - now, 0);
+    //         setTimeRemaining(remainingTime);
 
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            intervalRef.current = setInterval(() => {
-                setTimeRemaining((prevTime) => {
-                    if (prevTime <= 1000) {
-                        clearInterval(intervalRef.current);
-                        intervalRef.current = null;
-                        if (draftData?.turn === user.email && !pickLockRef.current) {
-                            // console.log(prevTime);
-                            console.log("Calling auto pick");
-                            autoPickCall();
-                        }
-                        return 0;
-                    }
-                    return prevTime - 1000;
-                });
-            }, 1000);
+    //         if (intervalRef.current) clearInterval(intervalRef.current);
+    //         intervalRef.current = setInterval(() => {
+    //             setTimeRemaining((prevTime) => {
+    //                 if (prevTime <= 1000) {
+    //                     clearInterval(intervalRef.current);
+    //                     intervalRef.current = null;
+    //                     if (draftData?.turn === user.email && !pickLockRef.current) {
+    //                         // console.log(prevTime);
+    //                         console.log("Calling auto pick");
+    //                         autoPickCall();
+    //                     }
+    //                     return 0;
+    //                 }
+    //                 return prevTime - 1000;
+    //             });
+    //         }, 1000);
 
 
-            if (!pollingIntervalRef.current) {
-                pollingIntervalRef.current = setInterval(() => {
-                    fetchdraftData();
-                    console.log("refreshing data");
-                    // }, ((draftData.time_per_pick / 3) * 1000));
-                }, 10000);
-            }
-        };
+    //         if (!pollingIntervalRef.current) {
+    //             pollingIntervalRef.current = setInterval(() => {
+    //                 fetchdraftData();
+    //                 console.log("refreshing data");
+    //                 // }, ((draftData.time_per_pick / 3) * 1000));
+    //             }, 10000);
+    //         }
+    //     };
 
-        if (draftData?.state === "In Process" && draftData?.turn) {
-            setupIntervals();
-        }
+    //     if (draftData?.state === "In Process" && draftData?.turn) {
+    //         setupIntervals();
+    //     }
 
-        return () => {
-            console.log("Clearing intervals on cleanup");
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            intervalRef.current = null;
-            if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
-            pollingIntervalRef.current = null;
-        };
-    }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
+    //     return () => {
+    //         console.log("Clearing intervals on cleanup");
+    //         if (intervalRef.current) clearInterval(intervalRef.current);
+    //         intervalRef.current = null;
+    //         if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+    //         pollingIntervalRef.current = null;
+    //     };
+    // }, [draftData?.state, draftData?.turn, draftData?.updatedAt]);
 
     // useEffect(() => {
     //     if (timeRemaining === 0) {
@@ -366,23 +410,27 @@ const DraftStart = ({ draftID, user, onSettings }) => {
 
 
     function autoPickCall(email) {
-        withPickLock(async () => {
+        return withPickLock(async () => {
             setLoadingSelect(true);
             try {
                 let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
-                await axios.get(link).then((response) => {
-                    // console.log(response);
-                    if (response.data && !response.data.error) {
-                        fetchdraftData();
-                        if (email) addAlert("Player successfully FORCE Picked!", "success");
-                        else addAlert("Player successfully AUTO Picked!", "success");
-                    } else {
-                        console.error("2 : Failed to pick player:", response.data.message);
-                        addAlert(response.data.message, 'error');
-                    }
-                });
+                const { data } = await axios.get(link);
+                // await axios.get(link).then((response) => {
+                // console.log(response);
+                if (data && !data.error) {
+                    await fetchdraftData();
+                    if (email) addAlert("Player successfully FORCE Picked!", "success");
+                    else addAlert("Player successfully AUTO Picked!", "success");
+                    return true;
+                } else {
+                    console.error("2 : Failed to pick player:", response.data.message);
+                    addAlert(response.data.message, 'error');
+                    return false;
+                }
+                // });
             } catch (error) {
                 console.error('Failed to add player:', error);
+                return false;
             } finally {
                 setLoadingSelect(false);
                 // setIsPicking(false);

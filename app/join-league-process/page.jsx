@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import ProgressBar from "../../components/ProgressBar/ProgressBar";
 import JoinLeague from "./components/JoinLeague";
@@ -16,6 +16,9 @@ const JoinLeagueProcess = () => {
   const totalSteps = 4;
   const { addAlert } = useAlert();
   const [user, setUser] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const submitLockRef = useRef(false);
 
   useEffect(() => {
     // Check if window is defined to ensure we are on the client side
@@ -39,17 +42,26 @@ const JoinLeagueProcess = () => {
 
   const handleNext = () => setStep(step + 1);
   const handleBack = () => setStep(step - 1);
-  const handleComplete = () => {
-    const league = JSON.parse(sessionStorage.getItem("joinLeagueData"));
-    const team = JSON.parse(sessionStorage.getItem("joinLeagueTeamData"));
-    const body = {
-      teamData: team,
-      userData: user,
-      leagueData: league,
-    };
-    console.log(body);
-    const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague/join";
-    axios.post(URL, body).then((response) => {
+
+  const handleComplete = async () => {
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
+
+    // guard #2: loading flag
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const league = JSON.parse(sessionStorage.getItem("joinLeagueData"));
+      const team = JSON.parse(sessionStorage.getItem("joinLeagueTeamData"));
+      const body = {
+        teamData: team,
+        userData: user,
+        leagueData: league,
+      };
+      console.log(body);
+      const URL = process.env.NEXT_PUBLIC_BACKEND_URL + "fantasyleague/join";
+      const response = await axios.post(URL, body)
       console.log(response);
       addAlert(response.data.message, response.data.error ? "error" : "success");
       if (response.data.error == false) {
@@ -57,7 +69,13 @@ const JoinLeagueProcess = () => {
         sessionStorage.removeItem("joinLeagueTeamData");
         router.push("/dashboard");
       }
-    });
+    } catch (error) {
+      console.log(error);
+      addAlert("An error occurred while joining the league.", "error");
+    } finally {
+      setLoading(false);
+      submitLockRef.current = false;
+    }
   };
 
   useEffect(() => {
@@ -65,13 +83,13 @@ const JoinLeagueProcess = () => {
   }, []);
 
   return (
-    <div className="join-league-process mx-6 mx-auto">
+    <div className="join-league-process mx-6">
       <ProgressBar currentStep={step} totalSteps={totalSteps} />
 
       {step === 2 && <JoinLeague onNext={handleNext} />}
       {step === 3 && <CreateTeam onNext={handleNext} onBack={handleBack} />}
       {step === 4 && (
-        <Confirmation onComplete={handleComplete} onBack={handleBack} />
+        <Confirmation onComplete={handleComplete} onBack={handleBack} loading={loading} />
       )}
     </div>
   );
