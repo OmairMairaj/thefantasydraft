@@ -131,13 +131,33 @@ const LeagueSettings = () => {
         reader.readAsDataURL(file);
     };
 
+
+    const normalizePointsCfg = (cfgArr) =>
+        cfgArr.map(cfg => {
+            const out = { ...cfg };
+            Object.keys(out).forEach(k => {
+                if (k === 'gameweek' || k === '_id') return;
+                const raw = out[k];
+                if (raw === '' || raw == null) out[k] = 0;
+                else {
+                    const num = Number(raw);
+                    out[k] = Number.isNaN(num) ? 0 : num;
+                }
+            });
+            return out;
+        });
+
     const handleSaveClick = async () => {
         // setLoading(true);
         try {
             // console.log("editData");    
             // console.log(editData);
+            const payload = {
+                ...leagueData,
+                points_configuration: normalizePointsCfg(leagueData.points_configuration),
+            };
             const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}fantasyleague/edit`, {
-                leagueData: leagueData
+                leagueData: payload
             });
             if (response.data && !response.data.error) {
                 setLeagueData(response.data.data);
@@ -322,16 +342,13 @@ const LeagueSettings = () => {
 
     // Update one stat for current + all upcoming gameweeks
     const updatePointsConfiguration = (key, rawValue) => {
-        // allow numbers only; tweak if you want to allow '' while typing
-        const val = Number(rawValue);
-
         setLeagueData((prev) => {
             if (!prev?.points_configuration) return prev;
 
             const next = prev.points_configuration.map((cfg) => {
                 const gwNum = Number(cfg.gameweek);
                 if (gwNum >= currGwNum) {
-                    return { ...cfg, [key]: val };
+                    return { ...cfg, [key]: rawValue };
                 }
                 return cfg;
             });
@@ -543,8 +560,17 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={gwCfg?.[key] ?? 0}
+                                        value={
+                                            isEditing
+                                                ? (gwCfg?.[key] ?? '')          // show '' while editing so backspace doesn't pop a 0
+                                                : (gwCfg?.[key] ?? 0)           // when not editing, show actual number or 0
+                                        }
                                         onChange={(e) => updatePointsConfiguration(key, e.target.value)}
+                                        onBlur={(e) => {
+                                            const v = e.target.value;
+                                            if (v === '' || v === '.' || v === '-' || v === '-.') return; // let truly empty stay empty
+                                            updatePointsConfiguration(key, String(Number(v))); // normalize '05' -> '5', '0.50' -> '0.5'
+                                        }}
                                         disabled={!isEditing || leagueData?.draftID?.state === "In Process" || leagueData?.draftID?.state === "Ended"}
                                         className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
@@ -564,8 +590,17 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={gwCfg?.[key] ?? 0}
+                                        value={
+                                            isEditing
+                                                ? (gwCfg?.[key] ?? '')          // show '' while editing so backspace doesn't pop a 0
+                                                : (gwCfg?.[key] ?? 0)           // when not editing, show actual number or 0
+                                        }
                                         onChange={(e) => updatePointsConfiguration(key, e.target.value)}
+                                        onBlur={(e) => {
+                                            const v = e.target.value;
+                                            if (v === '' || v === '.' || v === '-' || v === '-.') return; // let truly empty stay empty
+                                            updatePointsConfiguration(key, String(Number(v))); // normalize '05' -> '5', '0.50' -> '0.5'
+                                        }}
                                         disabled={!isEditing || leagueData?.draftID?.state === "In Process" || leagueData?.draftID?.state === "Ended"}
                                         className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
@@ -585,8 +620,17 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={gwCfg?.[key] ?? 0}
+                                        value={
+                                            isEditing
+                                                ? (gwCfg?.[key] ?? '')          // show '' while editing so backspace doesn't pop a 0
+                                                : (gwCfg?.[key] ?? 0)           // when not editing, show actual number or 0
+                                        }
                                         onChange={(e) => updatePointsConfiguration(key, e.target.value)}
+                                        onBlur={(e) => {
+                                            const v = e.target.value;
+                                            if (v === '' || v === '.' || v === '-' || v === '-.') return; // let truly empty stay empty
+                                            updatePointsConfiguration(key, String(Number(v))); // normalize '05' -> '5', '0.50' -> '0.5'
+                                        }}
                                         disabled={!isEditing || leagueData?.draftID?.state === "In Process" || leagueData?.draftID?.state === "Ended"}
                                         className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
@@ -606,8 +650,17 @@ const LeagueSettings = () => {
                                     <input
                                         type='number'
                                         step="0.1"
-                                        value={gwCfg?.[key] ?? 0}
+                                        value={
+                                            isEditing
+                                                ? (gwCfg?.[key] ?? '')          // show '' while editing so backspace doesn't pop a 0
+                                                : (gwCfg?.[key] ?? 0)           // when not editing, show actual number or 0
+                                        }
                                         onChange={(e) => updatePointsConfiguration(key, e.target.value)}
+                                        onBlur={(e) => {
+                                            const v = e.target.value;
+                                            if (v === '' || v === '.' || v === '-' || v === '-.') return; // let truly empty stay empty
+                                            updatePointsConfiguration(key, String(Number(v))); // normalize '05' -> '5', '0.50' -> '0.5'
+                                        }}
                                         disabled={!isEditing || leagueData?.draftID?.state === "In Process" || leagueData?.draftID?.state === "Ended"}
                                         className={`w-1/3 bg-transparent py-1 xl:py-2 rounded-lg text-white border border-[#333333] text-center ${isEditing ? 'focus:outline-none focus:border-[#FF8A00]' : ''}`}
                                     />
