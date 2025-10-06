@@ -370,7 +370,7 @@ const DraftStart = ({ draftID, user, onSettings }) => {
             setLoadingSelect(true);
             try {
                 let link = `${process.env.NEXT_PUBLIC_BACKEND_URL}fantasydraft/players/autopick?draftID=${draftID}&email=${email ? email : user.email}`
-                axios.get(link).then((response) => {
+                await axios.get(link).then((response) => {
                     // console.log(response);
                     if (response.data && !response.data.error) {
                         fetchdraftData();
