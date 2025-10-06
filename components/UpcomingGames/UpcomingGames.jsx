@@ -196,7 +196,16 @@ export default function UpcomingGames() {
                       height={60}
                       className="object-contain"
                     />
-                    <span className="text-white mt-2 text-sm md:text-base">
+                    <span
+                      className="text-white mt-2 px-2 text-center text-xs sm:text-sm xl:text-base leading-tight"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        minHeight: '2.8em', // ~2 lines at current line-height
+                      }}
+                    >
                       {homeTeam.team_name}
                     </span>
                   </div>
@@ -222,7 +231,16 @@ export default function UpcomingGames() {
                       height={60}
                       className="object-contain"
                     />
-                    <span className="text-white mt-2 text-sm md:text-base">
+                    <span
+                      className="text-white mt-2 px-2 text-center text-xs sm:text-sm xl:text-base leading-tight"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        minHeight: '2.8em', // ~2 lines at current line-height
+                      }}
+                    >
                       {awayTeam.team_name}
                     </span>
                   </div>
@@ -230,7 +248,7 @@ export default function UpcomingGames() {
 
                 {/* Game Date and Time */}
                 <div
-                  className={`text-[#FF8A00] text-sm sm:text-base md:text-lg ${exo2.className}`}
+                  className={`text-[#FF8A00] text-xs sm:text-sm xl:text-base ${exo2.className}`}
                 >
                   {game.state !== "Not Started"
                     ? `${game.scores.find(

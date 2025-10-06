@@ -277,7 +277,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 
 .pitch-view {
-  background-image: url('../public/images/pitch.png');
+  background-image: url('../public/images/pitch2.png');
   background-size: cover;
   background-position: top;
   position: relative;

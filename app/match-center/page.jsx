@@ -1028,11 +1028,11 @@ const MatchCenter = () => {
                                 const overlayColor = 'rgba(12,25,34,0.7)'
                                 return (
                                     <div key={match.id} onClick={() => handleFixtureClick(match)} className="bg-[#0C1922] rounded-xl text-center space-y-2 xl:space-y-4 pb-3 cursor-pointer hover:scale-[1.01]"
-                                    style={{
-                                        backgroundImage: `linear-gradient(${overlayColor}, ${overlayColor}), url(${homeTeam.ground_image_path})`,
-                                        backgroundSize: 'cover',
-                                        backgroundPosition: 'center',
-                                    }}
+                                        style={{
+                                            backgroundImage: `linear-gradient(${overlayColor}, ${overlayColor}), url(${homeTeam.ground_image_path})`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                        }}
                                     >
                                         {/* Teams Logos and VS */}
                                         <div className="flex justify-between items-center">
@@ -1043,7 +1043,16 @@ const MatchCenter = () => {
                                                     alt={homeTeam?.team_name}
                                                     className="object-cover w-12 h-12 sm:w-14 sm:h-14 xl:w-16 xl:h-16 rounded-md"
                                                 />
-                                                <span className="text-white mt-2 px-2 text-xs sm:text-sm xl:text-base">
+                                                <span
+                                                    className="text-white mt-2 px-2 text-center text-xs sm:text-sm xl:text-base leading-tight"
+                                                    style={{
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 2,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        overflow: 'hidden',
+                                                        minHeight: '2.8em', // ~2 lines at current line-height
+                                                    }}
+                                                >
                                                     {homeTeam?.team_name}
                                                 </span>
                                             </div>
@@ -1061,7 +1070,16 @@ const MatchCenter = () => {
                                                     alt={awayTeam?.team_name}
                                                     className="object-cover w-12 h-12 sm:w-14 sm:h-14 xl:w-16 xl:h-16 rounded-md"
                                                 />
-                                                <span className="text-white mt-2 px-2 text-xs sm:text-sm xl:text-base">
+                                                <span
+                                                    className="text-white mt-2 px-2 text-center flex items-center text-xs sm:text-sm xl:text-base leading-tight"
+                                                    style={{
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 2,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        overflow: 'hidden',
+                                                        minHeight: '2.8em', // ~2 lines at current line-height
+                                                    }}
+                                                >
                                                     {awayTeam?.team_name}
                                                 </span>
                                             </div>

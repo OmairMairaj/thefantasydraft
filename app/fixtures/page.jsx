@@ -139,7 +139,16 @@ const Fixtures = () => {
                         height={60}
                         className="object-cover w-12 h-12 sm:w-14 sm:h-14 xl:w-16 xl:h-16 rounded-md"
                       />
-                      <span className="text-white mt-2 px-2 text-xs sm:text-sm xl:text-base">
+                      <span
+                        className="text-white mt-2 px-2 text-center text-xs sm:text-sm xl:text-base leading-tight"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          minHeight: '2.8em', // ~2 lines at current line-height
+                        }}
+                      >
                         {homeTeam?.team_name}
                       </span>
                     </div>
@@ -159,7 +168,16 @@ const Fixtures = () => {
                         height={60}
                         className="object-cover w-12 h-12 sm:w-14 sm:h-14 xl:w-16 xl:h-16 rounded-md"
                       />
-                      <span className="text-white mt-2 px-2 text-xs sm:text-sm xl:text-base">
+                      <span
+                        className="text-white mt-2 px-2 text-center text-xs sm:text-sm xl:text-base leading-tight"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          minHeight: '2.8em', // ~2 lines at current line-height
+                        }}
+                      >
                         {awayTeam?.team_name}
                       </span>
                     </div>

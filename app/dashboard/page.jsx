@@ -437,7 +437,7 @@ const Dashboard = () => {
 
                             {/* Dropdown Menu */}
                             {dropdownOpen && (
-                              <div className="absolute w-full bg-[#0C1922] border border-[#484848] rounded-lg mt-2 z-10">
+                              <div className="absolute w-full max-h-64 xl:max-h-96 overflow-auto bg-[#0C1922] border border-[#484848] rounded-lg mt-2 z-10 scrollbar">
                                 {leagues &&
                                   leagues.map((league) => (
                                     <div
